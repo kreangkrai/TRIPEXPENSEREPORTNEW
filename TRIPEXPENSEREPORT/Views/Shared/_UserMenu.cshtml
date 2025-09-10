@@ -1,0 +1,56 @@
+﻿@{
+    DateTime date = DateTime.Now;
+}
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a asp-action="Index" asp-controller="Home" class="brand-link d-flex justify-content-center" style="background-color:#034694">
+        <img src="~/images/tripexpense2.png" alt="Contrologic Logo" class="brand-image w-75" style="opacity: .8">
+        @*<span class="brand-text font-weight-light">PROJECT NAME</span>*@
+    </a>
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" id="menusidebar" data-widget="treeview">
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <p><b>USER</b></p><i class="right fas fa-angle-left"></i>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a class="nav-link pl-4 dropdown-item" asp-controller="PersonalCar" asp-action="Index">
+                                <b>รถส่วนตัว</b>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link pl-4 dropdown-item" asp-controller="CompanyCar" asp-action="Index">
+                                <b>รถบริษัท</b>
+                            </a>
+                        </li>
+                        @if (date.Year > 2024 && date.Month >= 1)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link pl-4 dropdown-item" asp-controller="AllowanceNew" asp-action="Index">
+                                    <b>- เบี้ยเลี้ยง</b>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link pl-4 dropdown-item" asp-controller="Allowance" asp-action="Index">
+                                    <b>- เบี้ยเลี้ยง</b>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Account" asp-action="Logout">
+                        <i class="nav-icon fas fa-power-off"></i>
+                        <p><b>LOG OUT</b></p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>

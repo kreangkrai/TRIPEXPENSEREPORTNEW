@@ -15,23 +15,31 @@
 <body style="background-size:100%;background-repeat:no-repeat;background-image:url('@Url.Content("~/images/background.png")');" class="margin:1px 1px 1px 1px">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="jumbotron offset-md-3" style="background-color: white ;width:380px;height:450px; border-radius:5px;border-style:solid;border-color:#034694;border-width:1px;box-shadow:3px 3px 3px 3px #888888">
+            <div class="jumbotron offset-md-3" style="background-color: white ;width:380px;height:450px; border-radius:5px;border-style:solid;border-color:#888888;border-width:0px;box-shadow:3px 3px 15px 3px #888888">
                 <form role="form" asp-action="Login" asp-controller="Account" method="post">
+
+                    <!-- Image : Logo TE Report -->
                     <div class="text-center form-group" style="margin-top:-10px">
-                        <img src="~/images/tripexpense1.png" style="width:300px;height:55px;padding-right:5px; justify-items:center" />
+                        <img src="~/images/logo_tereport_wbg.png" style="width:320px;padding-right:5px; justify-items:center" />
                     </div>
-                    <div class="form-group" style="margin-top:80px">
+
+                    <!-- Entry : Username -->
+                    <div class="form-group" style="margin-top:30px">
                         @*<label for="Login" style="color:white;font-size:medium">User Name</label>*@
-                        <input type="text" name="User" asp-for="user" autocomplete="on" class="form-control input-sm" placeholder="User name">
+                        <input type="text" name="User" asp-for="user" autocomplete="on" class="form-control input-sm" placeholder="Username" style="letter-spacing:1px;">
                         <span asp-validation-for="user" class="text-danger"></span>
                     </div>
+
+                    <!-- Entry : Password -->
                     <div class="form-group">
                         @*<label for="Password" style="color:white;font-size:medium">Password</label>*@
-                        <input type="password" name="Password" asp-for="password" autocomplete="off" class="form-control input-sm" placeholder="Password">
+                        <input type="password" name="Password" asp-for="password" autocomplete="off" class="form-control input-sm" placeholder="Password" style="letter-spacing:1px">
                         <span asp-validation-for="password" class="text-danger"></span>
                     </div>
+
+                    <!-- Btn : Login -->
                     <div style="margin-top:40px">
-                        <input type="submit" value="Login" class="btn btn-info btn-block" style="background-color: #034694;border-radius:20px">
+                        <input type="submit" value="Login" class="btn btn-info btn-block" style="background-color: #2178BE;border-radius:10px; letter-spacing:3px; box-shadow:0px 4px 10px 0px #AAAAAA">
                     </div>
 
                 </form>

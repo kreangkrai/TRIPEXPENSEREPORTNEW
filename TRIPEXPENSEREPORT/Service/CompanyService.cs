@@ -138,6 +138,174 @@ namespace TRIPEXPENSEREPORT.Service
             return "Success";
         }
 
+        public List<CompanyViewModel> GetEditCompaniesByDate(DateTime start_date, DateTime stop_date)
+        {
+            List<CompanyViewModel> companies = new List<CompanyViewModel>();
+            SqlConnection connection = ConnectSQL.OpenConnect();
+            try
+            {
+                string strCmd = string.Format($@"SELECT code,
+	                                            EditCompany.driver,
+                                                emp1.name as driver_name,
+	                                            date,
+	                                            car_id,
+	                                            time_start,
+	                                            time_stop,
+                                                location,
+                                                zipcode,
+                                                job,
+												fleet,
+												cash,
+                                                ctbo,
+												exp,
+												pt,
+												mileage_start,
+												mileage_stop,
+												km,
+												program_km,
+												auto_km,
+												description,
+												status,
+												EditCompany.approver,
+												emp2.name as approver_name,
+												last_date
+                                                FROM EditCompany
+                                                LEFT JOIN Employees emp1 ON EditCompany.driver = emp1.emp_id
+												LEFT JOIN Employees emp2 ON EditCompany.approver = emp2.emp_id
+                                                WHERE date BETWEEN @start_date AND @stop_date");
+                SqlCommand command = new SqlCommand(strCmd, connection);
+                command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
+                connection.Open();
+                SqlDataReader dr = command.ExecuteReader();
+                if (dr.HasRows)
+                {
+                    while (dr.Read())
+                    {
+                        CompanyViewModel company = new CompanyViewModel()
+                        {
+                            code = dr["code"].ToString(),
+                            driver = dr["driver"].ToString(),
+                            driver_name = dr["driver_name"].ToString(),
+                            date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            car_id = dr["car_id"].ToString(),
+                            time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
+                            time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
+                            location = dr["location"].ToString(),
+                            zipcode = dr["zipcode"].ToString(),
+                            job = dr["job"].ToString(),
+                            fleet = dr["fleet"] != DBNull.Value ? Convert.ToDouble(dr["fleet"].ToString()) : 0,
+                            cash = dr["cash"] != DBNull.Value ? Convert.ToDouble(dr["cash"].ToString()) : 0,
+                            ctbo = dr["ctbo"] != DBNull.Value ? Convert.ToDouble(dr["ctbo"].ToString()) : 0,
+                            exp = dr["exp"] != DBNull.Value ? Convert.ToDouble(dr["exp"].ToString()) : 0,
+                            pt = dr["pt"] != DBNull.Value ? Convert.ToDouble(dr["pt"].ToString()) : 0,
+                            mileage_start = dr["mileage_start"] != DBNull.Value ? Convert.ToInt32(dr["mileage_start"].ToString()) : 0,
+                            mileage_stop = dr["mileage_stop"] != DBNull.Value ? Convert.ToInt32(dr["mileage_stop"].ToString()) : 0,
+                            km = dr["km"] != DBNull.Value ? Convert.ToInt32(dr["km"].ToString()) : 0,
+                            program_km = dr["program_km"] != DBNull.Value ? Convert.ToInt32(dr["program_km"].ToString()) : 0,
+                            auto_km = dr["auto_km"] != DBNull.Value ? Convert.ToInt32(dr["auto_km"].ToString()) : 0,
+                            description = dr["description"].ToString(),
+                            status = dr["status"].ToString(),
+                            approver = dr["approver"].ToString(),
+                            approver_name = dr["approver_name"].ToString(),
+                            last_date = dr["last_date"] != DBNull.Value ? Convert.ToDateTime(dr["last_date"].ToString()) : DateTime.MinValue,
+                        };
+                        companies.Add(company);
+                    }
+                    dr.Close();
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
+            return companies;
+        }
+
+        public List<CompanyViewModel> GetOriginalCompaniesByDate(DateTime start_date, DateTime stop_date)
+        {
+            List<CompanyViewModel> companies = new List<CompanyViewModel>();
+            SqlConnection connection = ConnectSQL.OpenConnect();
+            try
+            {
+                string strCmd = string.Format($@"SELECT code,
+	                                            OriginalCompany.driver,
+                                                emp1.name as driver_name,
+	                                            date,
+	                                            car_id,
+	                                            time_start,
+	                                            time_stop,
+                                                location,
+                                                zipcode,
+                                                job,
+												fleet,
+												cash,
+                                                ctbo,
+												exp,
+												pt,
+												mileage_start,
+												mileage_stop,
+												km,
+												program_km,
+												auto_km,
+												description,
+												status,
+												OriginalCompany.approver,
+												emp2.name as approver_name,
+												last_date
+                                                FROM OriginalCompany
+                                                LEFT JOIN Employees emp1 ON OriginalCompany.driver = emp1.emp_id
+												LEFT JOIN Employees emp2 ON OriginalCompany.approver = emp2.emp_id
+                                                WHERE date BETWEEN @start_date AND @stop_date");
+                SqlCommand command = new SqlCommand(strCmd, connection);
+                command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
+                connection.Open();
+                SqlDataReader dr = command.ExecuteReader();
+                if (dr.HasRows)
+                {
+                    while (dr.Read())
+                    {
+                        CompanyViewModel company = new CompanyViewModel()
+                        {
+                            code = dr["code"].ToString(),
+                            driver = dr["driver"].ToString(),
+                            driver_name = dr["driver_name"].ToString(),
+                            date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            car_id = dr["car_id"].ToString(),
+                            time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
+                            time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
+                            location = dr["location"].ToString(),
+                            zipcode = dr["zipcode"].ToString(),
+                            job = dr["job"].ToString(),
+                            fleet = dr["fleet"] != DBNull.Value ? Convert.ToDouble(dr["fleet"].ToString()) : 0,
+                            cash = dr["cash"] != DBNull.Value ? Convert.ToDouble(dr["cash"].ToString()) : 0,
+                            ctbo = dr["ctbo"] != DBNull.Value ? Convert.ToDouble(dr["ctbo"].ToString()) : 0,
+                            exp = dr["exp"] != DBNull.Value ? Convert.ToDouble(dr["exp"].ToString()) : 0,
+                            pt = dr["pt"] != DBNull.Value ? Convert.ToDouble(dr["pt"].ToString()) : 0,
+                            mileage_start = dr["mileage_start"] != DBNull.Value ? Convert.ToInt32(dr["mileage_start"].ToString()) : 0,
+                            mileage_stop = dr["mileage_stop"] != DBNull.Value ? Convert.ToInt32(dr["mileage_stop"].ToString()) : 0,
+                            km = dr["km"] != DBNull.Value ? Convert.ToInt32(dr["km"].ToString()) : 0,
+                            program_km = dr["program_km"] != DBNull.Value ? Convert.ToInt32(dr["program_km"].ToString()) : 0,
+                            auto_km = dr["auto_km"] != DBNull.Value ? Convert.ToInt32(dr["auto_km"].ToString()) : 0,
+                            description = dr["description"].ToString(),
+                            status = dr["status"].ToString(),
+                            approver = dr["approver"].ToString(),
+                            approver_name = dr["approver_name"].ToString(),
+                            last_date = dr["last_date"] != DBNull.Value ? Convert.ToDateTime(dr["last_date"].ToString()) : DateTime.MinValue,
+                        };
+                        companies.Add(company);
+                    }
+                    dr.Close();
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
+            return companies;
+        }
+
         public string OriginalInserts(List<CompanyModel> companies)
         {
             SqlConnection conn = ConnectSQL.OpenConnect();
@@ -253,6 +421,85 @@ namespace TRIPEXPENSEREPORT.Service
                         cmd.ExecuteNonQuery();
                     }
 
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+            }
+            return "Success";
+        }
+
+        public string UpdateByCode(CompanyModel company)
+        {
+            SqlConnection conn = ConnectSQL.OpenConnect();
+            try
+            {
+                string string_command = string.Format($@"
+                    UPDATE 
+                        EditCompany SET
+                        driver = @driver,
+                        date = @date,
+                        car_id = @car_id,
+	                    time_start = @time_start,
+	                    time_stop = @time_stop,
+                        location = @location,
+                        zipcode = @zipcode,
+                        job = @job,
+                        fleet = @fleet,
+						cash = @cash,
+                        ctbo = @ctbo,
+						exp = @exp,
+						pt = @pt,
+						mileage_start = @mileage_start,
+						mileage_stop = @mileage_stop,
+						km = @km,
+						program_km = @program_km,
+						auto_km = @auto_km,
+						description = @description,
+						status = @status,
+						approver = @approver,
+						last_date  = @last_date   	                                                          
+                        WHERE code = @code");
+                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@code", company.code);
+                    cmd.Parameters.AddWithValue("@driver", company.driver);
+                    cmd.Parameters.AddWithValue("@date", company.date);
+                    cmd.Parameters.AddWithValue("@car_id", company.car_id);
+                    cmd.Parameters.AddWithValue("@time_start", company.time_start);
+                    cmd.Parameters.AddWithValue("@time_stop", company.time_stop);
+                    cmd.Parameters.AddWithValue("@location", company.location);
+                    cmd.Parameters.AddWithValue("@zipcode", company.zipcode);
+                    cmd.Parameters.AddWithValue("@job", company.job);
+                    cmd.Parameters.AddWithValue("@fleet", company.fleet);
+                    cmd.Parameters.AddWithValue("@cash", company.cash);
+                    cmd.Parameters.AddWithValue("@ctbo", company.ctbo);
+                    cmd.Parameters.AddWithValue("@exp", company.exp);
+                    cmd.Parameters.AddWithValue("@pt", company.pt);
+                    cmd.Parameters.AddWithValue("@mileage_start", company.mileage_start);
+                    cmd.Parameters.AddWithValue("@mileage_stop", company.mileage_stop);
+                    cmd.Parameters.AddWithValue("@km", company.km);
+                    cmd.Parameters.AddWithValue("@program_km", company.program_km);
+                    cmd.Parameters.AddWithValue("@auto_km", company.auto_km);
+                    cmd.Parameters.AddWithValue("@description", company.description);
+                    cmd.Parameters.AddWithValue("@status", company.status);
+                    cmd.Parameters.AddWithValue("@approver", company.approver);
+                    cmd.Parameters.AddWithValue("@last_date", company.last_date);
+                    if (conn.State != ConnectionState.Open)
+                    {
+                        conn.Close();
+                        conn.Open();
+                    }
+                    cmd.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)

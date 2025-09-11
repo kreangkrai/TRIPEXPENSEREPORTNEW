@@ -7,6 +7,7 @@
         public string emp_id { get; set; }
         public string emp_name { get; set; }
         public string zipcode { get; set; }
+        public string province { get; set; }
         public DateTime date { get; set; }
         public string customer { get; set; }
         public string job { get; set; }

@@ -10,7 +10,7 @@ namespace TRIPEXPENSEREPORT.Service
             try
             {
                 List<UserManagementModel> users = new List<UserManagementModel>();
-                SqlCommand cmd = new SqlCommand("select emp_id,name,department,role from [Employees] order by name", ConnectSQL.OpenConnect());
+                SqlCommand cmd = new SqlCommand("select emp_id,name,department,location,role from [Employees] order by name", ConnectSQL.OpenConnect());
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -21,6 +21,7 @@ namespace TRIPEXPENSEREPORT.Service
                             emp_id = dr["emp_id"].ToString(),
                             name = dr["name"].ToString(),
                             department = dr["department"].ToString(),
+                            location = dr["location"].ToString(),
                             role = dr["role"].ToString(),
                         };
                         users.Add(u);

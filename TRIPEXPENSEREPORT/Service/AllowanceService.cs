@@ -9,10 +9,10 @@ namespace TRIPEXPENSEREPORT.Service
     {
         private IArea Area;
         private IUser User;
-        public AllowanceService(IArea area,IUser user)
+        public AllowanceService()
         {
-            Area = area;
-            User = user;
+            Area = new AreaService();
+            User = new UserService();
         }
         public List<AllowanceViewModel> GetEditAllowancesByDate(DateTime start_date, DateTime stop_date)
         {
@@ -496,26 +496,37 @@ namespace TRIPEXPENSEREPORT.Service
                 double Allowance8 = 0;
                 bool zone = false;     //true in zone , false out zone
 
-                List<DataTripModel> _trips = trips.Where(w => w.date.Date == date.Date).ToList();
+                List<DataTripModel> _trips = trips.Where(w => w.trip.Contains(date.Date.ToString("yyyyMMdd"))).ToList();
                 string code = Guid.NewGuid().ToString("N");
 
                 if (_trips.Count > 0) // Have Trip each date
                 {
                     #region Outside Zone
-                    List<DataTripModel> AllZone = _trips.Where(w => area_location.Contains(w.zipcode.Substring(0, 2))).ToList();
-                        //Check All CheckIn Zone.
-                    zone = AllZone.Count > 0 ? true : false;
 
-                    if (!zone)
+                    List<DataTripModel> zones = _trips.Where(w => areas.Select(s=>s.code).Contains(w.zipcode.Substring(0, 2))).ToList();
+                    if (zones.Count != _trips.Count)
                     {
+                        zone = true;
                         Allowance_Outside_Region = 100;
                     }
+                    else
+                    {
+                        List<DataTripModel> AllZone = _trips.Where(w => area_location.Contains(w.zipcode.Substring(0, 2))).ToList();
+                        //Check All CheckIn Zone.
+                        zone = AllZone.Count > 0 ? true : false;
+
+                        if (zone) // out zone
+                        {
+                            Allowance_Outside_Region = 100;
+                        }
+                    }
                     #endregion
-                    DateTime first_start = _trips.Where(w => w.date.Date == date.Date).FirstOrDefault().date;
-                    DateTime last_stop = _trips.Where(w => w.date.Date == date.Date).LastOrDefault().date;
+
+                    DateTime first_start = _trips.Where(w => w.trip.Contains(date.Date.ToString("yyyyMMdd"))).FirstOrDefault().date;
+                    DateTime last_stop = _trips.Where(w => w.trip.Contains(date.Date.ToString("yyyyMMdd"))).LastOrDefault().date;
                     double time_duration = (last_stop - first_start).TotalMinutes;
 
-                    if (zone) // In Zone
+                    if (!zone) // In Zone
                     {
                         if (location == "rbo")
                         {
@@ -546,12 +557,14 @@ namespace TRIPEXPENSEREPORT.Service
                                 }
                             }
                             else
-                            {                               
+                            {
                                 double sum_time_duration = 0.0;
-                                for (int i = 0; i < _trips.Count; i++)
+                                List<string> name_trips = _trips.GroupBy(g => g.trip).Select(s => s.FirstOrDefault().trip).ToList();
+                                for (int i = 0; i < name_trips.Count; i++)
                                 {
-                                    var start_ = first_start;
-                                    var stop_ = last_stop;
+                                    var ts = _trips.Where(w => w.trip == name_trips[i]).ToList();
+                                    var start_ = ts.FirstOrDefault().date;
+                                    var stop_ = ts.LastOrDefault().date;
                                     sum_time_duration += (stop_ - start_).TotalMinutes;
                                 }
 
@@ -572,68 +585,56 @@ namespace TRIPEXPENSEREPORT.Service
                                 }
                             }
                         }
-                    }
-                    else if (!zone) // Out Zone
-                    {
-                        Allowance1_4 = 50;
-                        Allowance4_8 = 70;
-                        Allowance8 = 80;
                     }
                     else // Have In and Out
                     {
-                        if (location == "rbo")
-                        {
-                            Allowance1_4 = 50;
-                            Allowance4_8 = 70;
-                            Allowance8 = 80;
-                        }
-                        else  // HQ , KBO
-                        {
-                            bool check_customer = _trips.Any(a=>a.location_mode == "CUSTOMER"); // Check Customer
 
-                            if (check_customer)
+                        bool check_customer = _trips.Any(a => a.location_mode == "CUSTOMER"); // Check Customer
+
+                        if (check_customer)
+                        {
+                            if (time_duration >= 60 && time_duration < 240)
                             {
-                                if (time_duration >= 60 && time_duration < 240)
-                                {
-                                    Allowance1_4 = 50;
-                                }
-                                else if (time_duration >= 240 && time_duration < 480)
-                                {
-                                    Allowance1_4 = 50;
-                                    Allowance4_8 = 70;
-                                }
-                                else if (time_duration >= 480)
-                                {
-                                    Allowance1_4 = 50;
-                                    Allowance4_8 = 70;
-                                    Allowance8 = 80;
-                                }
+                                Allowance1_4 = 50;
                             }
-                            else
-                            {                              
-                                double sum_time_duration = 0.0;
-                                for (int i = 0; i < _trips.Count; i++)
-                                {
-                                    var start_ = first_start;
-                                    var stop_ = last_stop;
-                                    sum_time_duration += (stop_ - start_).TotalMinutes;
-                                }
+                            else if (time_duration >= 240 && time_duration < 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                            }
+                            else if (time_duration >= 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                                Allowance8 = 80;
+                            }
+                        }
+                        else
+                        {
+                            double sum_time_duration = 0.0;
+                            List<string> name_trips = _trips.GroupBy(g => g.trip).Select(s => s.FirstOrDefault().trip).ToList();
+                            for (int i = 0; i < name_trips.Count; i++)
+                            {
+                                var ts = _trips.Where(w => w.trip == name_trips[i]).ToList();
+                                var start_ = ts.FirstOrDefault().date;
+                                var stop_ = ts.LastOrDefault().date;
+                                sum_time_duration += (stop_ - start_).TotalMinutes;
+                            }
 
-                                if (sum_time_duration >= 60 && sum_time_duration < 240)
-                                {
-                                    Allowance1_4 = 50;
-                                }
-                                else if (sum_time_duration >= 240 && sum_time_duration < 480)
-                                {
-                                    Allowance1_4 = 50;
-                                    Allowance4_8 = 70;
-                                }
-                                else if (sum_time_duration >= 480)
-                                {
-                                    Allowance1_4 = 50;
-                                    Allowance4_8 = 70;
-                                    Allowance8 = 80;
-                                }
+                            if (sum_time_duration >= 60 && sum_time_duration < 240)
+                            {
+                                Allowance1_4 = 50;
+                            }
+                            else if (sum_time_duration >= 240 && sum_time_duration < 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                            }
+                            else if (sum_time_duration >= 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                                Allowance8 = 80;
                             }
                         }
                     }

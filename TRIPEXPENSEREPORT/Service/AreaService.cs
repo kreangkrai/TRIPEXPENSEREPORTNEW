@@ -9,12 +9,10 @@ namespace TRIPEXPENSEREPORT.Service
         public List<AreaModel> GetAreas()
         {
             List<AreaModel> areas = new List<AreaModel>();
-            SqlConnection connection = ConnectSQL.OpenConnect();
             try
             {
-                string strCmd = string.Format($@"SELECT code,hq,rbo,kbo FROM Area");
-                SqlCommand command = new SqlCommand(strCmd, connection);
-                connection.Open();
+                string strCmd = string.Format($@"SELECT code,hq,rbo,kbo FROM Area" );
+                SqlCommand command = new SqlCommand(strCmd, ConnectSQL.OpenReportConnect());
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -34,7 +32,10 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                connection.Close();
+                if (ConnectSQL.con_report.State == System.Data.ConnectionState.Open)
+                {
+                    ConnectSQL.CloseReportConnect();
+                }
             }
             return areas;
         }

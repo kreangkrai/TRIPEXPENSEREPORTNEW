@@ -9,5 +9,6 @@ namespace TRIPEXPENSEREPORT.Interface
         List<AllowanceViewModel> GetOriginalAllowancesByDate(DateTime start_date, DateTime stop_date);
         List<AllowanceViewModel> GetEditAllowancesByDate(DateTime start_date, DateTime stop_date);
         string UpdateByCode(AllowanceModel allowance);
+        List<AllowanceModel> CalculateAllowanceNew(string emp_id, List<DataTripModel> trips, DateTime start, DateTime stop);
     }
 }

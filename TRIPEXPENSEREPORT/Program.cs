@@ -1,7 +1,13 @@
+using TRIPEXPENSEREPORT.Interface;
+using TRIPEXPENSEREPORT.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<IAllowance, AllowanceService>();
+builder.Services.AddTransient<IUser, UserService>();
+builder.Services.AddTransient<IArea, AreaService>();
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     // This lambda determines whether user consent for non-essential cookies is needed for a given request.

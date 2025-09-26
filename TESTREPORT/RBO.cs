@@ -27,10 +27,10 @@ namespace TESTREPORT
         {
             DateTime start = new DateTime(2025, 9, 1);
             DateTime stop = new DateTime(2025, 9, 30);
-            List<DataTripModel> trips = new List<DataTripModel>();
 
             for (int i = 0; i < DataModel.datas.Count; i++)
             {
+                List<DataTripModel> trips = new List<DataTripModel>();
                 DataTripModel trip1 = new DataTripModel()
                 {
                     date = DataModel.datas[i].start,

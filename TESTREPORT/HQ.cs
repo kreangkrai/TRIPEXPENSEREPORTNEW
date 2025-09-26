@@ -9,11 +9,11 @@ using TRIPEXPENSEREPORT.Service;
 
 namespace TESTREPORT
 {
-    public class HQInZone
+    public class HQ
     {
         private IAllowance Allowance;
         List<DataModel> DataModels = new List<DataModel> ();
-        public HQInZone()
+        public HQ()
         {
             Allowance = new AllowanceService();
         }
@@ -28,10 +28,11 @@ namespace TESTREPORT
         {
             DateTime start = new DateTime(2025, 9, 1);
             DateTime stop = new DateTime(2025, 9, 30);
-            List<DataTripModel> trips = new List<DataTripModel>();
+            
 
             for (int i = 0; i < DataModel.datas.Count; i++)
             {
+                List<DataTripModel> trips = new List<DataTripModel>();
                 DataTripModel trip1 = new DataTripModel()
                 {
                     date = DataModel.datas[i].start,

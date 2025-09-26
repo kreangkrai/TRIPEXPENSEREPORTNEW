@@ -6,6 +6,7 @@ namespace TRIPEXPENSEREPORT.Service
     {
         public static SqlConnection con;
         public static SqlConnection con_ctl;
+        public static SqlConnection con_report;
         public static SqlConnection OpenConnect()
         {
             con = new SqlConnection("Data Source = 192.168.15.12, 1433; Initial Catalog = TRIP_EXPENSE; User Id = sa; Password = p@ssw0rd;TrustServerCertificate=True; Timeout = 120");
@@ -17,6 +18,19 @@ namespace TRIPEXPENSEREPORT.Service
             con.Close();
             return con;
         }
+
+        public static SqlConnection OpenReportConnect()
+        {
+            con_report = new SqlConnection("Data Source = 192.168.15.12, 1433; Initial Catalog = TRIP_EXPENSE_REPORT; User Id = sa; Password = p@ssw0rd;TrustServerCertificate=True; Timeout = 120");
+            con_report.Open();
+            return con_report;
+        }
+        public static SqlConnection CloseReportConnect()
+        {
+            con_report.Close();
+            return con_report;
+        }
+
 
         public static SqlConnection Open_CTL_Connect()
         {

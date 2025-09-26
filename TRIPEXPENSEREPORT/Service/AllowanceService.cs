@@ -6,7 +6,14 @@ using TRIPEXPENSEREPORT.Models;
 namespace TRIPEXPENSEREPORT.Service
 {
     public class AllowanceService : IAllowance
-    {     
+    {
+        private IArea Area;
+        private IUser User;
+        public AllowanceService()
+        {
+            Area = new AreaService();
+            User = new UserService();
+        }
         public List<AllowanceViewModel> GetEditAllowancesByDate(DateTime start_date, DateTime stop_date)
         {
             List<AllowanceViewModel> allowances = new List<AllowanceViewModel>();
@@ -458,6 +465,242 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return "Success";
+        }
+
+        public List<AllowanceModel> CalculateAllowanceNew(string emp_id, List<DataTripModel> trips , DateTime start, DateTime stop)
+        {
+            List<AllowanceModel> dataAllowances = new List<AllowanceModel>();
+
+            List<UserManagementModel> users = User.GetUsers();
+            List<AreaModel> areas = Area.GetAreas();
+
+            string location = users.Where(w => w.emp_id == emp_id).FirstOrDefault().location;
+            List<string> area_location = new List<string>();
+            if (location == "hq") {
+                area_location = areas.Where(w => w.hq == true).Select(s => s.code).ToList();
+            }
+            if (location == "rbo")
+            {
+                area_location = areas.Where(w => w.rbo == true).Select(s => s.code).ToList();
+            }
+            if (location == "kbo")
+            {
+                area_location = areas.Where(w => w.kbo == true).Select(s => s.code).ToList();
+            }
+
+            for (DateTime date = start; date <= stop; date = date.AddDays(1))
+            {
+                double Allowance_Outside_Region = 0;
+                double Allowance1_4 = 0;
+                double Allowance4_8 = 0;
+                double Allowance8 = 0;
+                bool zone = false;     //true in zone , false out zone
+
+                List<DataTripModel> _trips = trips.Where(w => w.trip.Contains(date.Date.ToString("yyyyMMdd"))).ToList();
+                string code = Guid.NewGuid().ToString("N");
+
+                if (_trips.Count > 0) // Have Trip each date
+                {
+                    #region Outside Zone
+
+                    List<DataTripModel> zones = _trips.Where(w => areas.Select(s=>s.code).Contains(w.zipcode.Substring(0, 2))).ToList();
+                    if (zones.Count != _trips.Count)
+                    {
+                        zone = true;
+                        Allowance_Outside_Region = 100;
+                    }
+                    else
+                    {
+                        List<DataTripModel> AllZone = _trips.Where(w => area_location.Contains(w.zipcode.Substring(0, 2))).ToList();
+                        //Check All CheckIn Zone.
+                        zone = AllZone.Count > 0 ? true : false;
+
+                        if (zone) // out zone
+                        {
+                            Allowance_Outside_Region = 100;
+                        }
+                    }
+                    #endregion
+
+                    DateTime first_start = _trips.Where(w => w.trip.Contains(date.Date.ToString("yyyyMMdd"))).FirstOrDefault().date;
+                    DateTime last_stop = _trips.Where(w => w.trip.Contains(date.Date.ToString("yyyyMMdd"))).LastOrDefault().date;
+                    double time_duration = (last_stop - first_start).TotalMinutes;
+
+                    if (!zone) // In Zone
+                    {
+                        if (location == "rbo")
+                        {
+                            Allowance1_4 = 50;
+                            Allowance4_8 = 70;
+                            Allowance8 = 80;
+                        }
+                        else  // HQ , KBO
+                        {
+                            bool check_customer = _trips.Any(a => a.location_mode == "CUSTOMER"); // Check Customer In Trip
+
+                            if (check_customer)
+                            {
+                                if (time_duration >= 60 && time_duration < 240)
+                                {
+                                    Allowance1_4 = 50;
+                                }
+                                else if (time_duration >= 240 && time_duration < 480)
+                                {
+                                    Allowance1_4 = 50;
+                                    Allowance4_8 = 70;
+                                }
+                                else if (time_duration >= 480)
+                                {
+                                    Allowance1_4 = 50;
+                                    Allowance4_8 = 70;
+                                    Allowance8 = 80;
+                                }
+                            }
+                            else
+                            {
+                                double sum_time_duration = 0.0;
+                                List<string> name_trips = _trips.GroupBy(g => g.trip).Select(s => s.FirstOrDefault().trip).ToList();
+                                for (int i = 0; i < name_trips.Count; i++)
+                                {
+                                    var ts = _trips.Where(w => w.trip == name_trips[i]).ToList();
+                                    var start_ = ts.FirstOrDefault().date;
+                                    var stop_ = ts.LastOrDefault().date;
+                                    sum_time_duration += (stop_ - start_).TotalMinutes;
+                                }
+
+                                if (sum_time_duration >= 60 && sum_time_duration < 240)
+                                {
+                                    Allowance1_4 = 50;
+                                }
+                                else if (sum_time_duration >= 240 && sum_time_duration < 480)
+                                {
+                                    Allowance1_4 = 50;
+                                    Allowance4_8 = 70;
+                                }
+                                else if (sum_time_duration >= 480)
+                                {
+                                    Allowance1_4 = 50;
+                                    Allowance4_8 = 70;
+                                    Allowance8 = 80;
+                                }
+                            }
+                        }
+                    }
+                    else // Have In and Out
+                    {
+
+                        bool check_customer = _trips.Any(a => a.location_mode == "CUSTOMER"); // Check Customer
+
+                        if (check_customer)
+                        {
+                            if (time_duration >= 60 && time_duration < 240)
+                            {
+                                Allowance1_4 = 50;
+                            }
+                            else if (time_duration >= 240 && time_duration < 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                            }
+                            else if (time_duration >= 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                                Allowance8 = 80;
+                            }
+                        }
+                        else
+                        {
+                            double sum_time_duration = 0.0;
+                            List<string> name_trips = _trips.GroupBy(g => g.trip).Select(s => s.FirstOrDefault().trip).ToList();
+                            for (int i = 0; i < name_trips.Count; i++)
+                            {
+                                var ts = _trips.Where(w => w.trip == name_trips[i]).ToList();
+                                var start_ = ts.FirstOrDefault().date;
+                                var stop_ = ts.LastOrDefault().date;
+                                sum_time_duration += (stop_ - start_).TotalMinutes;
+                            }
+
+                            if (sum_time_duration >= 60 && sum_time_duration < 240)
+                            {
+                                Allowance1_4 = 50;
+                            }
+                            else if (sum_time_duration >= 240 && sum_time_duration < 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                            }
+                            else if (sum_time_duration >= 480)
+                            {
+                                Allowance1_4 = 50;
+                                Allowance4_8 = 70;
+                                Allowance8 = 80;
+                            }
+                        }
+                    }
+
+                    double Allowance_Sum = Allowance_Outside_Region + Allowance1_4 + Allowance4_8 + Allowance8;
+
+                    var AllDay = _trips.Select(s => s.location).ToHashSet().ToArray();
+                    string joinTrip = AllDay != null ? string.Join(",", AllDay.Where(w => w != "").ToArray()) : "";
+
+                    var AllMode = _trips.Select(s => s.mode).ToHashSet().ToArray();
+
+                    string joinMode = AllMode != null ? string.Join(",", AllMode) : "";
+                    
+                    AllowanceModel allowance = new AllowanceModel()
+                    {
+                        emp_id = emp_id,
+                        date = date.Date,
+                        customer = joinTrip,
+                        job = _trips.FirstOrDefault().job_id,
+                        allowance_province = Allowance_Outside_Region,
+                        allowance_1_4 = Allowance1_4,
+                        allowance_4_8 = Allowance4_8,
+                        allowance_8 = Allowance8,
+                        allowance_hostel = 0,
+                        allowance_other = 0,
+                        amount = Allowance_Sum,
+                        zipcode = _trips.FirstOrDefault().zipcode,
+                        approver = "",
+                        status = "IN PROGRESS",
+                        description = "",
+                        last_date = DateTime.Now,
+                        code = code,
+                        list = "",
+                        remark = ""
+                    };
+
+                    dataAllowances.Add(allowance);
+                }
+                else // ไม่มี Trip
+                {
+                    AllowanceModel allowance = new AllowanceModel()
+                    {
+                        emp_id = emp_id,
+                        date = date.Date,
+                        customer = "",
+                        job = "",
+                        allowance_province = 0,
+                        allowance_1_4 = 0,
+                        allowance_4_8 = 0,
+                        allowance_8 = 0,
+                        allowance_hostel = 0,
+                        allowance_other = 0,
+                        amount = 0,
+                        zipcode = "",
+                        approver = "",
+                        status = "IN PROGRESS",
+                        description = "",
+                        last_date = DateTime.Now,
+                        code = code,
+                        list = "",
+                        remark = ""
+                    };
+                    dataAllowances.Add(allowance);
+                }
+            }
+            return dataAllowances;
         }
     }
 }

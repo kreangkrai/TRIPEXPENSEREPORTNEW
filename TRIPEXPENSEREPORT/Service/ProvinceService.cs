@@ -9,12 +9,10 @@ namespace TRIPEXPENSEREPORT.Service
         public List<ProvinceModel> GetProvinces()
         {
             List<ProvinceModel> provinces = new List<ProvinceModel>();
-            SqlConnection connection = ConnectSQL.OpenConnect();
             try
             {
-                string strCmd = string.Format($@"SELECT zipcode,province FROM Province");
-                SqlCommand command = new SqlCommand(strCmd, connection);
-                connection.Open();
+                string strCmd = string.Format($@"SELECT zipcode,province FROM Province WHERE zipcode <> ''");
+                SqlCommand command = new SqlCommand(strCmd, ConnectSQL.OpenReportConnect());
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -32,7 +30,10 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                connection.Close();
+                if (ConnectSQL.con_report.State == System.Data.ConnectionState.Open)
+                {
+                    ConnectSQL.CloseReportConnect();
+                }
             }
             return provinces;
         }

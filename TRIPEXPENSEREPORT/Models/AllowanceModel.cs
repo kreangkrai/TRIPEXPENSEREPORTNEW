@@ -7,6 +7,8 @@
         public string emp_id { get; set; }
         public string zipcode { get; set; }
         public DateTime date { get; set; }
+        public DateTime date_start { get; set; }
+        public DateTime date_stop { get; set; }
         public string customer {  get; set; }
         public string job { get; set; }
         public double allowance_province { get; set; }

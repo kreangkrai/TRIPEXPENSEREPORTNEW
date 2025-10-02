@@ -26,6 +26,8 @@ namespace TRIPEXPENSEREPORT.Service
 	                                           EditAllowance.zipcode,
 	                                           p.province
 	                                           date,
+                                               date_start,
+                                               date_stop,
 	                                           customer,
 	                                           job,
 	                                           allowance_province,
@@ -64,6 +66,8 @@ namespace TRIPEXPENSEREPORT.Service
                             zipcode = dr["zipcode"].ToString(),
                             province = dr["province"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            date_start = dr["date_start"] != DBNull.Value ? Convert.ToDateTime(dr["date_start"].ToString()) : DateTime.MinValue,
+                            date_stop = dr["date_stop"] != DBNull.Value ? Convert.ToDateTime(dr["date_stop"].ToString()) : DateTime.MinValue,
                             customer = dr["customer"].ToString(),
                             job = dr["job"].ToString(),
                             allowance_province = dr["allowance_province"] != DBNull.Value ? Convert.ToDouble(dr["allowance_province"].ToString()) : 0,
@@ -105,6 +109,8 @@ namespace TRIPEXPENSEREPORT.Service
 	                                           OriginalAllowance.zipcode,
 	                                           p.province
 	                                           date,
+                                               date_start,
+                                               date_stop,
 	                                           customer,
 	                                           job,
 	                                           allowance_province,
@@ -143,6 +149,8 @@ namespace TRIPEXPENSEREPORT.Service
                             zipcode = dr["zipcode"].ToString(),
                             province = dr["province"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            date_start = dr["date_start"] != DBNull.Value ? Convert.ToDateTime(dr["date_start"].ToString()) : DateTime.MinValue,
+                            date_stop = dr["date_stop"] != DBNull.Value ? Convert.ToDateTime(dr["date_stop"].ToString()) : DateTime.MinValue,
                             customer = dr["customer"].ToString(),
                             job = dr["job"].ToString(),
                             allowance_province = dr["allowance_province"] != DBNull.Value ? Convert.ToDouble(dr["allowance_province"].ToString()) : 0,
@@ -182,6 +190,8 @@ namespace TRIPEXPENSEREPORT.Service
                             emp_id,
                             zipcode,
                             date,
+                            date_start,
+                            date_stop,
                             customer,
                             job,
                             allowance_province,
@@ -201,6 +211,8 @@ namespace TRIPEXPENSEREPORT.Service
                             @emp_id,
                             @zipcode,
                             @date,
+                            @date_start,
+                            @date_stop,
                             @customer,
                             @job,
                             @allowance_province,
@@ -223,6 +235,8 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@emp_id", SqlDbType.Text);
                     cmd.Parameters.Add("@zipcode", SqlDbType.Text);
                     cmd.Parameters.Add("@date", SqlDbType.Date);
+                    cmd.Parameters.Add("@date_start", SqlDbType.Date);
+                    cmd.Parameters.Add("@date_stop", SqlDbType.Date);
                     cmd.Parameters.Add("@customer", SqlDbType.Text);
                     cmd.Parameters.Add("@job", SqlDbType.Text);
                     cmd.Parameters.Add("@allowance_province", SqlDbType.Float);
@@ -250,21 +264,23 @@ namespace TRIPEXPENSEREPORT.Service
                         cmd.Parameters[1].Value = allowances[i].emp_id;
                         cmd.Parameters[2].Value = allowances[i].zipcode;
                         cmd.Parameters[3].Value = allowances[i].date;
-                        cmd.Parameters[4].Value = allowances[i].customer;
-                        cmd.Parameters[5].Value = allowances[i].job;
-                        cmd.Parameters[6].Value = allowances[i].allowance_province;
-                        cmd.Parameters[7].Value = allowances[i].allowance_1_4;
-                        cmd.Parameters[8].Value = allowances[i].allowance_4_8;
-                        cmd.Parameters[9].Value = allowances[i].allowance_8;
-                        cmd.Parameters[10].Value = allowances[i].allowance_other;
-                        cmd.Parameters[11].Value = allowances[i].allowance_hostel;
-                        cmd.Parameters[12].Value = allowances[i].list;
-                        cmd.Parameters[13].Value = allowances[i].amount;
-                        cmd.Parameters[14].Value = allowances[i].description;
-                        cmd.Parameters[15].Value = allowances[i].remark;
-                        cmd.Parameters[16].Value = allowances[i].status;
-                        cmd.Parameters[17].Value = allowances[i].approver;
-                        cmd.Parameters[18].Value = allowances[i].last_date;
+                        cmd.Parameters[4].Value = allowances[i].date_start;
+                        cmd.Parameters[5].Value = allowances[i].date_stop;
+                        cmd.Parameters[6].Value = allowances[i].customer;
+                        cmd.Parameters[7].Value = allowances[i].job;
+                        cmd.Parameters[8].Value = allowances[i].allowance_province;
+                        cmd.Parameters[9].Value = allowances[i].allowance_1_4;
+                        cmd.Parameters[10].Value = allowances[i].allowance_4_8;
+                        cmd.Parameters[11].Value = allowances[i].allowance_8;
+                        cmd.Parameters[12].Value = allowances[i].allowance_other;
+                        cmd.Parameters[13].Value = allowances[i].allowance_hostel;
+                        cmd.Parameters[14].Value = allowances[i].list;
+                        cmd.Parameters[15].Value = allowances[i].amount;
+                        cmd.Parameters[16].Value = allowances[i].description;
+                        cmd.Parameters[17].Value = allowances[i].remark;
+                        cmd.Parameters[18].Value = allowances[i].status;
+                        cmd.Parameters[19].Value = allowances[i].approver;
+                        cmd.Parameters[20].Value = allowances[i].last_date;
                         cmd.ExecuteNonQuery();
                     }
 
@@ -294,6 +310,8 @@ namespace TRIPEXPENSEREPORT.Service
                             emp_id,
                             zipcode,
                             date,
+                            date_start,
+                            date_stop,
                             customer,
                             job,
                             allowance_province,
@@ -313,6 +331,8 @@ namespace TRIPEXPENSEREPORT.Service
                             @emp_id,
                             @zipcode,
                             @date,
+                            @date_start,
+                            @date_stop,
                             @customer,
                             @job,
                             @allowance_province,
@@ -335,6 +355,8 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@emp_id", SqlDbType.Text);
                     cmd.Parameters.Add("@zipcode", SqlDbType.Text);
                     cmd.Parameters.Add("@date", SqlDbType.Date);
+                    cmd.Parameters.Add("@date_start", SqlDbType.Date);
+                    cmd.Parameters.Add("@date_stop", SqlDbType.Date);
                     cmd.Parameters.Add("@customer", SqlDbType.Text);
                     cmd.Parameters.Add("@job", SqlDbType.Text);
                     cmd.Parameters.Add("@allowance_province", SqlDbType.Float);
@@ -362,21 +384,23 @@ namespace TRIPEXPENSEREPORT.Service
                         cmd.Parameters[1].Value = allowances[i].emp_id;
                         cmd.Parameters[2].Value = allowances[i].zipcode;
                         cmd.Parameters[3].Value = allowances[i].date;
-                        cmd.Parameters[4].Value = allowances[i].customer;
-                        cmd.Parameters[5].Value = allowances[i].job;
-                        cmd.Parameters[6].Value = allowances[i].allowance_province;
-                        cmd.Parameters[7].Value = allowances[i].allowance_1_4;
-                        cmd.Parameters[8].Value = allowances[i].allowance_4_8;
-                        cmd.Parameters[9].Value = allowances[i].allowance_8;
-                        cmd.Parameters[10].Value = allowances[i].allowance_other;
-                        cmd.Parameters[11].Value = allowances[i].allowance_hostel;
-                        cmd.Parameters[12].Value = allowances[i].list;
-                        cmd.Parameters[13].Value = allowances[i].amount;
-                        cmd.Parameters[14].Value = allowances[i].description;
-                        cmd.Parameters[15].Value = allowances[i].remark;
-                        cmd.Parameters[16].Value = allowances[i].status;
-                        cmd.Parameters[17].Value = allowances[i].approver;
-                        cmd.Parameters[18].Value = allowances[i].last_date;
+                        cmd.Parameters[4].Value = allowances[i].date_start;
+                        cmd.Parameters[5].Value = allowances[i].date_stop;
+                        cmd.Parameters[6].Value = allowances[i].customer;
+                        cmd.Parameters[7].Value = allowances[i].job;
+                        cmd.Parameters[8].Value = allowances[i].allowance_province;
+                        cmd.Parameters[9].Value = allowances[i].allowance_1_4;
+                        cmd.Parameters[10].Value = allowances[i].allowance_4_8;
+                        cmd.Parameters[11].Value = allowances[i].allowance_8;
+                        cmd.Parameters[12].Value = allowances[i].allowance_other;
+                        cmd.Parameters[13].Value = allowances[i].allowance_hostel;
+                        cmd.Parameters[14].Value = allowances[i].list;
+                        cmd.Parameters[15].Value = allowances[i].amount;
+                        cmd.Parameters[16].Value = allowances[i].description;
+                        cmd.Parameters[17].Value = allowances[i].remark;
+                        cmd.Parameters[18].Value = allowances[i].status;
+                        cmd.Parameters[19].Value = allowances[i].approver;
+                        cmd.Parameters[20].Value = allowances[i].last_date;
                         cmd.ExecuteNonQuery();
                     }
 
@@ -407,6 +431,8 @@ namespace TRIPEXPENSEREPORT.Service
                         emp_id = @emp_id,
                         zipcode = @zipcode,
 	                    date = @date,
+                        date_start = @date_start,
+                        date_stop = @date_stop,
 	                    customer = @customer,
 	                    job = @job,
 	                    allowance_province = @allowance_province,
@@ -430,6 +456,8 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@emp_id", allowance.emp_id);
                     cmd.Parameters.AddWithValue("@zipcode", allowance.zipcode);
                     cmd.Parameters.AddWithValue("@date", allowance.date);
+                    cmd.Parameters.AddWithValue("@date_start", allowance.date_start);
+                    cmd.Parameters.AddWithValue("@date_stop", allowance.date_stop);
                     cmd.Parameters.AddWithValue("@customer", allowance.customer);
                     cmd.Parameters.AddWithValue("@job", allowance.job);
                     cmd.Parameters.AddWithValue("@allowance_province", allowance.allowance_province);

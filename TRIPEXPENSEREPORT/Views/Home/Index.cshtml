@@ -14,7 +14,7 @@
 
 <div>
 <div class=" text-center">
-    <h1 class="kanit-medium" style="font-size:30px; align-content:center; padding:10px; color:#1C4698">FOR USER </h1>
+        <h1  style="font-family:Rajdhani; font-weight:bold; font-size:33px; letter-spacing:2px;align-content:center; padding:10px; color:#1C4698">FOR USER </h1>
 </div>
 @* <div class="row">
     <div class="col-md-4">
@@ -34,16 +34,16 @@
     </div>
 </div> *@
 
-<div class="container mt-4 ">
+<div class="container mt-1">
     <div class="row justify-content-center">
         <!-- การ์ดปุ่มที่ 1: รถส่วนตัว -->
         <div class="col-md-4 mb-4">
-                <a href="@Url.Action("BookCar", "Home")" class="text-decoration-none" style="color:#2C75B4">
+                <a href="@Url.Action("PersonalCar", "Home")" class="text-decoration-none" style="color:#1BA2E4">
                 <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                     <div class="card-body d-flex flex-column align-items-center">
                         <i class="fas fa-car fa-3x  mb-3"></i>  <!-- ไอคอนรถยนต์ สีน้ำเงิน -->
                         <h5 class="card-title  kanit-medium" style="font-size:25px">รถส่วนตัว </h5>
-                        <p class="text-muted medium mb-0">PERSONAL CAR</p>
+                            <p class="text-muted medium mb-0" >PERSONAL CAR</p>
                     </div>
                 </div>
             </a>
@@ -51,10 +51,10 @@
 
         <!-- การ์ดปุ่มที่ 2: รถบริษัท -->
         <div class="col-md-4 mb-4" >
-                <a href="@Url.Action("RequestVehicle", "Home")" class="text-decoration-none" style="color:#2178BE">
+                <a href="@Url.Action("CompanyCar", "Home")" class="text-decoration-none" style="color:#2178BE">
                     <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                     <div class="card-body d-flex flex-column align-items-center">
-                            <i class="fas fa-truck fa-3x mb-3" ></i>  <!-- ไอคอนรถบรรทุก สีเทา -->
+                            <i class="fas fa-truck fa-3x mb-3"></i>  <!-- ไอคอนรถบรรทุก สีเทา -->
                             <h5 class="card-title kanit-medium" style="font-size:25px">รถบริษัท</h5>
                         <p class="text-muted medium mb-0">COMPANY CAR</p>
                     </div>
@@ -64,7 +64,7 @@
 
         <!-- การ์ดปุ่มที่ 3: เบี้ยเลี้ยง -->
         <div class="col-md-4 mb-4">
-                <a href="@Url.Action("Reimburse", "Home")" class="text-decoration-none" style="color:#0BB084">
+                <a href="@Url.Action("Allowance", "Home")" class="text-decoration-none" style="color:#27D86C">
                 <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                     <div class="card-body d-flex flex-column align-items-center">
                         <i class="fas fa-envelope-open-text fa-3x  mb-3"></i>  <!-- ไอคอนซองจดหมาย สีเขียว -->
@@ -80,7 +80,7 @@
 
 <div>
     <div class=" text-center">
-        <h1 class="kanit-medium" style="font-size:30px; align-content:center; color:#1C4698">FOR ADMIN </h1>
+        <h1 style="font-family:Rajdhani; font-weight:bold; font-size:33px; letter-spacing:2px;align-content:center; padding:0px; color:#1C4698">FOR ADMIN </h1>
     </div>
     @* <div class="row">
     <div class="col-md-4">
@@ -100,15 +100,15 @@
     </div>
     </div> *@
 
-    <div class="container mt-4 ">
+    <div class="container mt-3">
         <div class="row justify-content-center">
             <!-- การ์ดปุ่มที่ 1: รถส่วนตัว -->
             <div class="col-md-4 mb-4">
-                <a href="@Url.Action("BookCar", "Home")" class="text-decoration-none">
+                <a href="@Url.Action("PersonalCar", "Home")" class="text-decoration-none" style="color:#1BA2E4; letter-spacing:1px">
                     <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                         <div class="card-body d-flex flex-column align-items-center">
-                            <i class="fas fa-car fa-3x text-primary mb-3"></i>  <!-- ไอคอนรถยนต์ สีน้ำเงิน -->
-                            <h5 class="card-title text-primary kanit-medium" style="font-size:25px">รถส่วนตัว </h5>
+                            <i class="fa-solid fa-car-side fa-3x mb-3"></i>  <!-- ไอคอนรถยนต์ สีน้ำเงิน -->
+                            <h5 class="card-title  kanit-medium" style="font-size:25px">รถส่วนตัว </h5>
                             <p class="text-muted medium mb-0">PERSONAL CAR</p>
                         </div>
                     </div>
@@ -117,11 +117,11 @@
 
             <!-- การ์ดปุ่มที่ 2: รถบริษัท -->
             <div class="col-md-4 mb-4">
-                <a href="@Url.Action("RequestVehicle", "Home")" class="text-decoration-none">
+                <a href="@Url.Action("CompanyCar", "Home")" class="text-decoration-none" style="color:#2178BE; letter-spacing:1px">
                     <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                         <div class="card-body d-flex flex-column align-items-center">
-                            <i class="fas fa-truck fa-3x text-secondary mb-3"></i>  <!-- ไอคอนรถบรรทุก สีเทา -->
-                            <h5 class="card-title text-secondary kanit-medium" style="font-size:25px">รถบริษัท</h5>
+                            <i class="fa-solid fa-truck-pickup fa-3x mb-3"></i>  <!-- ไอคอนรถบรรทุก สีเทา -->
+                            <h5 class="card-title kanit-medium" style="font-size:25px">รถบริษัท</h5>
                             <p class="text-muted medium mb-0">COMPANY CAR</p>
                         </div>
                     </div>
@@ -130,11 +130,11 @@
 
             <!-- การ์ดปุ่มที่ 3: เบี้ยเลี้ยง -->
             <div class="col-md-4 mb-4">
-                <a href="@Url.Action("Reimburse", "Home")" class="text-decoration-none">
+                <a href="@Url.Action("Allowance", "Home")" class="text-decoration-none" style="color:#27D86C; letter-spacing:1px">
                     <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                         <div class="card-body d-flex flex-column align-items-center">
-                            <i class="fas fa-envelope-open-text fa-3x text-success mb-3"></i>  <!-- ไอคอนซองจดหมาย สีเขียว -->
-                            <h5 class="card-title text-success kanit-medium" style="font-size:25px">เบี้ยเลี้ยง</h5>
+                            <i class="fas fa-envelope-open-text fa-3x  mb-3"></i>  <!-- ไอคอนซองจดหมาย สีเขียว -->
+                            <h5 class="card-title kanit-medium" style="font-size:25px">เบี้ยเลี้ยง</h5>
                             <p class="text-muted medium mb-0">ALLOWANCE</p>
                         </div>
                     </div>

@@ -10,12 +10,10 @@ namespace TRIPEXPENSEREPORT.Service
         public List<EmployeeModel> GetEmployees()
         {
             List<EmployeeModel> employees = new List<EmployeeModel>();
-            SqlConnection connection = ConnectSQL.OpenConnect();
             try
             {
                 string strCmd = string.Format($@"SELECT emp_id,name,department,role FROM Employees");
-                SqlCommand command = new SqlCommand(strCmd, connection);
-                connection.Open();
+                SqlCommand command = new SqlCommand(strCmd, ConnectSQL.OpenConnect());
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -35,7 +33,10 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                connection.Close();
+                if (ConnectSQL.con.State == ConnectionState.Open)
+                {
+                    ConnectSQL.CloseConnect();
+                }
             }
             return employees;
         }

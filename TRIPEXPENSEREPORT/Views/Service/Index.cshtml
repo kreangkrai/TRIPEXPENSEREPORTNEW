@@ -1,0 +1,563 @@
+﻿@using TRIPEXPENSEREPORT.Service
+@{
+    ViewData["Title"] = "Service Maintenance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    List<ServiceTypeModel> services = ViewBag.serviceType;
+}
+
+<div class="container">
+    <div class="row p-1" style="row-gap:10px">
+        <div class="col-xl-12">
+            <div class="card card-dark">
+                <div class="card-body">
+                    <div class="row d-flex justify-content-center">
+                        <label style="color: #034694; font-size: 30px; font-weight: 600">SERVICE MAINTENANCE</label>
+                    </div>
+                    <div class="row d-flex justify-content-center">
+                        @{
+                            for (int i = 0; i < services.Count; i++)
+                            {
+                                if (i == 0)
+                                {
+                                    <div class="col-12 col-xl-3 col-md-4 pt-2 d-flex justify-content-center">
+                                        <input class="form-control btn btn-primary" type="button" style="width:200px;height:80px; font-size:20px" value="@services[i].service_name" onclick="Service_Click(`@services[i].service_id`,`@services[i].service_name`)" />
+                                    </div>
+                                }
+                                if (i == 1)
+                                {
+                                    <div class="col-12 col-xl-3 col-md-4 pt-2 d-flex justify-content-center">
+                                        <input class="form-control btn btn-success" type="button" style="width: 200px; height: 80px; font-size: 20px" value="@services[i].service_name" onclick="Service_Click(`@services[i].service_id`,`@services[i].service_name`)" />
+                                    </div>
+                                }
+                                if (i == 2)
+                                {
+                                    <div class="col-12 col-xl-3 col-md-4 pt-2 d-flex justify-content-center">
+                                        <input class="form-control btn btn-info" type="button" style="width: 200px; height: 80px; font-size: 20px" value="@services[i].service_name" onclick="Service_Click(`@services[i].service_id`,`@services[i].service_name`)" />
+                                    </div>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row p-1" style="row-gap:1px">
+        <div class="col-xl-12">
+            <div class="card card-dark">
+                <div class="card-header" style="background-color: #034694">
+                    <span id="title_service_name" class="card-title">SER01:GENERAL SERVICE</span>
+                    <div class="card-tools">
+                        <input type="button" id="btn_add_car_service" class="btn btn-success" value="Add Car" />
+                    </div>
+                </div>
+                <div class="card-body" style="overflow-x:auto">
+                    <table id="table" class="table table-hover table-bordered text-center w-100">
+                        <thead style="background-color: #034694;color:white">
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>รถยนต์</th>
+                                <th>ทะเบียนรถยนต์</th>
+                                <th>เลขไมล์ตอนเข้าศูนย์ล่าสุด</th>
+                                <th>วันที่เข้าศูนย์ล่าสุด</th>
+                                <th>ระยะเลขไมล์ที่แจ้ง</th>
+                                <th>วันที่แจ้ง</th>
+                                <th>เลขไมล์ระยะถัดไป</th>
+                                <th>วันที่เข้าศูนย์ถัดไป</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_add_car_service" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-lg modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_title_service" style="font-weight:600">Add Car Service</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <label for="add_service_type">ServiceType</label>
+                            <input id="add_service_type" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="add_car">รถยนต์</label>
+                            <select id="add_car" class="form-control"></select>
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="add_car">ทะเบียนรถยนต์</label>
+                            <input id="add_license_plate" class="form-control" type="text" />
+                        </div>
+
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-3">
+                            <label for="add_mileage_at_service">เลขไมล์ตอนเข้าศูนย์</label>
+                            <input id="add_mileage_at_service" type="number" value="0" class="form-control" />
+                        </div>
+                        <div class="col-xl-3">
+                            <label for="add_date_at_service">วันที่เข้าศูนย์</label>
+                            <input id="add_date_at_service" type="date" class="form-control" />
+                        </div>
+                        <div class="col-xl-3">
+                            <label for="add_appointment_mileage">ระยะเลขไมล์ที่แจ้ง</label>
+                            <input id="add_appointment_mileage" type="number" value="0" class="form-control" />
+                        </div>
+                        <div class="col-xl-3">
+                            <label for="add_appointment_date">วันที่แจ้ง</label>
+                            <input id="add_appointment_date" type="date" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <label for="add_next_appointment_mileage">เลขไมล์ระยะถัดไป</label>
+                            <input id="add_next_appointment_mileage" type="number" value="0" class="form-control" />
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="add_next_appointment_date">วันที่เข้าศูนย์ถัดไป</label>
+                            <input id="add_next_appointment_date" type="date" class="form-control" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btn_add" type="button" class="btn btn-primary">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_update_car_service" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-lg modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_title_update_service" style="font-weight:600">Update Car Service</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_service_type">ServiceType</label>
+                            <input id="update_service_type" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_car">รถยนต์</label>
+                            <input id="update_car" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_license_plate">ทะเบียนรถยนต์</label>
+                            <input id="update_license_plate" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_current_mileage">เลขไมล์ปัจจุบัน</label>
+                            <input id="update_current_mileage" type="number" value="0" class="form-control" />
+                        </div>
+
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_mileage_at_service">เลขไมล์ตอนเข้าศูนย์</label>
+                            <input id="update_mileage_at_service" type="number" value="0" class="form-control" />
+                        </div>
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_date_at_service">วันที่เข้าศูนย์</label>
+                            <input id="update_date_at_service" type="date" class="form-control" />
+                        </div>
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_appointment_mileage">ระยะเลขไมล์ที่แจ้ง</label>
+                            <input id="update_appointment_mileage" type="number" value="0" class="form-control" />
+                        </div>
+                        <div class="col-6 col-xl-3 pt-1">
+                            <label for="update_appointment_date">วันที่แจ้ง</label>
+                            <input id="update_appointment_date" type="date" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-4 pt-1">
+                            <label for="update_next_appointment_mileage">เลขไมล์ระยะถัดไป</label>
+                            <input id="update_next_appointment_mileage" type="number" value="0" class="form-control" />
+                        </div>
+                        <div class="col-6 col-xl-4 pt-1">
+                            <label for="update_next_appointment_date">วันที่เข้าศูนย์ถัดไป</label>
+                            <input id="update_next_appointment_date" type="date" class="form-control" />
+                        </div>
+                        <div class="col-xl-4 pt-1">
+                            <label for="isService">ศูนย์บริการ/อู่รถยนต์ทั่วไป</label>
+                            <div class="form-group row p-2">
+                                <input id="update_check_service" type="checkbox" style="width:17px;height:1.5em;" />
+                                <label class="pl-1" for="update_check_service"> บันทึกเข้ารับบริการ</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr style="border-width: 2px; border-color: #034694" />
+                    <div class="form-group row" id="isService1" hidden>
+                        <div class="col-xl-3">
+                            <label for="update_user">ผู้เข้ารับบริการ</label>
+                            <select id="update_user" class="form-control"></select>
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="update_location">ชื่อสถานที่บริการ</label>
+                            <textarea id="update_location" class="form-control"></textarea>
+                        </div>
+                        <div class="col-xl-5">
+                            <label for="update_detail">รายละเอียด</label>
+                            <textarea id="update_detail" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="isService2" hidden>
+                        <div class="col-xl-12">
+                            <label for="update_note">หมายเหตุ</label>
+                            <textarea id="update_note" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btn_update" type="button" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        var table;
+        let cars_mileage = [];
+        let cars = [];
+        $(document).ready(async function () {
+           // await UpdateMileage();
+            await GetCars('SER01');
+        });
+
+        async function GetCars(service) {
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetServicesByService", "Service")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { service },
+                success: function (response) {
+                    let services = response.services;
+                    GenerateTable(services);
+                }
+            });
+        }
+
+        async function Service_Click(service_id, service_name) {
+
+            await GetCars(service_id);
+            $('#title_service_name').text(service_id +":"+service_name);
+        }
+
+        $('#btn_add').on('click', async function () {
+            let service_id = $('#add_service_type').val();
+            let car_id = $('#add_car').val();
+            let mileage_at_service = $('#add_mileage_at_service').val();
+            let date_at_service = $('#add_date_at_service').val();
+            let appointment_mileage = $('#add_appointment_mileage').val();
+            let appointment_date = $('#add_appointment_date').val();
+            let next_appointment_mileage = $('#add_next_appointment_mileage').val();
+            let next_appointment_date = $('#add_next_appointment_date').val();
+
+            var str = JSON.stringify({
+                "service_id": service_id,
+                "car_id": car_id,
+                "mileage_at_service": mileage_at_service,
+                "date_at_service": date_at_service,
+                "appointment_mileage": appointment_mileage,
+                "appointment_date": appointment_date,
+                "next_appointment_mileage": next_appointment_mileage,
+                "next_appointment_date": next_appointment_date
+            });
+
+            await $.ajax({
+                type: "POST",
+                url: '@Url.Action("InsertService", "Service")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: {str },
+                success: function (response) {
+                    if (response == "Success") {
+                        window.location.reload();
+                    } else {
+                        alert(response);
+                    }
+                }
+            });
+
+        });
+
+        $('#btn_update').on('click', async function () {
+            let service_id = $('#update_service_type').val();
+            let car_id = $('#update_car').val();
+            let current_mileage = $('#update_current_mileage').val();
+            let mileage_at_service = $('#update_mileage_at_service').val();
+            let date_at_service = $('#update_date_at_service').val();
+            let appointment_mileage = $('#update_appointment_mileage').val();
+            let appointment_date = $('#update_appointment_date').val();
+            let next_appointment_mileage = $('#update_next_appointment_mileage').val();
+            let next_appointment_date = $('#update_next_appointment_date').val();
+            let detail = $('#update_detail').val();
+            let note = $('#update_note').val();
+            let location_service = $('#update_location').val();
+            let name = $('#update_user').val();
+            let is_service = document.getElementById("update_check_service").checked;
+            var str = JSON.stringify({
+                "service_id": service_id,
+                "car_id": car_id,
+                "current_mileage": current_mileage,
+                "mileage_at_service": mileage_at_service,
+                "date_at_service": date_at_service,
+                "appointment_mileage": appointment_mileage,
+                "appointment_date": appointment_date,
+                "next_appointment_mileage": next_appointment_mileage,
+                "next_appointment_date": next_appointment_date
+            });
+
+            var str_log = JSON.stringify({
+                "service_id": service_id,
+                "car_id": car_id,
+                "current_mileage": current_mileage,
+                "mileage_at_service": mileage_at_service,
+                "date_at_service": date_at_service,
+                "appointment_mileage": appointment_mileage,
+                "appointment_date": appointment_date,
+                "detail": detail,
+                "note": note,
+                "location_service": location_service,
+                "name" : name
+            });
+            await $.ajax({
+                type: "PUT",
+                url: '@Url.Action("UpdateService", "Service")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { str,str_log,is_service },
+                success: function (response) {
+                    if (response == "Success") {
+                        window.location.reload();
+                    } else {
+                        alert(response);
+                    }
+                }
+            });
+        });
+
+        $('#btn_add_car_service').on('click', async function () {
+            let service_id = $('#title_service_name').text().split(':')[0];
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetCar", "Service")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { service_id },
+                success: function (response) {
+                    cars = response;
+                    GenerateCarOptions(cars);
+                }
+            });
+
+            let service_type = $('#title_service_name').text();
+            $('#modal_title_service').text("Add Car Service " + "[" + service_type.split(':')[1] + "]")
+            $('#add_service_type').val(service_type.split(':')[0]);
+            $('#add_mileage_at_service').val(0);
+            $('#add_appointment_mileage').val(0);
+            $('#add_next_appointment_mileage').val(0);
+            $('#add_date_at_service').val(new Date().toISOString().split('T')[0]);
+            $('#add_appointment_date').val(new Date().toISOString().split('T')[0]);
+            $('#add_next_appointment_date').val(new Date().toISOString().split('T')[0]);
+            $('#modal_add_car_service').modal();
+        });
+
+        $('#update_check_service').on('change', function () {
+            let chk = document.getElementById("update_check_service").checked;
+            if (chk) {
+                $('#isService1').attr('hidden', false);
+                $('#isService2').attr('hidden', false);
+            } else {
+                $('#isService1').attr('hidden', true);
+                $('#isService2').attr('hidden', true);
+            }
+        });
+
+        $('#update_mileage_at_service').on('change', function () {
+            let old_mileage_at_service = parseInt($('#update_mileage_at_service').val());
+            let service_id = $('#title_service_name').text().split(':')[0];
+            let services = JSON.parse('@Html.Raw(Json.Serialize(services))');
+            services = services.filter(f => f.service_id === service_id).map(m => m)[0];
+            let _mileage_at_service = services.due_mileage;
+            let new_mileage_at_service = old_mileage_at_service + _mileage_at_service;
+            $('#update_next_appointment_mileage').val(new_mileage_at_service);
+        });
+
+        $('#update_date_at_service').on('change', function () {
+            let old_date_at_service = new Date($('#update_date_at_service').val());
+            let service_id = $('#title_service_name').text().split(':')[0];
+            let services = JSON.parse('@Html.Raw(Json.Serialize(services))');
+            services = services.filter(f => f.service_id === service_id).map(m => m)[0];
+            let _day_at_service = services.due_date;
+            old_date_at_service.setDate(old_date_at_service.getDate() + _day_at_service);
+            let new_day_at_service = old_date_at_service.toISOString().split('T')[0];
+            $('#update_next_appointment_date').val(new_day_at_service);
+        });
+
+        $('#add_mileage_at_service').on('change', function () {
+            let old_mileage_at_service = parseInt($('#add_mileage_at_service').val());
+            let service_id = $('#title_service_name').text().split(':')[0];
+            let services = JSON.parse('@Html.Raw(Json.Serialize(services))');
+            services = services.filter(f => f.service_id === service_id).map(m => m)[0];
+            let _mileage_at_service = services.due_mileage;
+            let new_mileage_at_service = old_mileage_at_service + _mileage_at_service;
+            $('#add_next_appointment_mileage').val(new_mileage_at_service);
+        });
+
+        $('#add_date_at_service').on('change', function () {
+            let old_date_at_service = new Date($('#add_date_at_service').val());
+            let service_id = $('#title_service_name').text().split(':')[0];
+            let services = JSON.parse('@Html.Raw(Json.Serialize(services))');
+            services = services.filter(f => f.service_id === service_id).map(m => m)[0];
+            let _day_at_service = services.due_date;
+            old_date_at_service.setDate(old_date_at_service.getDate() + _day_at_service);
+            let new_day_at_service = old_date_at_service.toISOString().split('T')[0];
+            $('#add_next_appointment_date').val(new_day_at_service);
+        });
+
+        $('#add_car').on('change', function () {
+            let car_id = $('#add_car').val();
+            let license_plate = cars.filter(f => f.Car_No === car_id).map(m => m.License_Plate)[0];
+            $('#add_license_plate').val(license_plate);
+        });
+        async function GenerateCarOptions(cars) {
+            var str = '<option value="" selected disabled>Select Car</option>';
+            for (var i = 0; i < cars.length; i++) {
+                str += '<option value="' + cars[i].Car_No + '">' + cars[i].Car_No + '</option>';
+            }
+            $('#add_car').empty();
+            $('#add_car').append(str);
+        }
+        async function GenerateUserOptions(users) {
+            var str = '<option value="" selected disabled>Select</option>';
+            for (var i = 0; i < users.length; i++) {
+                str += '<option value="' + users[i].name + '">' + users[i].name + '</option>';
+            }
+            $('#update_user').empty();
+            $('#update_user').append(str);
+        }
+
+        async function Edit_Click(car_id) {
+            let service_id = $('#title_service_name').text().split(':')[0];
+            let car;
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetServiceByCar", "Service")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { car_id, service_id },
+                success: async function (response) {
+                    car = response.service;
+                    let users = response.users;
+                    await GenerateUserOptions(users);
+                }
+            });
+
+            let service_type = $('#title_service_name').text();
+            $('#modal_title_update_service').text("Update Car Service " + "[" + service_type.split(':')[1] + "]")
+            $('#update_service_type').val(car.service_id);
+            $('#update_car').val(car.car_id);
+            $('#update_license_plate').val(car.license_plate);
+            $('#update_current_mileage').val(car.current_mileage);
+            $('#update_mileage_at_service').val(car.mileage_at_service);
+            $('#update_date_at_service').val(car.date_at_service.split('T')[0]);
+            $('#update_appointment_mileage').val(car.appointment_mileage);
+            $('#update_appointment_date').val(car.appointment_date.split('T')[0]);
+            $('#update_next_appointment_mileage').val(car.next_appointment_mileage);
+            $('#update_next_appointment_date').val(car.next_appointment_date.split('T')[0]);
+            $('#modal_update_car_service').modal();
+
+        };
+
+        function GenerateTable(services) {
+            let datas = [];
+            for (let i = 0; i < services.length; i++) {
+                datas.push([ (i + 1),
+                    services[i].car_id,
+                    services[i].license_plate,
+                    services[i].mileage_at_service,
+                    services[i].date_at_service.toString().split('T')[0],
+                    services[i].appointment_mileage,
+                    services[i].appointment_date.toString().split('T')[0],
+                    services[i].next_appointment_mileage,
+                    services[i].next_appointment_date.toString().split('T')[0],
+                    ""
+                ]);
+            }
+
+            if (table !== undefined) {
+                table.destroy();
+            }
+
+            table = $('#table').DataTable({
+                data: datas,
+                columnDefs: [
+                    {
+                        targets: 0,
+                        width: "5%"
+                    },
+                    {
+                        targets: 5,
+                        width: "20%",
+                        className: "text-center"
+                    },
+                ],
+                rowCallback: function (row, data) {
+                    let car_id = data[1];
+                    let next_appointment_mileage = data[7];
+                    let next_appointment_date = new Date(data[8]);
+
+                    let current_mileage = cars_mileage.filter(f => f.car == car_id).map(m => m.mileage)[0];
+                    let diff_mileage = parseInt(next_appointment_mileage) - parseInt(current_mileage);
+                    let day = parseInt(next_appointment_date - new Date()) / 1000 / 86400;
+
+                    if (day < 0 || diff_mileage < 200) {
+                        $('td', row).css("color", 'red');
+                        $('td', row).css("font-weight", "600");
+                    } else if ((day >= 0 && day <= 15) || (diff_mileage >= 200 && diff_mileage < 500)) {
+                        $('td', row).css("color", 'orange');
+                        $('td', row).css("font-weight", "600");
+                    }
+
+                    $('td:eq(9)', row).html(`
+                           <button type="button" class="btn btn-primary" style="width:80px" onclick="Edit_Click('${car_id}')">แก้ไข
+                           </button>
+                    `);
+                }
+            });
+        }
+
+        // async function UpdateMileage() {
+        //     await $.ajax({
+        //         type: "PUT",
+        //         url: '@Url.Action("UpdateMileage", "Service")',
+        //         contentType: 'application/x-www-form-urlencoded',
+        //         data: { },
+        //         success: async function (response) {
+        //             if (response.length > 0) {
+        //                 cars_mileage = response;
+        //             } else {
+        //                 alert(response);
+        //             }
+        //         }
+        //     });
+        // }
+    </script>
+}

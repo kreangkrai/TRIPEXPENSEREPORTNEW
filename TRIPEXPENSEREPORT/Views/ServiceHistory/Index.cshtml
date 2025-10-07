@@ -1,0 +1,144 @@
+﻿@using TRIPEXPENSEREPORT.Service
+@{
+    ViewData["Title"] = "Service History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    List<ServiceTypeModel> services = ViewBag.serviceType;
+}
+
+<div class="container">
+    <div class="row p-3" style="row-gap:10px">
+        <div class="col-xl-12">
+            <div class="card card-dark">
+                <div class="card-body">
+                    <div class="row d-flex justify-content-center">
+                        <label style="color: #034694; font-size: 30px; font-weight: 600">SERVICE HISTORY</label>
+                    </div>
+                    <div class="row d-flex justify-content-center">
+                        @{
+                            for (int i = 0; i < services.Count; i++)
+                            {
+                                if (i == 0)
+                                {
+                                    <div class="col-12 col-xl-3 col-md-4 pt-2 d-flex justify-content-center">
+                                        <input class="form-control btn btn-primary" type="button" style="width:200px;height:80px; font-size:20px" value="@services[i].service_name" onclick="Service_Click(`@services[i].service_id`,`@services[i].service_name`)" />
+                                    </div>
+                                }
+                                if (i == 1)
+                                {
+                                    <div class="col-12 col-xl-3 col-md-4 pt-2 d-flex justify-content-center">
+                                        <input class="form-control btn btn-success" type="button" style="width: 200px; height: 80px; font-size: 20px" value="@services[i].service_name" onclick="Service_Click(`@services[i].service_id`,`@services[i].service_name`)" />
+                                    </div>
+                                }
+                                if (i == 2)
+                                {
+                                    <div class="col-12 col-xl-3 col-md-4 pt-2 d-flex justify-content-center">
+                                        <input class="form-control btn btn-info" type="button" style="width: 200px; height: 80px; font-size: 20px" value="@services[i].service_name" onclick="Service_Click(`@services[i].service_id`,`@services[i].service_name`)" />
+                                    </div>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row p-1" style="row-gap:1px">
+        <div class="col-xl-12">
+            <div class="card card-dark">
+                <div class="card-header" style="background-color: #034694">
+                    <span id="title_service_name" class="card-title">SER01:GENERAL SERVICE</span>
+                    <div class="card-tools">
+                        <input type="button" id="btn_export" class="btn btn-success btn-sm" style="width:100px" value="Export" />
+                    </div>
+                </div>
+                <div class="card-body" style="overflow-x:auto">
+                    <table id="table" class="table table-hover table-bordered text-center w-100">
+                        <thead style="background-color: #034694;color:white">
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>รถยนต์</th>
+                                <th>ทะเบียนรถยนต์</th>
+                                <th>เลขไมล์ตอนเข้าศูนย์ล่าสุด</th>
+                                <th>วันที่เข้าศูนย์ล่าสุด</th>
+                                <th>ระยะเลขไมล์ที่แจ้ง</th>
+                                <th>วันที่แจ้งรับบริการ</th>
+                                <th>ผู้เข้ารับบริการ</th>
+                                <th>สถานที่บริการ</th>
+                                <th>รายละเอียด</th>
+                                <th>หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        var table;
+        $(document).ready(async function () {
+            await GetCars('SER01');
+        });
+
+        async function GetCars(service) {
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetServicesHistoryByService", "ServiceHistory")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { service },
+                success: function (response) {
+                    let services = response;
+                    GenerateTable(services);
+                }
+            });
+        }
+
+        async function Service_Click(service_id, service_name) {
+
+            await GetCars(service_id);
+            $('#title_service_name').text(service_id + ":" + service_name);
+        }
+
+        function GenerateTable(services) {
+            let datas = [];
+            for (let i = 0; i < services.length; i++) {
+                datas.push([(i + 1),
+                services[i].car_id,
+                services[i].license_plate,
+                services[i].mileage_at_service,
+                services[i].date_at_service.toString().split('T')[0],
+                services[i].appointment_mileage,
+                services[i].appointment_date.toString().split('T')[0],
+                services[i].name,
+                services[i].location_service,
+                services[i].detail,
+                services[i].note
+                ]);
+            }
+
+            if (table !== undefined) {
+                table.destroy();
+            }
+
+            table = $('#table').DataTable({
+                data: datas,
+                columnDefs: [
+                    {
+                        targets: 0,
+                        width: "5%"
+                    },
+                ],
+                rowCallback: function (row, data) {
+                }
+            });
+        }
+
+        $('#btn_export').on('click', function () {
+            window.location.href = '@Url.Action("DownloadXlsxReport", "ServiceHistory")';
+        });
+    </script>
+}

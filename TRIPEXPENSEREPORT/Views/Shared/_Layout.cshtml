@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-   
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]  Labor Appearance Active Time</title>
@@ -118,9 +118,47 @@
             font-weight: 900;
             font-style: italic;
         }
+
+        .scrollable-table {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            display: block; /* ช่วยให้เลื่อนได้ดีขึ้น */
+        }
+
+            .scrollable-table table {
+                width: 100%; /* ตรวจสอบว่าเทเบิลเต็มความกว้างของ Container */
+            }
+
+            .scrollable-table thead th {
+                position: sticky;
+                top: 0;
+                background-color: #2178BE; /* เก็บหัวตารางให้คงที่ */
+                color: white;
+                z-index: 1;
+            }
+
+        .modal.fade .modal-dialog {
+            transition: transform 0.2s ease-out;
+            transform: translate(0, -50px);
+        }
+
+        .modal.show .modal-dialog {
+            transform: translate(0, 0);
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+            .clickable-row:hover {
+                background-color: #f5f5f5; /* ไฮไลต์เมื่อชี้ (ตัวเลือก) */
+            }
+
+
     </style>
 </head>
-<body class="layout-fixed layout-top-nav layout-footer-fixed" >
+<body class="layout-fixed layout-top-nav layout-footer-fixed">
     <div class="wrapper">
         <partial name="_Header" />
         @*<partial name="_Sidebar" />*@

@@ -9,17 +9,24 @@ namespace TRIPEXPENSEREPORT.Service
     {
         private IArea Area;
         private IUser User;
+        ConnectSQL connect = null;
+        SqlConnection con = null;
         public AllowanceService()
         {
             Area = new AreaService();
             User = new UserService();
+            connect = new ConnectSQL();
+            con = connect.OpenConnect();
         }
         public List<AllowanceViewModel> GetEditAllowancesByDate(DateTime start_date, DateTime stop_date)
         {
             List<AllowanceViewModel> allowances = new List<AllowanceViewModel>();
-            SqlConnection connection = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT code,
 	                                           EditAllowance.emp_id,
                                                emp1.name as emp_name,
@@ -49,10 +56,9 @@ namespace TRIPEXPENSEREPORT.Service
                                                 LEFT JOIN Employees emp1 ON EditAllowance.emp_id = emp1.emp_id
 												LEFT JOIN Employees emp2 ON EditAllowance.approver = emp2.emp_id
                                                 WHERE date BETWEEN @start_date AND @stop_date");
-                SqlCommand command = new SqlCommand(strCmd, connection);
+                SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
                 command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
-                connection.Open();
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -92,7 +98,10 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                connection.Close();
+                if (con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
             }
             return allowances;
         }
@@ -100,9 +109,12 @@ namespace TRIPEXPENSEREPORT.Service
         public List<AllowanceViewModel> GetOriginalAllowancesByDate(DateTime start_date, DateTime stop_date)
         {
             List<AllowanceViewModel> allowances = new List<AllowanceViewModel>();
-            SqlConnection connection = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT code,
 	                                           OriginalAllowance.emp_id,
                                                emp1.name as emp_name,
@@ -132,10 +144,9 @@ namespace TRIPEXPENSEREPORT.Service
                                                 LEFT JOIN Employees emp1 ON OriginalAllowance.emp_id = emp1.emp_id
 												LEFT JOIN Employees emp2 ON OriginalAllowance.approver = emp2.emp_id
                                                 WHERE date BETWEEN @start_date AND @stop_date");
-                SqlCommand command = new SqlCommand(strCmd, connection);
+                SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
                 command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
-                connection.Open();
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -175,15 +186,21 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                connection.Close();
+                if (con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
             }
             return allowances;
         }
         public string EditInserts(List<AllowanceModel> allowances)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     INSERT INTO 
                         EditAllowance(code,
@@ -228,7 +245,7 @@ namespace TRIPEXPENSEREPORT.Service
                             @approver,
                             @last_date
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.Add("@code", SqlDbType.Text);
@@ -253,11 +270,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@approver", SqlDbType.Text);
                     cmd.Parameters.Add("@last_date", SqlDbType.Text);
 
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
                     for (int i = 0; i < allowances.Count; i++)
                     {
                         cmd.Parameters[0].Value = allowances[i].code;
@@ -292,18 +304,21 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";
         }
         public string OriginalInserts(List<AllowanceModel> allowances)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     INSERT INTO 
                         OriginalAllowance(code,
@@ -348,7 +363,7 @@ namespace TRIPEXPENSEREPORT.Service
                             @approver,
                             @last_date
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.Add("@code", SqlDbType.Text);
@@ -373,11 +388,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@approver", SqlDbType.Text);
                     cmd.Parameters.Add("@last_date", SqlDbType.Text);
 
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
                     for (int i = 0; i < allowances.Count; i++)
                     {
                         cmd.Parameters[0].Value = allowances[i].code;
@@ -412,9 +422,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";
@@ -422,9 +432,12 @@ namespace TRIPEXPENSEREPORT.Service
 
         public string UpdateByCode(AllowanceModel allowance)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     UPDATE 
                         EditAllowance SET
@@ -449,7 +462,7 @@ namespace TRIPEXPENSEREPORT.Service
 						approver = @approver,
 						last_date = @last_date                                                     
                         WHERE code = @code");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@code", allowance.code);
@@ -473,11 +486,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@status", allowance.status);
                     cmd.Parameters.AddWithValue("@approver", allowance.approver);
                     cmd.Parameters.AddWithValue("@last_date", allowance.last_date);
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -487,9 +495,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";

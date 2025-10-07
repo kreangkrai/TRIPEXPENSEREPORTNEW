@@ -1,16 +1,28 @@
 ﻿using Microsoft.Data.SqlClient;
 using TRIPEXPENSEREPORT.Models;
 using TRIPEXPENSEREPORT.Interface;
+using System.Data;
 namespace TRIPEXPENSEREPORT.Service
 {
     public class UserService : IUser
     {
+        ConnectSQL connect = null;
+        SqlConnection con = null;
+        public UserService()
+        {
+            connect = new ConnectSQL();
+            con = connect.OpenReportConnect();
+        }
         public List<UserManagementModel> GetUsers()
         {
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 List<UserManagementModel> users = new List<UserManagementModel>();
-                SqlCommand cmd = new SqlCommand("select emp_id,name,department,location,role from [Employees] order by name", ConnectSQL.OpenReportConnect());
+                SqlCommand cmd = new SqlCommand("select emp_id,name,department,location,role from [Employees] order by name", con);
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -32,9 +44,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == System.Data.ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
         }

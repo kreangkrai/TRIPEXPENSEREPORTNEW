@@ -7,11 +7,21 @@ namespace TRIPEXPENSEREPORT.Service
 {
     public class PersonalService : IPersonal
     {
+        ConnectSQL connect = null;
+        SqlConnection con = null;
+        public PersonalService()
+        {
+            connect = new ConnectSQL();
+            con = connect.OpenConnect();
+        }
         public string OriginalInserts(List<PersonalModel> personals)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     INSERT INTO 
                         OriginalPersonal(code,
@@ -60,7 +70,7 @@ namespace TRIPEXPENSEREPORT.Service
                             @approver,
                             @last_date
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.Add("@code", SqlDbType.Text);
@@ -86,11 +96,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@approver", SqlDbType.Text);
                     cmd.Parameters.Add("@last_date", SqlDbType.DateTime);
 
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
                     for (int i = 0; i < personals.Count; i++)
                     {
                         cmd.Parameters[0].Value = personals[i].code;
@@ -126,9 +131,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";
@@ -136,9 +141,12 @@ namespace TRIPEXPENSEREPORT.Service
 
         public string EditInserts(List<PersonalModel> personals)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     INSERT INTO 
                         EditPersonal(code,
@@ -187,7 +195,7 @@ namespace TRIPEXPENSEREPORT.Service
                             @approver,
                             @last_date
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.Add("@code", SqlDbType.Text);
@@ -213,11 +221,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@approver", SqlDbType.Text);
                     cmd.Parameters.Add("@last_date", SqlDbType.DateTime);
 
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
                     for (int i = 0; i < personals.Count; i++)
                     {
                         cmd.Parameters[0].Value = personals[i].code;
@@ -253,9 +256,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";
@@ -263,9 +266,12 @@ namespace TRIPEXPENSEREPORT.Service
 
         public string UpdateByCode(PersonalModel personal)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     UPDATE 
                         EditPersonal SET
@@ -291,7 +297,7 @@ namespace TRIPEXPENSEREPORT.Service
 						approver = @approver,
 						last_date  = @last_date   	                                                          
                         WHERE code = @code");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@code", personal.code);
@@ -316,11 +322,7 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@gasoline", personal.gasoline);
                     cmd.Parameters.AddWithValue("@approver", personal.approver);
                     cmd.Parameters.AddWithValue("@last_date", personal.last_date);
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
+
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -330,9 +332,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";
@@ -341,9 +343,12 @@ namespace TRIPEXPENSEREPORT.Service
         public List<PersonalViewModel> GetOriginalPersonalsByDate(DateTime start_date, DateTime stop_date)
         {
             List<PersonalViewModel> personals = new List<PersonalViewModel>();
-            SqlConnection connection = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT code,
 	                                            OriginalPersonal.driver,
                                                 emp1.name as driver_name,
@@ -372,10 +377,9 @@ namespace TRIPEXPENSEREPORT.Service
                                                 LEFT JOIN Employees emp1 ON OriginalPersonal.driver = emp1.emp_id
 												LEFT JOIN Employees emp2 ON OriginalPersonal.approver = emp2.emp_id
                                                 WHERE date BETWEEN @start_date AND @stop_date");
-                SqlCommand command = new SqlCommand(strCmd, connection);
+                SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
                 command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
-                connection.Open();
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -415,7 +419,11 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                connection.Close();
+                if (con.State == ConnectionState.Open)
+                {
+
+                con.Close(); 
+                }
             }
             return personals;
         }
@@ -423,9 +431,12 @@ namespace TRIPEXPENSEREPORT.Service
         public List<PersonalViewModel> GetEditPersonalsByDate(DateTime start_date, DateTime stop_date)
         {
             List<PersonalViewModel> personals = new List<PersonalViewModel>();
-            SqlConnection connection = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT code,
 	                                            EditPersonal.driver,
                                                 emp1.name as driver_name,
@@ -454,10 +465,9 @@ namespace TRIPEXPENSEREPORT.Service
                                                 LEFT JOIN Employees emp1 ON EditPersonal.driver = emp1.emp_id
 												LEFT JOIN Employees emp2 ON EditPersonal.approver = emp2.emp_id
                                                 WHERE date BETWEEN @start_date AND @stop_date");
-                SqlCommand command = new SqlCommand(strCmd, connection);
+                SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
                 command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
-                connection.Open();
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -497,7 +507,10 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                connection.Close();
+                if (con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
             }
             return personals;
         }

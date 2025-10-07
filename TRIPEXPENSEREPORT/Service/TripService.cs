@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -6,11 +7,22 @@ namespace TRIPEXPENSEREPORT.Service
 {
     public class TripService : ITrip
     {
+        ConnectSQL connect = null;
+        SqlConnection con = null;
+        public TripService()
+        {
+            connect = new ConnectSQL();
+            con = connect.OpenConnect();
+        }
         public List<DataModel> GetDatasByID(string emp_id, DateTime start, DateTime end)
         {
             List<DataModel> trips = new List<DataModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT '' AS car_id,
                                            driver,
                                            '' AS passenger,
@@ -144,7 +156,7 @@ namespace TRIPEXPENSEREPORT.Service
                                       AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
                                       AND status <> 'NA';
                                     ");
-                SqlCommand command = new SqlCommand(strCmd, ConnectSQL.OpenConnect());
+                SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@emp_id", emp_id);
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
@@ -182,9 +194,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con.State == System.Data.ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseConnect();
+                    con.Close();
                 }
             }
             return trips;

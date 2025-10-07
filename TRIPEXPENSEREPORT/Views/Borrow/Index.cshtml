@@ -1,0 +1,608 @@
+﻿@{
+    ViewData["Title"] = "Borrow Car";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    table {
+        cursor:pointer
+    }
+</style>
+<div class="container-fluid">
+    <div class="row p-3">
+        <div class="col-xl-12">
+            <div class="card card-dark">
+                <div class="card-header" style="background-color: #034694;color:white">
+                    <span class="card-title">Car</span>
+                    <div class="card-tools">
+                        <button id="BtnAddBorrower" type="button" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Add Borrower
+                        </button>
+                        <input type="button" id="btn_export" class="btn btn-success btn-sm" style="width:100px" value="Export" />
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group" style="overflow-x:auto">
+                            <table id="table" class="table compact text-center table-bordered">
+                                <thead style="background-color: #034694;color:white">
+                                    <tr>
+                                        <th>Borrow ID</th>
+                                        <th>Car</th>
+                                        <th>License Plate</th>
+                                        <th>Borrower</th>
+                                        <th>Borrow Date</th>
+                                        <th>Plan Return Date</th>
+                                        <th>Customer</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Admin</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_borrow" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-md modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_task_title" style="font-weight:600">Borrow Car</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-3">
+                            <label for="borrow_car">Car</label>
+                            <select id="borrow_car" class="form-control"></select>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <label for="borrow_license_plate">Lisense Plate</label>
+                            <input id="borrow_license_plate" class="form-control" type="text"/>
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="borrow_borrower">Borrower</label>
+                            <select id="borrow_borrower" class="form-control"></select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-4 col-xl-4">
+                            <label for="borrow_mileage">Mileage Start</label>
+                            <input id="borrow_mileage" type="number" class="form-control" />
+                        </div>
+                        <div class="col-8 col-xl-8">
+                            <label for="borrow_customer">Customer</label>
+                            <input id="borrow_customer" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-4">
+                            <label for="borrow_job">Job</label>
+                            <input id="borrow_job" type="text" class="form-control" />
+                        </div>
+                        <div class="col-6 col-xl-4">
+                            <label for="borrow_date">Borrow Date</label>
+                            <input id="borrow_date" type="date" class="form-control" />
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="borrow_plan_return_date">Plan Return Date</label>
+                            <input id="borrow_plan_return_date" type="date" class="form-control" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btn_borrow_accept" type="button" class="btn btn-primary">Accept</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_update_borrow" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-md modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_task_title" style="font-weight:600">Edit Borrow Car</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <input id="update_borrow_id" type="text" class="form-control" hidden />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-3">
+                            <label for="update_borrow_car">Car</label>
+                            <input id="update_borrow_car" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <label for="update_borrow_license_plate">License Plate</label>
+                            <input id="update_borrow_license_plate" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="update_borrow_borrower">Borrower</label>
+                            <input id="update_borrow_borrower" type="text" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-4 col-xl-4">
+                            <label for="update_borrow_mileage">Mileage Start</label>
+                            <input id="update_borrow_mileage" type="number" class="form-control" />
+                        </div>
+                        <div class="col-8 col-xl-8">
+                            <label for="update_borrow_customer">Customer</label>
+                            <input id="update_borrow_customer" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-4">
+                            <label for="update_borrow_job">Job</label>
+                            <input id="update_borrow_job" type="text" class="form-control" />
+                        </div>
+                        <div class="col-6 col-xl-4">
+                            <label for="update_borrow_date">Borrow Date</label>
+                            <input id="update_borrow_date" type="date" class="form-control" />
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="update_borrow_plan_return_date">Plan Return Date</label>
+                            <input id="update_borrow_plan_return_date" type="date" class="form-control" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btn_update_borrow" type="button" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_return_borrow" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-md modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_task_title" style="font-weight:600">Return Car</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <input id="return_borrow_id" type="text" class="form-control" hidden />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-3">
+                            <label for="return_borrow_car">Car</label>
+                            <input id="return_borrow_car" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <label style="font-size:14px" for="return_borrow_license_plate">License Plate</label>
+                            <input id="return_borrow_license_plate" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="return_borrow_borrower">Borrower</label>
+                            <input id="return_borrow_borrower" type="text" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-4 col-xl-4">
+                            <label for="return_borrow_mileage">Mileage Start</label>
+                            <input id="return_borrow_mileage" type="number" class="form-control" disabled />
+                        </div>
+                        <div class="col-8 col-xl-8">
+                            <label for="return_borrow_customer">Customer</label>
+                            <input id="return_borrow_customer" type="text" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-xl-4">
+                            <label for="return_borrow_job">Job</label>
+                            <input id="return_borrow_job" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-6 col-xl-4">
+                            <label for="return_borrow_date">Borrow Date</label>
+                            <input id="return_borrow_date" type="date" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="return_borrow_plan_return_date">Plan Return Date</label>
+                            <input id="return_borrow_plan_return_date" type="date" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-12">
+                            <label for="return_borrow_note">Note</label>
+                            <textarea id="return_borrow_note" type="text" class="form-control" ></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btn_return_borrow" type="button" class="btn btn-primary">Return</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_view_borrow" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-md modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_task_title" style="font-weight:600">View Car</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <input id="view_borrow_id" type="text" class="form-control" hidden />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-3">
+                            <label for="view_borrow_car">Car</label>
+                            <input id="view_borrow_car" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-3">
+                            <label style="font-size:14px" for="view_borrow_license_plate">License Plate</label>
+                            <input id="view_borrow_license_plate" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="view_borrow_borrower">Borrower</label>
+                            <input id="view_borrow_borrower" type="text" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <label for="view_borrow_mileage">Mileage Start</label>
+                            <input id="view_borrow_mileage" type="number" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-8">
+                            <label for="view_borrow_customer">Customer</label>
+                            <input id="view_borrow_customer" type="text" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <label for="view_borrow_job">Job</label>
+                            <input id="view_borrow_job" type="text" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="view_borrow_date">Borrow Date</label>
+                            <input id="view_borrow_date" type="date" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-4">
+                            <label for="view_borrow_plan_return_date">Plan Return Date</label>
+                            <input id="view_borrow_plan_return_date" type="date" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-4">
+                            <label for="view_borrow_actual_return_date">Actual Return Date</label>
+                            <input id="view_borrow_actual_return_date" type="date" class="form-control" disabled />
+                        </div>
+                        <div class="col-xl-8">
+                            <label for="view_borrow_receiver">Receiver</label>
+                            <input id="view_borrow_receiver" type="text" class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xl-12">
+                            <label for="view_borrow_note">Note</label>
+                            <input id="view_borrow_note" type="text" class="form-control" disabled />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript">
+        var table;
+        let borrower;
+        let cars = [];
+        $(document).ready(async function () {
+            await GetBorrowers();
+        });
+
+        $('#BtnAddBorrower').on('click', async function () {
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetData", "Borrow")',
+	            contentType: 'application/x-www-form-urlencoded',
+                data: { },
+                success: function (response) {
+                    cars = response.cars;
+                    let users = response.users;
+
+                    GenerateCarOptions(cars);
+                    GenerateUserOptions(users);
+                }
+            });
+
+            $('#borrow_date').val(new Date().toISOString().split('T')[0]);
+            $('#borrow_plan_return_date').val(new Date().toISOString().split('T')[0]);
+            $('#modal_borrow').modal();
+        });
+
+        $('#btn_borrow_accept').on('click', async function () {
+            let car = $('#borrow_car').val();
+            let borrower = $('#borrow_borrower').val();
+            let mileage = $('#borrow_mileage').val();
+            let customer = $('#borrow_customer').val();
+            let job = $('#borrow_job').val();
+            let borrow_date = $('#borrow_date').val();
+            let plan_return_date = $('#borrow_plan_return_date').val();
+
+            var str = JSON.stringify({
+                "car_id": car,
+                "job": job,
+                "mileage": mileage,
+                "customer": customer,
+                "borrower": borrower,
+                "borrow_date": borrow_date,
+                "plan_return_date": plan_return_date
+            });
+
+            await $.ajax({
+                type: "POST",
+                url: '@Url.Action("InsertBorrow", "Borrow")',
+	            contentType: 'application/x-www-form-urlencoded',
+                data: {str },
+                success: function (response) {
+                    if (response == "Success") {
+                        window.location.reload();
+                    } else {
+                        alert(response);
+                    }
+                }
+            });
+
+        });
+
+        $('#btn_update_borrow').on('click', async function () {
+            let id = $('#update_borrow_id').val();
+            let car = $('#update_borrow_car').val();
+            let borrower = $('#update_borrow_borrower').val();
+            let mileage = $('#update_borrow_mileage').val();
+            let customer = $('#update_borrow_customer').val();
+            let job = $('#update_borrow_job').val();
+            let borrow_date = $('#update_borrow_date').val();
+            let plan_return_date = $('#update_borrow_plan_return_date').val();
+            var str = JSON.stringify({
+                "id":id,
+                "car_id": car,
+                "job": job,
+                "mileage": mileage,
+                "customer": customer,
+                "borrower": borrower,
+                "borrow_date": borrow_date,
+                "plan_return_date": plan_return_date
+            });
+
+            await $.ajax({
+                type: "PUT",
+                url: '@Url.Action("UpdateBorrow", "Borrow")',
+	            contentType: 'application/x-www-form-urlencoded',
+                data: {str },
+                success: function (response) {
+                    if (response == "Success") {
+                        window.location.reload();
+                    } else {
+                        alert(response);
+                    }
+                }
+            });
+
+        });
+
+        $('#btn_return_borrow').on('click', async function () {
+            let id = $('#return_borrow_id').val();
+            let car = $('#return_borrow_car').val();
+            let borrower = $('#return_borrow_borrower').val();
+            let mileage = $('#return_borrow_mileage').val();
+            let customer = $('#return_borrow_customer').val();
+            let job = $('#return_borrow_job').val();
+            let borrow_date = $('#return_borrow_date').val();
+            let plan_return_date = $('#return_borrow_plan_return_date').val();
+            let note = $('#return_borrow_note').val();
+            var str = JSON.stringify({
+                "id":id,
+                "car_id": car,
+                "job": job,
+                "mileage": mileage,
+                "customer": customer,
+                "borrower": borrower,
+                "borrow_date": borrow_date,
+                "plan_return_date": plan_return_date,
+                "note":note
+            });
+
+            await $.ajax({
+                type: "PUT",
+                url: '@Url.Action("ReturnBorrow", "Borrow")',
+	            contentType: 'application/x-www-form-urlencoded',
+                data: {str },
+                success: function (response) {
+                    if (response == "Success") {
+                        window.location.reload();
+                    } else {
+                        alert(response);
+                    }
+                }
+            });
+
+        });
+        async function GetBorrowers() {
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBorrowers", "Borrow")',
+	            contentType: 'application/x-www-form-urlencoded',
+                data: { },
+                success: function (response) {
+                    let borrowers = response;
+                    GenerateTable(borrowers);
+                }
+            });
+        }
+
+        function GenerateTable(borrowers) {
+            let datas = [];
+            for (let i = 0; i < borrowers.length; i++) {
+                datas.push([borrowers[i].borrow_id,
+                borrowers[i].car_id,
+                borrowers[i].license_plate,
+                borrowers[i].borrower_name,
+                borrowers[i].borrow_date.toString().split('T')[0],
+                borrowers[i].plan_return_date.toString().split('T')[0],
+                borrowers[i].customer,
+                borrowers[i].main_location,
+                borrowers[i].status,
+                borrowers[i].admin_name,
+                    ""
+                ]);
+            }
+
+            if (table !== undefined) {
+                table.destroy();
+            }
+
+            table = $('#table').DataTable({
+                data: datas,
+                columnDefs: [
+                    {
+                        targets: 0,
+                        width: "5%"
+                    },
+                    {
+                        targets: 5,
+                        width: "20%",
+                        className: "text-center"
+                    },
+                ],
+                rowCallback: function (row, data) {
+                    let borrow_id = data[0];
+                    let status = data[8];
+                    let plan_return_date = new Date(data[5]);
+                    let day = parseInt(plan_return_date - new Date()) / 1000 / 86400;
+                    if (day < 0 && status === "Borrowed") {
+                        $('td', row).css("color", 'red');
+                        $('td', row).css("font-weight", "600");
+                    } else if (day >= 0  && day <= 2 && status === "Borrowed") {
+                        $('td', row).css("color", 'orange');
+                        $('td', row).css("font-weight", "400");
+                    }
+
+                    if (status === "Borrowed") {
+                        $('td:eq(10)', row).html(`
+                                    <button type="button" class="btn btn-primary" style="width:80px" onclick="ReturnCar('${borrow_id}')">Return
+                            </button>
+                        `);
+                    }
+                }
+            });
+        }
+
+        $('#table tbody').on('click', 'td','tr', async function () {
+            var cell = table.cell(this);
+            var column = cell[0][0].column;
+            var row = table.row(this);
+            var id = row.data()[0];
+            var status = row.data()[8];
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBorrowersById", "Borrow")',
+	            contentType: 'application/x-www-form-urlencoded',
+                data: { id },
+                success: function (response) {
+                    borrower = response;
+                }
+            });
+            if (column != "8" && status === "Borrowed") {
+                $('#update_borrow_id').val(id);
+                $('#update_borrow_car').val(borrower.car_id);
+                $('#update_borrow_license_plate').val(borrower.license_plate);
+                $('#update_borrow_borrower').val(borrower.borrower);
+                $('#update_borrow_mileage').val(borrower.mileage);
+                $('#update_borrow_customer').val(borrower.customer);
+                $('#update_borrow_job').val(borrower.job);
+                $('#update_borrow_date').val(borrower.borrow_date.split("T")[0]);
+                $('#update_borrow_plan_return_date').val(borrower.plan_return_date.split("T")[0]);
+                $('#modal_update_borrow').modal();
+            }
+        });
+
+        $('#borrow_car').on('change', function () {
+            let car_id = $('#borrow_car').val();
+            let license_plate = cars.filter(f => f.Car_No === car_id).map(m => m.License_Plate)[0];
+            $('#borrow_license_plate').val(license_plate);
+        });
+
+        $('#btn_export').on('click', function () {
+            window.location.href = '@Url.Action("DownloadXlsxReport","Borrow")';
+        });
+
+        async function ReturnCar(borrow_id) {
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBorrowersById", "Borrow")',
+	            contentType: 'application/x-www-form-urlencoded',
+                data: { borrow_id },
+                success: function (response) {
+                    borrower = response;
+                }
+            });
+
+            $('#return_borrow_id').val(borrow_id);
+            $('#return_borrow_car').val(borrower.car_id);
+            $('#return_borrow_license_plate').val(borrower.license_plate);
+            $('#return_borrow_borrower').val(borrower.borrower_name);
+            $('#return_borrow_mileage').val(borrower.mileage_start);
+            $('#return_borrow_customer').val(borrower.customer);
+            $('#return_borrow_job').val(borrower.job_id);
+            $('#return_borrow_date').val(borrower.borrow_date.split("T")[0]);
+            $('#return_borrow_plan_return_date').val(borrower.plan_return_date.split("T")[0]);
+            $('#modal_return_borrow').modal();
+        }
+        async function GenerateCarOptions(cars) {
+            var str = '<option value="" selected disabled>Select</option>';
+            for (var i = 0; i < cars.length; i++) {
+                str += '<option value="' + cars[i].Car_No + '">' + cars[i].Car_No + '</option>';
+            }
+            $('#borrow_car').empty();
+            $('#borrow_car').append(str);
+        }
+
+        async function GenerateUserOptions(users) {
+            var str = '<option value="" selected disabled>Select Borrower</option>';
+            for (var i = 0; i < users.length; i++) {
+                str += '<option value="' + users[i].name + '">'+users[i].name + '</option>';
+            }
+            $('#borrow_borrower').empty();
+            $('#borrow_borrower').append(str);
+        }
+
+    </script>
+}

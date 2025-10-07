@@ -6,16 +6,27 @@ namespace TRIPEXPENSEREPORT.Service
 {
     public class ServiceService : IService
     {
+        ConnectSQL connect = null;
+        SqlConnection con = null;
+        public ServiceService()
+        {
+            connect = new ConnectSQL();
+            con = connect.OpenReportConnect();
+        }
         public List<ServiceTypeModel> GetServiceTypes()
         {
             List<ServiceTypeModel> services = new List<ServiceTypeModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 SqlCommand cmd = new SqlCommand(@"SELECT [service_id]
                                                   ,[service_name]
                                                   ,[due_mileage]
                                                   ,[due_date]
-                                              FROM [gps_sale_tracking].[dbo].[ServiceType]", ConnectSQL.OpenReportConnect());
+                                              FROM [gps_sale_tracking].[dbo].[ServiceType]", con);
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -35,9 +46,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return services;
@@ -48,6 +59,10 @@ namespace TRIPEXPENSEREPORT.Service
             ServiceModel service = new ServiceModel();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 SqlCommand cmd = new SqlCommand($@"SELECT ServiceCar.car_id,
                                                 [TRIP_EXPENSE].dbo.Cars.License_Plate as license_plate,
 	                                            ServiceCar.service_id,
@@ -62,7 +77,7 @@ namespace TRIPEXPENSEREPORT.Service
                                             FROM ServiceCar
                                             LEFT JOIN ServiceType ON ServiceType.service_id = ServiceCar.service_id
                                             LEFT JOIN [TRIP_EXPENSE].dbo.Cars ON Cars.car_id = ServiceCar.car_id
-                                            WHERE ServiceCar.car_id = '{car_id}' AND ServiceCar.service_id = '{service_id}'", ConnectSQL.OpenReportConnect());
+                                            WHERE ServiceCar.car_id = '{car_id}' AND ServiceCar.service_id = '{service_id}'", con);
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -88,9 +103,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return service;
@@ -101,6 +116,10 @@ namespace TRIPEXPENSEREPORT.Service
             List<ServiceModel> services = new List<ServiceModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 SqlCommand cmd = new SqlCommand(@"SELECT ServiceCar.car_id,
                                                 [TRIP_EXPENSE].dbo.Cars.License_Plate as license_plate,
 	                                            ServiceCar.service_id,
@@ -115,7 +134,7 @@ namespace TRIPEXPENSEREPORT.Service
                                             FROM ServiceCar
                                             LEFT JOIN ServiceType ON ServiceType.service_id = ServiceCar.service_id
                                             LEFT JOIN [TRIP_EXPENSE].dbo.Cars ON Cars.car_id = ServiceCar.car_id
-                                            ORDER BY ServiceCar.car_id", ConnectSQL.OpenReportConnect());
+                                            ORDER BY ServiceCar.car_id", con);
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -142,9 +161,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return services;
@@ -155,6 +174,10 @@ namespace TRIPEXPENSEREPORT.Service
             List<ServiceModel> services = new List<ServiceModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 SqlCommand cmd = new SqlCommand($@"SELECT ServiceCar.car_id,
                                                 [TRIP_EXPENSE].dbo.Cars.License_Plate as license_plate,
 	                                            ServiceCar.service_id,
@@ -170,7 +193,7 @@ namespace TRIPEXPENSEREPORT.Service
                                             LEFT JOIN ServiceType ON ServiceType.service_id = ServiceCar.service_id
                                             LEFT JOIN [TRIP_EXPENSE].dbo.Cars ON Cars.car_id = ServiceCar.car_id
                                             WHERE ServiceCar.service_id = '{_service}'
-                                            ORDER BY car_id", ConnectSQL.OpenReportConnect());
+                                            ORDER BY car_id", con);
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -197,9 +220,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return services;
@@ -210,6 +233,10 @@ namespace TRIPEXPENSEREPORT.Service
             List<ServiceModel> services = new List<ServiceModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 SqlCommand cmd = new SqlCommand(@"SELECT 
 	                                                ServiceCarHistory.car_id,
                                                     [TRIP_EXPENSE].dbo.Cars.License_Plate as license_plate,
@@ -226,7 +253,7 @@ namespace TRIPEXPENSEREPORT.Service
                                                 FROM ServiceCarHistory
                                                 LEFT JOIN ServiceType ON ServiceType.service_id = ServiceCarHistory.service_id
                                                 LEFT JOIN [TRIP_EXPENSE].dbo.Cars ON Cars.car_id = ServiceCarHistory.car_id
-                                                ORDER BY car_id", ConnectSQL.OpenReportConnect());
+                                                ORDER BY car_id", con);
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -254,9 +281,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return services;
@@ -267,6 +294,10 @@ namespace TRIPEXPENSEREPORT.Service
             List<ServiceModel> services = new List<ServiceModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 SqlCommand cmd = new SqlCommand($@"SELECT 
 	                                                ServiceCarHistory.car_id,
                                                     [TRIP_EXPENSE].dbo.Cars.License_Plate as license_plate,
@@ -284,7 +315,7 @@ namespace TRIPEXPENSEREPORT.Service
                                                 LEFT JOIN ServiceType ON ServiceType.service_id = ServiceCarHistory.service_id
                                                 LEFT JOIN [TRIP_EXPENSE].dbo.Cars ON Cars.car_id = ServiceCarHistory.car_id
                                                 WHERE ServiceCarHistory.service_id = '{_service}'
-                                                ORDER BY car_id", ConnectSQL.OpenReportConnect());
+                                                ORDER BY car_id", con);
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -312,9 +343,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return services;
@@ -324,13 +355,17 @@ namespace TRIPEXPENSEREPORT.Service
         {
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     INSERT INTO 
                         ServiceCar(car_id,service_id,mileage_at_service,date_at_service,appointment_mileage,appointment_date,next_appointment_mileage,next_appointment_date
                         )
                         VALUES(@car_id,@service_id,@mileage_at_service,@date_at_service,@appointment_mileage,@appointment_date,@next_appointment_mileage,@next_appointment_date
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, ConnectSQL.OpenReportConnect()))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@car_id", service.car_id);
@@ -342,11 +377,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@next_appointment_mileage", service.next_appointment_mileage);
                     cmd.Parameters.AddWithValue("@next_appointment_date", service.next_appointment_date);
 
-                    if (ConnectSQL.con_report.State != ConnectionState.Open)
-                    {
-                        ConnectSQL.CloseReportConnect();
-                        ConnectSQL.OpenReportConnect();
-                    }
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -356,9 +386,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return "Success";
@@ -368,13 +398,17 @@ namespace TRIPEXPENSEREPORT.Service
         {
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     INSERT INTO 
                         ServiceCarHistory(car_id,service_id,mileage_at_service,date_at_service,appointment_mileage,appointment_date,detail,note,location_service,name
                         )
                         VALUES(@car_id,@service_id,@mileage_at_service,@date_at_service,@appointment_mileage,@appointment_date,@detail,@note,@location_service,@name
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, ConnectSQL.OpenReportConnect()))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@car_id", service.car_id);
@@ -388,11 +422,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@location_service", service.location_service);
                     cmd.Parameters.AddWithValue("@name", service.name);
 
-                    if (ConnectSQL.con_report.State != ConnectionState.Open)
-                    {
-                        ConnectSQL.CloseReportConnect();
-                        ConnectSQL.OpenReportConnect();
-                    }
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -402,9 +431,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return "Success";
@@ -414,20 +443,19 @@ namespace TRIPEXPENSEREPORT.Service
         {
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     UPDATE ServiceCar SET current_mileage = @current_mileage
                                       WHERE car_id = @car_id");
-                using (SqlCommand cmd = new SqlCommand(string_command, ConnectSQL.OpenReportConnect()))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@car_id", car);
                     cmd.Parameters.AddWithValue("@current_mileage", mileage);
 
-                    if (ConnectSQL.con_report.State != ConnectionState.Open)
-                    {
-                        ConnectSQL.CloseReportConnect();
-                        ConnectSQL.OpenReportConnect();
-                    }
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -437,9 +465,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return "Success";
@@ -449,6 +477,10 @@ namespace TRIPEXPENSEREPORT.Service
         {
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     UPDATE ServiceCar SET current_mileage = @current_mileage,
                                           mileage_at_service = @mileage_at_service,
@@ -458,7 +490,7 @@ namespace TRIPEXPENSEREPORT.Service
                                           next_appointment_mileage = @next_appointment_mileage,
                                           next_appointment_date = @next_appointment_date
                                       WHERE car_id = @car_id AND service_id = @service_id");
-                using (SqlCommand cmd = new SqlCommand(string_command, ConnectSQL.OpenReportConnect()))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@car_id", service.car_id);
@@ -471,11 +503,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@next_appointment_mileage", service.next_appointment_mileage);
                     cmd.Parameters.AddWithValue("@next_appointment_date", service.next_appointment_date);
 
-                    if (ConnectSQL.con_report.State != ConnectionState.Open)
-                    {
-                        ConnectSQL.CloseReportConnect();
-                        ConnectSQL.OpenReportConnect();
-                    }
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -485,9 +512,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return "Success";

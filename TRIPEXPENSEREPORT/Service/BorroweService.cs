@@ -269,5 +269,56 @@ namespace TRIPEXPENSEREPORT.Service
             }
             return "Success";
         }
+        public string Update(BorrowerModel borrower)
+        {
+            try
+            {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
+                string string_command = string.Format($@"
+                    UPDATE Borrowers SET
+                                    car_id = @car_id,
+                                    job_id = @job_id,
+                                    mileage_start = @mileage_start,
+                                    main_location = @main_location,
+                                    customer = @customer,
+                                    borrower = @borrower,
+                                    borrow_date = @borrow_date,
+                                    plan_return_date = @plan_return_date,
+                                    status = @status,
+                                    admin = @admin
+                                    WHERE borrow_id = @borrow_id");
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@borrow_id", borrower.borrow_id);
+                    cmd.Parameters.AddWithValue("@car_id", borrower.car_id);
+                    cmd.Parameters.AddWithValue("@job_id", borrower.job_id);
+                    cmd.Parameters.AddWithValue("@mileage_start", borrower.mileage_start);
+                    cmd.Parameters.AddWithValue("@main_location", borrower.main_location);
+                    cmd.Parameters.AddWithValue("@customer", borrower.customer);
+                    cmd.Parameters.AddWithValue("@borrower", borrower.borrower);
+                    cmd.Parameters.AddWithValue("@borrow_date", borrower.borrow_date);
+                    cmd.Parameters.AddWithValue("@plan_return_date", borrower.plan_return_date);
+                    cmd.Parameters.AddWithValue("@status", borrower.status);
+                    cmd.Parameters.AddWithValue("@admin", borrower.admin);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
+            }
+            return "Success";
+        }
     }
 }

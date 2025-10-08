@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 using TRIPEXPENSEREPORT.Service;
@@ -54,7 +55,9 @@ namespace TRIPEXPENSEREPORT.Controllers
         public IActionResult GetBorrowers()
         {
             List<BorrowerModel> borrowers = Borrow.GetBorrowers();
-            return Json(borrowers);
+            List<EmployeeModel> users = Employee.GetEmployees();
+            var data = new { borrowers = borrowers, users = users };
+            return Json(data);
         }
         [HttpGet]
         public IActionResult GetData()
@@ -73,36 +76,48 @@ namespace TRIPEXPENSEREPORT.Controllers
         public string InsertBorrow(string str)
         {
             BorrowerModel borrower = JsonConvert.DeserializeObject<BorrowerModel>(str);
-            string message = Borrow.Insert(borrower);
-            if (message == "Success")
-            {
-                //message = Car.UpdateBorrower(borrower.car_id, borrower.borrower);
-            }
+            borrower.borrow_id = DateTime.Now.ToString("yyyyMMddHHmmssff");
+            borrower.main_location = "";
+            borrower.status = "Borrowed";
+            var userId = HttpContext.Session.GetString("userId");
+            string emp_id = Employee.GetEmployees().Where(w => w.name.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
+            borrower.admin = emp_id;
+            string message = Borrow.Insert(borrower);          
             return message;
         }
 
-        //[HttpPut]
-        //public string UpdateBorrow(string str)
-        //{
-        //    BorrowerModel borrower = JsonConvert.DeserializeObject<BorrowerModel>(str);
-        //    string message = Borrow.Update(borrower);
-        //    return message;
-        //}
+        [HttpPut]
+        public string UpdateBorrow(string str)
+        {
+            BorrowerModel borrower = JsonConvert.DeserializeObject<BorrowerModel>(str);
+            borrower.main_location = "";
+            borrower.status = "Borrowed";
+            var userId = HttpContext.Session.GetString("userId");
+            string emp_id = Employee.GetEmployees().Where(w => w.name.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
+            borrower.admin = emp_id;
+            string message = Borrow.Update(borrower);
+            return message;
+        }
 
-        //[HttpPut]
-        //public string ReturnBorrow(string str)
-        //{
-        //    BorrowerModel borrower = JsonConvert.DeserializeObject<BorrowerModel>(str);
-        //    borrower.actual_return_date = DateTime.Now;
-        //    var userId = HttpContext.Session.GetString("userId");
-        //    borrower.receiver = userId;
-        //    string message = Borrow.Return(borrower);
-        //    if (message == "Success")
-        //    {
-        //        //message = Car.UpdateBorrower(borrower.car_id, "");
-        //    }
-        //    return message;
-        //}
+        [HttpPut]
+        public string ReturnBorrow(string str)
+        {
+            BorrowerModel borrower = JsonConvert.DeserializeObject<BorrowerModel>(str);
+            BorrowerModel _borrower = Borrow.GetBorrowers().Where(w => w.borrow_id == borrower.borrow_id).FirstOrDefault();
+            _borrower.remark = borrower.remark;
+            _borrower.actual_return_date = DateTime.Now;
+            borrower = _borrower;
+            borrower.status = "Returned";
+            var userId = HttpContext.Session.GetString("userId");
+            string emp_id = Employee.GetEmployees().Where(w => w.name.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
+            borrower.admin = emp_id;
+            string message = Borrow.InsertLog(borrower);
+            if (message == "Success")
+            {
+                Borrow.Delete(borrower.borrow_id);
+            }
+            return message;
+        }
 
         //public IActionResult DownloadXlsxReport()
         //{

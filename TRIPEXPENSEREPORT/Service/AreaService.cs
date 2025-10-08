@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -6,13 +7,24 @@ namespace TRIPEXPENSEREPORT.Service
 {
     public class AreaService : IArea
     {
+        ConnectSQL connect = null;
+        SqlConnection con = null;
+        public AreaService()
+        {
+            connect = new ConnectSQL();
+            con = connect.OpenReportConnect();
+        }
         public List<AreaModel> GetAreas()
         {
             List<AreaModel> areas = new List<AreaModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT code,hq,rbo,kbo FROM Area" );
-                SqlCommand command = new SqlCommand(strCmd, ConnectSQL.OpenReportConnect());
+                SqlCommand command = new SqlCommand(strCmd, con);
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -32,9 +44,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con_report.State == System.Data.ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseReportConnect();
+                    con.Close();
                 }
             }
             return areas;

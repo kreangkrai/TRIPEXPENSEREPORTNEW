@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -6,18 +7,29 @@ namespace TRIPEXPENSEREPORT.Service
 {
     public class CarService : ICar
     {
+        ConnectSQL connect = null;
+        SqlConnection con = null;
+        public CarService()
+        {
+            connect = new ConnectSQL();
+            con = connect.OpenConnect();
+        }
         public List<CarModel> GetCars()
         {
             List<CarModel> cars = new List<CarModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT [car_id]
                                                       ,[license_plate]
                                                       ,[brand]
                                                       ,[fleet_card_no]
                                                       ,[balance]
                                                   FROM [TRIP_EXPENSE].[dbo].[Cars]");
-                SqlCommand command = new SqlCommand(strCmd, ConnectSQL.OpenConnect());
+                SqlCommand command = new SqlCommand(strCmd, con);
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -38,9 +50,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con.State == System.Data.ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseConnect();
+                    con.Close();
                 }
             }
             return cars;

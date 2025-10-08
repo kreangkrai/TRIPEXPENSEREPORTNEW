@@ -7,13 +7,24 @@ namespace TRIPEXPENSEREPORT.Service
 {
     public class EmployeeService : IEmployee
     {
+        ConnectSQL connect = null;
+        SqlConnection con = null;
+        public EmployeeService()
+        {
+            connect = new ConnectSQL();
+            con = connect.OpenConnect();
+        }
         public List<EmployeeModel> GetEmployees()
         {
             List<EmployeeModel> employees = new List<EmployeeModel>();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string strCmd = string.Format($@"SELECT emp_id,name,department,role FROM Employees");
-                SqlCommand command = new SqlCommand(strCmd, ConnectSQL.OpenConnect());
+                SqlCommand command = new SqlCommand(strCmd, con);
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -33,9 +44,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (ConnectSQL.con.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    ConnectSQL.CloseConnect();
+                    con.Close();
                 }
             }
             return employees;
@@ -43,9 +54,12 @@ namespace TRIPEXPENSEREPORT.Service
 
         public string Inserts(List<EmployeeModel> employees)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     INSERT INTO 
                         OriginalPersonal(emp_id,
@@ -58,7 +72,7 @@ namespace TRIPEXPENSEREPORT.Service
                             @department,
                             @role
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.Add("@emp_id", SqlDbType.Text);
@@ -66,11 +80,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@department", SqlDbType.Text);
                     cmd.Parameters.Add("@role", SqlDbType.Text);
 
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
                     for (int i = 0; i < employees.Count; i++)
                     {
                         cmd.Parameters[0].Value = employees[i].emp_id;
@@ -87,9 +96,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";
@@ -97,9 +106,12 @@ namespace TRIPEXPENSEREPORT.Service
 
         public string Update(EmployeeModel employee)
         {
-            SqlConnection conn = ConnectSQL.OpenConnect();
             try
             {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
                 string string_command = string.Format($@"
                     UPDATE 
                         Employees SET
@@ -107,18 +119,13 @@ namespace TRIPEXPENSEREPORT.Service
                         department = @department,
                         role = @role
                         WHERE emp_id = @emp_id");
-                using (SqlCommand cmd = new SqlCommand(string_command, conn))
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@emp_id", employee.emp_id);
                     cmd.Parameters.AddWithValue("@name", employee.name);
                     cmd.Parameters.AddWithValue("@department", employee.department);
                     cmd.Parameters.AddWithValue("@role", employee.role);
-                    if (conn.State != ConnectionState.Open)
-                    {
-                        conn.Close();
-                        conn.Open();
-                    }
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -128,9 +135,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
+                if (con.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return "Success";

@@ -13,20 +13,27 @@
                     ตัวกรอง
                 </h5>
                 <div class="mb-2">
-                    <input type="text" class="form-control" placeholder="วันที่ (dd/mm/yyyy)" />
+                    <label for="date">วันที่เริ่มต้น:</label>
+                    <input type="date" class="form-control" placeholder="วันที่ (dd/mm/yyyy)" />
                 </div>
+
                 <div class="mb-2">
-                    <input type="text" class="form-control" placeholder="วันที่ (dd/mm/yyyy)" />
+                    <label for="date">วันที่สิ้นสุด:</label>
+                    <input type="date" class="form-control" placeholder="วันที่ (dd/mm/yyyy)" />
                 </div>
+
+                <label for="date">ชื่อพนักงาน:</label>
+                <select name="employees" id="employee" class="mb-2" style="border-radius:5px">
+                    <option value="NULL">Please Select...</option>
+                    <option value="EM001">Sarit T.</option>
+                    <option value="EM002">Kriangkrai R.</option>
+                    <option value="EM003">Jirawat J.</option>
+                    <option value="EM004">Chakrit R.</option>
+                </select>
+
                 <button class="btn btn-primary w-100 mb-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">ค้นหา</button>
                 <button class="btn btn-success w-100 mb-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">Send & Export <i class="fas fa-download"></i></button>
-                <button class="btn btn-danger w-100" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">Cancel Send</button>
-                <div class="input-group date" data-provide="datepicker">
-                    <input type="text" class="form-control">
-                    <div class="input-group-addon">
-                        <span class="glyphicon glyphicon-th"></span>
-                    </div>
-                </div>
+                <button class="btn btn-danger w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">Cancel Send</button>
             </div>
         </div>
 
@@ -34,7 +41,7 @@
         <div class="col-md-10 p-3 kanit-regular">
             <h4 class="mb-3" style="color:#034694">เบี้ยเลี้ยง</h4>
             <div class="scrollable-table">
-                <table class="table table-striped table-bordered">
+                <table class="table table-striped table-bordered ">
                     <thead class="bg-primary text-white">
                         <tr>
                             <th>วันที่</th>
@@ -104,7 +111,7 @@
 
 <!-- Modal ที่ปรับแต่ง -->
 <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-md" role="document">
         <!-- เพิ่ม modal-lg สำหรับขนาดใหญ่ -->
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%); color: white; border-bottom: none;">
@@ -132,11 +139,11 @@
 
                     <!-- ROW 2 : ลูกค้า, จังหวัด -->
                     <div class="form-row">
-                        <div class="form-group col-sm-12 col-md-6">
+                        <div class="form-group col-sm-12 col-md-8">
                             <label for="inputCustomer">ลูกค้า</label>
                             <input type="text" class="form-control" id="inputCustomer" placeholder="Ex. HOTEL, CTL-(HQ)">
                         </div>
-                        <div class="form-group col-sm-12 col-md-6">
+                        <div class="form-group col-sm-12 col-md-4">
                             <label for="inputProvince">จังหวัด</label>
                             <input type="text" class="form-control" id="inputProvince" placeholder="Ex. กรุงเทพ">
                         </div>
@@ -144,65 +151,85 @@
 
                     <!-- ROW 3 : เบี้ยเลี้ยง -->
                     <label for="inputCustomer">เบี้ยเลี้ยง</label>
-                    <div class="form-group col-sm-12 col-md-12">
-                        <div class="form-check form-check-inline col-sm-12 col-md-3">
-                            <input class="form-check-input " type="checkbox" id="inlineCheckbox1" value="option1">
-                            <label class="form-check-label" for="inlineCheckbox1">1-4 ชม.</label>
+                    <div class="form-group ">
+                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
+                            <input class="form-check-input " type="checkbox" id="inlineCheckboxAllowance_1_4" value="option1">
+                            <label class="form-check-label" for="inlineCheckboxAllowance_1_4">1-4 ชม.</label>
                         </div>
-                        <div class="form-check form-check-inline col-sm-12 col-md-3">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                            <label class="form-check-label" for="inlineCheckbox2">4-8 ชม.</label>
+                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_4_8" value="option2">
+                            <label class="form-check-label" for="inlineCheckboxAllowance_4_8">4-8 ชม.</label>
                         </div>
-                        <div class="form-check form-check-inline col-sm-12 col-md-3">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option1">
-                            <label class="form-check-label" for="inlineCheckbox1">8 ชม. ขึ้นไป</label>
+                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_8_up" value="option3">
+                            <label class="form-check-label" for="inlineCheckboxAllowance_8_up">8 ชม. ขึ้นไป</label>
                         </div>
-                        <div class="form-check form-check-inline col-sm-12 col-md-3">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckbox4" value="option2">
-                            <label class="form-check-label" for="inlineCheckbox2">ต่างจังหวัด</label>
+                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_province" value="option4">
+                            <label class="form-check-label" for="inlineCheckboxAllowance_province">ต่างจังหวัด</label>
                         </div>
-                        <div class="form-check form-check-inline col-sm-12 col-md-3">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckbox5" value="option2">
-                            <label class="form-check-label" for="inlineCheckbox2">ต่างประเทศ</label>
+                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_abroad" value="option5">
+                            <label class="form-check-label" for="inlineCheckboxAllowance_abroad">ต่างประเทศ</label>
                         </div>
-                        <div class="form-check form-check-inline col-sm-12 col-md-3">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckbox6" value="option2">
-                            <label class="form-check-label" for="inlineCheckbox2">อื่น ๆ </label>
+                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_other" value="option6">
+                            <label class="form-check-label" for="inlineCheckboxAllowance_other" style="margin-right:10px">อื่นๆ </label>
+                            <input type="text" class="form-control col-sm-8 col-md-8" id="inputAllowance_other">
                         </div>
                     </div>
 
-                    <!-- ROW 4 : ค่าที่พัก, ค่าใช้จ่ายอื่น, รายการ -->
+                    <!-- ROW 4 : ค่าที่พัก, ค่าใช้จ่ายอื่นๆ, รายการ -->
+                    <div class="form-row ">
+                        <div class="form-group col-sm-12 col-md-3">
+                            <label for="inputJob">ค่าที่พัก</label>
+                            <input type="text" class="form-control" id="inputJob" placeholder="0">
+                        </div>
+                        <div class="form-group col-sm-12 col-md-3">
+                            <label for="inputJob">ค่าใช้จ่ายอื่นๆ</label>
+                            <input type="text" class="form-control" id="inputJob" placeholder="0">
+                        </div>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputJob">รายการ</label>
+                            <input type="text" class="form-control" id="inputDescription" placeholder="Ex. เลี้ยงลูกค้า">
+                        </div>
+
+                    </div>
+
+                    <!-- ROW 5 : หมายเหตุ, รวม -->
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 col-md-8">
+                            <label for="inputRemark">หมายเหตุ</label>
+                            <input type="text" class="form-control" id="inputRemark">
+                        </div>
+                        <fieldset disabled class="col-sm-12 col-md-4">
+                            <div class="form-group">
+                                <label for="disabledTextInputAllowance_sum">รวม</label>
+                                <input type="text" class="form-control" id="disabledTextInputAllowance_sum" placeholder="0">
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- ROW 6 : อัปเดตล่าสุด, ผู้ดำเนินการ -->
                     <div class="form-row ">
                         <fieldset disabled class="col-sm-12 col-md-6">
                             <div class="form-group">
-                                <label for="disabledTextInputDate">วันที่</label>
-                                <input type="text" class="form-control" id="disabledTextInputDate" placeholder="08/10/2025">
+                                <label for="disabledTextInputDate">อัปเดตล่าสุด</label>
+                                <input type="text" class="form-control" id="disabledTextInputDate" placeholder="08/10/2025 12:34:56">
                             </div>
                         </fieldset>
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputJob">Job</label>
-                            <input type="text" class="form-control" id="inputJob" placeholder="Jxx-xxxx">
-                        </div>
-
+                        <fieldset disabled class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <label for="disabledTextInputDate">ผู้ดำเนินการ</label>
+                                <input type="text" class="form-control" id="disabledTextInputDate" placeholder="Kriangkrai R.">
+                            </div>
+                        </fieldset>
                     </div>
-
-                    <!-- ROW 2 : ลูกค้า, จังหวัด -->
-                    <div class="form-row">
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputCustomer">ลูกค้า</label>
-                            <input type="text" class="form-control" id="inputCustomer" placeholder="Ex. HOTEL, CTL-(HQ)">
-                        </div>
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputProvince">จังหวัด</label>
-                            <input type="text" class="form-control" id="inputProvince" placeholder="Ex. กรุงเทพ">
-                        </div>
-                    </div>
-
                 </form>
             </div>
             <div class="modal-footer kanit-regular">
-                <button type="button" class="btn btn-outline-success" id="editButton">บันทึก</button>
-                <button type="button" class="btn btn-close" data-dismiss="modal">ยกเลิก</button>
+                <button type="button" class="btn btn-outline-success col-sm-3 col-md-3" id="editButton">บันทึก</button>
+                <button type="button" class="btn btn-close col-sm-3 col-md-2" data-dismiss="modal">ยกเลิก</button>
             </div>
         </div>
     </div>

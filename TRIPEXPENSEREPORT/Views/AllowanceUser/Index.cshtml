@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar (ซ้าย) -->
-        <div class="col-md-2 bg-light p-3 kanit-medium" >
+        <div class="col-md-2 bg-light p-3 kanit-medium">
             <div class="card border-0 shadow-sm h-0 p-2 rounded-10">
                 <h5 class="mb-3" style="padding:8px; color:white; border-radius:5px; background: #2178BE;
                     background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);">
@@ -61,16 +61,16 @@
                         {
                             <tr data-date="@item.date.ToString("dd/MM/yyyy")"
                                 data-time="@item.date_start.ToString("HH:mm")"
-                                data-customer="@item.customer" 
+                                data-customer="@item.customer"
                                 data-zipcode="@item.zipcode"
                                 data-jobno="@item.job"
-                                data-allowance-province="@item.allowance_province" 
+                                data-allowance-province="@item.allowance_province"
                                 data-allowance-1-4="@item.allowance_1_4"
                                 data-allowance-4-8="@item.allowance_4_8"
-                                data-allowance-8="@item.allowance_8" 
+                                data-allowance-8="@item.allowance_8"
                                 data-allowance-other="@item.allowance_other"
                                 data-allowance-hostel="@item.allowance_hostel"
-                                data-list="@item.list" 
+                                data-list="@item.list"
                                 data-description="@item.description"
                                 data-remark="@item.remark"
                                 data-status="@item.status"
@@ -114,156 +114,91 @@
                 </button>
             </div>
             <div class="modal-body kanit-regular">
-                <div class="container-fluid ">
-                    <!-- ROW1 : วันที่, Job, จังหวัด: -->
-                    <div class="row">
-                        <!-- วันที่ -->
-                        <div class="col-12 col-sm-6 col-md-4 mb-2">
-                            <div class="row align-items-center">
-                                <div class="col-6 col-sm-6 col-md-4 text-right">
-                                    <label class="mb-0" >วันที่:</label>
-                                </div>
-                                <div class="col-6 col-sm-6 col-md-8">
-                                    <input type="text" class="form-control" id="recipient-name">
-                                </div>
+                <form>
+                    <!-- ROW 1 : วันที่, Job -->
+                    <div class="form-row ">
+                        <fieldset disabled class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <label for="disabledTextInputDate">วันที่</label>
+                                <input type="text" class="form-control" id="disabledTextInputDate" placeholder="08/10/2025">
                             </div>
+                        </fieldset>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputJob">Job</label>
+                            <input type="text" class="form-control" id="inputJob" placeholder="Jxx-xxxx">
                         </div>
-                        <!-- Job -->
-                        <div class="col-12 col-sm-6 col-md-4 mb-2">
-                            <div class="row align-items-center">
-                                <div class="col-6 col-sm-6 col-md-4 text-right">
-                                    <label class="mb-0">Job:</label>
-                                </div>
-                                <div class="col-6 col-sm-6 col-md-8">
-                                    <input type="text" class="form-control" id="recipient-name">
-                                </div>
-                            </div>
+
+                    </div>
+
+                    <!-- ROW 2 : ลูกค้า, จังหวัด -->
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputCustomer">ลูกค้า</label>
+                            <input type="text" class="form-control" id="inputCustomer" placeholder="Ex. HOTEL, CTL-(HQ)">
                         </div>
-                        <!-- จังหวัด -->
-                        <div class="col-12 col-sm-6 col-md-4 mb-2">
-                            <div class="row align-items-center">
-                                <div class="col-6 col-sm-6 col-md-4 text-right">
-                                    <label class="mb-0">จังหวัด:</label>
-                                </div>
-                                <div class="col-6 col-sm-6 col-md-8">
-                                    <input type="text" class="form-control" id="recipient-name">
-                                </div>
-                            </div>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputProvince">จังหวัด</label>
+                            <input type="text" class="form-control" id="inputProvince" placeholder="Ex. กรุงเทพ">
                         </div>
                     </div>
 
-                    <!-- ROW2 : ชื่อลูกค้า -->
-                    <div class="row">
-                        <!-- ชื่อลูกค้า -->
-                        <div class="col-12">
-                            <div class="row align-items-center mb-5">
-                                <div class="col-12 col-sm-6 col-md-2 text-right">
-                                    <label class="mb-0">ชื่อลูกค้า:</label>
-                                </div>
-                                <div class="col-12 col-sm-6 col-md-10">
-                                    <input type="text" class="form-control" id="recipient-name">
-                                </div>
-                            </div>
+                    <!-- ROW 3 : เบี้ยเลี้ยง -->
+                    <label for="inputCustomer">เบี้ยเลี้ยง</label>
+                    <div class="form-group col-sm-12 col-md-12">
+                        <div class="form-check form-check-inline col-sm-12 col-md-3">
+                            <input class="form-check-input " type="checkbox" id="inlineCheckbox1" value="option1">
+                            <label class="form-check-label" for="inlineCheckbox1">1-4 ชม.</label>
                         </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <!-- วันที่ -->
-                    <div class="col-12 col-sm-6 col-md-6 mb-2">
-                        <div class="row align-items-center">
-                            <div class="col-6 col-sm-6 col-md-3 text-right">
-                                <label class="mb-0">วันที่:</label>
-                            </div>
-                            <div class="col-6 col-sm-6 col-md-9">
-                                <input type="text" class="form-control" id="recipient-name">
-                            </div>
+                        <div class="form-check form-check-inline col-sm-12 col-md-3">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
+                            <label class="form-check-label" for="inlineCheckbox2">4-8 ชม.</label>
                         </div>
-                    </div>
-                    <!-- Job -->
-                    <div class="col-12 col-sm-6 col-md-6 mb-2">
-                        <div class="row align-items-center">
-                            <div class="col-6 col-sm-6 col-md-3 text-right">
-                                <label class="mb-0">Job:</label>
-                            </div>
-                            <div class="col-6 col-sm-6 col-md-9">
-                                <input type="text" class="form-control" id="recipient-name">
-                            </div>
+                        <div class="form-check form-check-inline col-sm-12 col-md-3">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option1">
+                            <label class="form-check-label" for="inlineCheckbox1">8 ชม. ขึ้นไป</label>
+                        </div>
+                        <div class="form-check form-check-inline col-sm-12 col-md-3">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckbox4" value="option2">
+                            <label class="form-check-label" for="inlineCheckbox2">ต่างจังหวัด</label>
+                        </div>
+                        <div class="form-check form-check-inline col-sm-12 col-md-3">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckbox5" value="option2">
+                            <label class="form-check-label" for="inlineCheckbox2">ต่างประเทศ</label>
+                        </div>
+                        <div class="form-check form-check-inline col-sm-12 col-md-3">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckbox6" value="option2">
+                            <label class="form-check-label" for="inlineCheckbox2">อื่น ๆ </label>
                         </div>
                     </div>
 
-                    <!-- จังหวัด -->
-                    <div class="col-12 col-sm-6 col-md-6 mb-2">
-                        <div class="row align-items-center">
-                            <div class="col-6 col-sm-6 col-md-3 text-right">
-                                <label class="mb-0">จังหวัด:</label>
+                    <!-- ROW 4 : ค่าที่พัก, ค่าใช้จ่ายอื่น, รายการ -->
+                    <div class="form-row ">
+                        <fieldset disabled class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <label for="disabledTextInputDate">วันที่</label>
+                                <input type="text" class="form-control" id="disabledTextInputDate" placeholder="08/10/2025">
                             </div>
-                            <div class="col-6 col-sm-6 col-md-9">
-                                <input type="text" class="form-control" id="recipient-name">
-                            </div>
+                        </fieldset>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputJob">Job</label>
+                            <input type="text" class="form-control" id="inputJob" placeholder="Jxx-xxxx">
+                        </div>
+
+                    </div>
+
+                    <!-- ROW 2 : ลูกค้า, จังหวัด -->
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputCustomer">ลูกค้า</label>
+                            <input type="text" class="form-control" id="inputCustomer" placeholder="Ex. HOTEL, CTL-(HQ)">
+                        </div>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputProvince">จังหวัด</label>
+                            <input type="text" class="form-control" id="inputProvince" placeholder="Ex. กรุงเทพ">
                         </div>
                     </div>
-                    <!-- ชื่อลูกค้า -->
-                    <div class="col-12 col-sm-6 col-md-6 mb-2">
-                        <div class="row align-items-center">
-                            <div class="col-6 col-sm-6 col-md-3 text-right">
-                                <label class="mb-0">ชื่อลูกค้า:</label>
-                            </div>
-                            <div class="col-6 col-sm-6 col-md-9">
-                                <input type="text" class="form-control" id="recipient-name">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                    <label class="form-check-label" for="inlineCheckbox1">1-4 ชม.</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                    <label class="form-check-label" for="inlineCheckbox2">4-8 ชม.</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option1">
-                    <label class="form-check-label" for="inlineCheckbox1">8 ชม. ขึ้นไป</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox4" value="option2">
-                    <label class="form-check-label" for="inlineCheckbox2">ต่างจังหวัด</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox5" value="option2">
-                    <label class="form-check-label" for="inlineCheckbox2">ต่างประเทศ</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox6" value="option2">
-                    <label class="form-check-label" for="inlineCheckbox2">อื่น ๆ </label>
-                </div>
 
-
-                @* <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr><th>วันที่</th><td><span id="modalDate"></span></td></tr>
-                            <tr><th>เวลา</th><td><span id="modalTime"></span></td></tr>
-                            <tr><th>ชื่อลูกค้า</th><td><span id="modalCustomer"></span></td></tr>
-                            <tr><th>จังหวัด</th><td><span id="modalZipcode"></span></td></tr>
-                            <tr><th>Job No.</th><td><span id="modalJobNo"></span></td></tr>
-                            <tr><th>ต่างจังหวัด</th><td><span id="modalAllowanceProvince"></span></td></tr>
-                            <tr><th>1-4 ชม.</th><td><span id="modalAllowance1_4"></span></td></tr>
-                            <tr><th>4-8 ชม.</th><td><span id="modalAllowance4_8"></span></td></tr>
-                            <tr><th>8 ชม.+</th><td><span id="modalAllowance8"></span></td></tr>
-                            <tr><th>อื่นๆ</th><td><span id="modalAllowanceOther"></span></td></tr>
-                            <tr><th>ค่าที่พัก</th><td><span id="modalAllowanceHostel"></span></td></tr>
-                            <tr><th>รายการ</th><td><span id="modalList"></span></td></tr>
-                            <tr><th>จำนวนเงิน</th><td><span id="modalAmount">150</span></td></tr>
-                            <tr><th>รายละเอียด</th><td><span id="modalDescription"></span></td></tr>
-                            <tr><th>รวม</th><td><span id="modalTotal">300</span></td></tr>
-                            <tr><th>หมายเหตุ</th><td><span id="modalRemark"></span></td></tr>
-                            <tr><th>สถานะ</th><td><span id="modalStatus"></span></td></tr>
-                        </tbody>
-                    </table>
-                </div> *@
+                </form>
             </div>
             <div class="modal-footer kanit-regular">
                 <button type="button" class="btn btn-outline-success" id="editButton">บันทึก</button>

@@ -7,6 +7,7 @@ namespace TRIPEXPENSEREPORT.Interface
         List<BorrowerModel> GetBorrowers();
         List<BorrowerModel> GetBorrowersLog();
         string Insert(BorrowerModel borrower);
+        string Update(BorrowerModel borrower);
         string Delete(string borrow_id);
         string InsertLog(BorrowerModel borrower);
     }

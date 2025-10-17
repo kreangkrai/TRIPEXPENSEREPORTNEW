@@ -1,15 +1,19 @@
-﻿@model List<TRIPEXPENSEREPORT.Models.AllowanceModel>
+﻿@model List<TRIPEXPENSEREPORT.Models.PersonalModel>
 @{
-    ViewData["Title"] = "TE : เบิกเงิน";
+    ViewData["Title"] = "TE : รถส่วนตัว";
 }
 
 <style>
+    .hidden {
+        display: none;
+    }
+
     input[type="checkbox"] {
         transition: all 0.3s ease; /* ทำให้เปลี่ยนสี/ขนาดนุ่มนวล */
     }
 
         input[type="checkbox"]:checked {
-            transform: scale(1.125); /* ขยายนิดนึงตอนกด */
+            transform: scale(1.15); /* ขยายนิดนึงตอนกด */
             background-color: #1e90ff
         }
 
@@ -28,7 +32,9 @@
             opacity: 1; /* ชัดเจน */
             /* background-color: #ffffff; */ /* สีขาวตอนกรอกได้ */
         }
+
 </style>
+
 
 <div class="container-fluid">
     <div class="row">
@@ -50,81 +56,140 @@
                     <input type="date" class="form-control" id="date_end" placeholder="วันที่ (dd/mm/yyyy)" />
                 </div>
 
-                <label for="employee" style="color:#555555">ชื่อพนักงาน:</label>
-                <select name="employees" id="employee" class="mb-3 form-control" style="border-radius:5px">
-                    <option value="NULL">Please Select...</option>
-                    <option value="EM001">Sarit T.</option>
-                    <option value="EM002">Kriangkrai R.</option>
-                    <option value="EM003">Jirawat J.</option>
-                    <option value="EM004">Chakrit R.</option>
-                </select>
-                <button class="btn btn-primary w-100 mb-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">ค้นหา</button>
+                <div class="form-group">
+                    <label for="employee" style="color:#555555" id="employee-label" >ชื่อผู้ขับ:</label>
+                    <select name="employees" id="employee" class="mb-3 form-control" style="border-radius:5px">
+                        <option value="NULL">Please Select...</option>
+                        <option value="EM001">Sarit T.</option>
+                        <option value="EM002">Kriangkrai R.</option>
+                        <option value="EM003">Jirawat J.</option>
+                        <option value="EM004">Chakrit R.</option>
+                    </select>
+                    <button class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        ค้นหา
+                    </button>
+                </div>
             </div>
         </div>
-
         <!-- Main Content (ขวา) : Table  -->
         <div class="col-md-10 p-3 kanit-regular">
             <h4 style="letter-spacing:2px; padding:10px; padding-left:15px; color:white; border-top-right-radius:20px; border-top-left-radius:20px; background: #2178BE;
-                    background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);">
-                เบี้ยเลี้ยง
+        background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);
+        display: flex; justify-content: space-between; align-items: center;">
+                รถส่วนตัว
+                <button class="btn btn-success" data-toggle="modal" data-target="#AddTripModal"
+                        style="width:100px; text-align:end; border-radius:20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <i class="fa-solid fa-plus"></i> เพิ่มทริป
+                </button>
             </h4>
+
+            <!-- Add Trip Modal -->
+            <div class="modal fade" id="AddTripModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-md" role="document">
+                    <!-- เพิ่ม modal-lg สำหรับขนาดใหญ่ -->
+                    <div class="modal-content">
+                        <div class="modal-header" style="background: #34ba7c;
+                                background: linear-gradient(90deg, rgba(52, 186, 124, 1) 0%, rgba(0, 138, 112, 1) 100%); color: white; border-bottom: none;">
+                            <h5 class="modal-title kanit-regular" id="detailModalLabel">เพิ่มข้อมูล (รถบริษัท)</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true" style="color: white;">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body kanit-regular" style="color:#444444">
+                            <form>
+                                <!-- ROW 1 : วันที่, ผู้ขับรถ -->
+                                <div class="form-row ">
+                                    <div class="form-group col-sm-12 col-md-6">
+                                        <label for="InputDate">วันที่</label>
+                                        <input type="date" class="form-control" id="InputDate">
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-6">
+                                        <label for="SelectDriver">ผู้ขับ</label>
+                                        <select class="form-control" id="SelectDriver">
+                                            <option value="NULL">Please Select...</option>
+                                            <option value="EM001">Sarit T.</option>
+                                            <option value="EM002">Kriangkrai R.</option>
+                                            <option value="EM003">Jirawat J.</option>
+                                            <option value="EM004">Chakrit R.</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- ROW 2 : รถบริษัท, ทะเบียนรถ -->
+                                <div class="form-row ">
+
+                                    <div class="form-group col-sm-12 col-md-6">
+                                        <label for="car" style="color:#555555" id="car-label">รถบริษัท:</label>
+                                        <select name="cars" id="car" class="form-control" style="border-radius:5px">
+                                            <option value="NULL">Please Select...</option>
+                                            <option value="CAR01">CAR#01</option>
+                                            <option value="CAR02">CAR#02</option>
+                                            <option value="CAR03">CAR#03</option>
+                                            <option value="CAR04">CAR#04</option>
+                                        </select>
+                                    </div>
+
+                                    <fieldset disabled class="col-sm-12 col-md-6">
+                                        <div class="form-group">
+                                            <label for="disabledTextInputLicensePlate">ป้ายทะเบียนรถ</label>
+                                            <input type="text" class="form-control" id="disabledTextInputLicensePlate" placeholder="กก-0000">
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- Footer Button -->
+                        <div class="modal-footer kanit-regular">
+                            <button type="button" class="btn btn-outline-danger col-sm-3 col-md-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-dismiss="modal">
+                                ยกเลิก
+                            </button>
+                            <button type="button" id="BtnAddTrip" class="btn btn-success col-sm-3 col-md-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <i class="fa-solid fa-plus"></i> เพิ่ม
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
             <div class="scrollable-table table-responsive-lg">
                 <table class="table table-striped table-bordered ">
                     <thead class="bg-primary text-white align-content-center text-center">
                         <tr>
                             <th>วันที่</th>
-                            <th>เวลา</th>
-                            <th>ชื่อลูกค้า</th>
-                            <th>จังหวัด</th>
-                            <th>Job No.</th>
-                            <th>ต่างจังหวัด</th>
-                            <th>1-4 ชม.</th>
-                            <th>4-8 ชม.</th>
-                            <th>8 ชม.+</th>
-                            <th>อื่นๆ</th>
-                            <th>ค่าที่พัก</th>
-                            <th>รายการ</th>
-                            <th>จำนวนเงิน</th>
-                            <th>รวม</th>
-                            <th>หมายเหตุ</th>
+                            <th>Job</th>
+                            <th>ตั้งแต่เวลา</th>
+                            <th>ถึงเวลา</th>
+                            <th>การเดินทาง</th>
+                            <th>CTBO</th>
+                            <th>EXP</th>
+                            <th>P/T</th>
+                            <th>เลขไมล์เริ่มต้น</th>
+                            <th>เลขไมล์สิ้นสุด</th>
+                            <th>ระยะทาง</th>
+                            <th>รายละเอียด</th>
                             <th>สถานะ</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            <tr data-date="@item.date.ToString("dd/MM/yyyy")"
-                                data-time="@item.date_start.ToString("HH:mm")"
-                                data-customer="@item.customer"
-                                data-zipcode="@item.zipcode"
-                                data-jobno="@item.job"
-                                data-allowance-province="@item.allowance_province"
-                                data-allowance-1-4="@item.allowance_1_4"
-                                data-allowance-4-8="@item.allowance_4_8"
-                                data-allowance-8="@item.allowance_8"
-                                data-allowance-other="@item.allowance_other"
-                                data-allowance-hostel="@item.allowance_hostel"
-                                data-list="@item.list"
-                                data-remark="@item.remark"
-                                data-status="@item.status"
-                                class="clickable-row align-content-center text-center"
+                            <tr class="clickable-row align-content-center text-center"
                                 style="color:#444444">
 
                                 <td>@item.date.ToString("dd/MM/yyyy")</td>
-                                <td>@item.date_start.ToString("HH:mm")</td>
-                                <td>@item.customer</td>
-                                <td>@item.zipcode</td>
                                 <td>@item.job</td>
-                                <td>@item.allowance_province</td>
-                                <td>@item.allowance_1_4</td>
-                                <td>@item.allowance_4_8</td>
-                                <td>@item.allowance_8</td>
-                                <td>@item.allowance_other</td>
-                                <td>@item.allowance_hostel</td>
-                                <td>@item.list</td>
-                                <td>150</td> <!-- ค่าคงที่ในตัวอย่าง -->
-                                <td>300</td> <!-- ค่าคงที่ในตัวอย่าง -->
-                                <td>@item.remark</td>
+                                <td>8:30</td>
+                                <td>17:30</td>
+                                <td>@item.location</td>
+                                <td>@item.ctbo</td>
+                                <td>@item.exp</td>
+                                <td>@item.pt</td>
+                                <td>@item.mileage_start</td>
+                                <td>@item.mileage_stop</td>
+                                <td>@item.km</td>
+                                <td>@item.description</td>
                                 <td>@item.status</td>
                             </tr>
                         }
@@ -227,106 +292,105 @@
         <!-- เพิ่ม modal-lg สำหรับขนาดใหญ่ -->
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%); color: white; border-bottom: none;">
-                <h5 class="modal-title kanit-regular" id="detailModalLabel">แก้ไขข้อมูล (เบี้ยเลี้ยง)</h5>
+                <h5 class="modal-title kanit-regular" id="detailModalLabel">แก้ไขข้อมูล (รถส่วนตัว)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true" style="color: white;">&times;</span>
                 </button>
             </div>
             <div class="modal-body kanit-regular" style="color:#444444">
                 <form>
-                    <!-- ROW 1 : วันที่, Job -->
+                    <!-- ROW 1 : วันที่, รถบริษัท, ทะเบียนรถ -->
                     <div class="form-row ">
-                        <fieldset disabled class="col-sm-12 col-md-6">
+                        <fieldset disabled class="col-sm-12 col-md-4">
                             <div class="form-group">
                                 <label for="disabledTextInputDate">วันที่</label>
                                 <input type="text" class="form-control" id="disabledTextInputDate" placeholder="08/10/2025">
+                            </div>
+                        </fieldset>
+                        <fieldset disabled class="col-sm-12 col-md-4">
+                            <div class="form-group">
+                                <label for="disabledTextInputCar">รถบริษัท</label>
+                                <input type="text" class="form-control" id="disabledTextInputCar" placeholder="CAR#99">
+                            </div>
+                        </fieldset>
+                        <fieldset disabled class="col-sm-12 col-md-4">
+                            <div class="form-group">
+                                <label for="disabledTextInputLicensePlate">ทะเบียนรถ</label>
+                                <input type="text" class="form-control" id="disabledTextInputLicensePlate" placeholder="กก-1111">
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- ROW 2 : ผู้ขับรถ, Job -->
+                    <div class="form-row">
+                        <fieldset disabled class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <label for="disabledTextInputDriver">ผู้ขับรถ</label>
+                                <input type="text" class="form-control" id="disabledTextInputDriver" placeholder="Sarit T.">
                             </div>
                         </fieldset>
                         <div class="form-group col-sm-12 col-md-6">
                             <label for="inputJob">Job</label>
                             <input type="text" class="form-control" id="inputJob" placeholder="Jxx-xxxx">
                         </div>
-
                     </div>
 
-                    <!-- ROW 2 : ลูกค้า, จังหวัด -->
+                    <!-- ROW 3 : เวลาเริ่มต้น, เวลาสิ้นสุด -->
                     <div class="form-row">
-                        <div class="form-group col-sm-12 col-md-8">
-                            <label for="inputCustomer">ลูกค้า</label>
-                            <input type="text" class="form-control" id="inputCustomer" placeholder="Ex. HOTEL, CTL-(HQ)">
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputTimeStart">เวลาเริ่มต้น</label>
+                            <input type="time" class="form-control" id="inputTimeStart" placeholder="Jxx-xxxx">
                         </div>
-                        <div class="form-group col-sm-12 col-md-4">
-                            <label for="inputProvince">จังหวัด</label>
-                            <input type="text" class="form-control" id="inputProvince" placeholder="Ex. กรุงเทพ">
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputTimeStop">เวลาสิ้นสุด</label>
+                            <input type="time" class="form-control" id="inputTimeStop" placeholder="Jxx-xxxx">
                         </div>
                     </div>
 
-                    <!-- ROW 3 : เบี้ยเลี้ยง -->
-                    <label>เบี้ยเลี้ยง</label>
-                    <div class="form-group ">
-                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_1_4" value="option1">
-                            <label class="form-check-label" for="inlineCheckboxAllowance_1_4">1-4 ชม.</label>
+                    <!-- ROW 4 : การเดินทาง, ระยะทาง -->
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 col-md-9">
+                            <label for="inputDestination">การเดินทาง</label>
+                            <input type="text" class="form-control" id="inputDestination" placeholder="Ex. Home-CTL(HQ)-Home">
                         </div>
-                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_4_8" value="option2">
-                            <label class="form-check-label" for="inlineCheckboxAllowance_4_8">4-8 ชม.</label>
-                        </div>
-                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_8_up" value="option3">
-                            <label class="form-check-label" for="inlineCheckboxAllowance_8_up">8 ชม. ขึ้นไป</label>
-                        </div>
-                        <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_province" value="option4">
-                            <label class="form-check-label" for="inlineCheckboxAllowance_province">ต่างจังหวัด</label>
-                        </div>
-                        @* <div class="form-check form-check-inline col-sm-6 col-md-3 mb-1">
-                        <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_abroad" value="option5">
-                        <label class="form-check-label" for="inlineCheckboxAllowance_abroad">ต่างประเทศ</label>
-                        </div> *@
-
-                        @* <div class="form-check form-check-inline col-sm-6 col-md-6 mb-1">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_other" value="option6">
-                            <label class="form-check-label" for="inlineCheckboxAllowance_other" style="margin-right:10px">อื่นๆ </label>
+                        <div class="form-group col-sm-12 col-md-3">
+                            <label for="inputDistance">ระยะทาง</label>
                             <div class="input-group">
-                                <input type="text" class="form-control col-sm-8 col-md-8" style="text-align:end" id="inputAllowance_other" placeholder="0">
+                                <input type="text" class="form-control" style="text-align:end" id="inputDistance" placeholder="0">
                                 <div class="input-group-append">
-                                    <span class="input-group-text">฿</span>
-                                </div>
-                            </div>
-                        </div> *@
-
-                        <div class="form-check form-check-inline col-sm-6 col-md-6 mb-1">
-                            <input class="form-check-input" type="checkbox" id="inlineCheckboxAllowance_other" value="option6">
-                            <label class="form-check-label" for="inlineCheckboxAllowance_other" style="margin-right:10px">อื่นๆ </label>
-                            <div class="input-group">
-                                <input type="text" class="form-control col-sm-8 col-md-8" style="text-align:end" id="inputAllowance_other" placeholder="0" disabled>
-                                <div class="input-group-append">
-                                    <span class="input-group-text">฿</span>
+                                    <span class="input-group-text">กม.</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ROW 4 : ค่าที่พัก, ค่าใช้จ่ายอื่นๆ, รายการ -->
+                    <!-- ROW 5 : เลขไมล์เริ่มต้น, เลขไมล์สิ้นสุด -->
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputMileageStart">เลขไมล์เริ่มต้น</label>
+                            <input type="text" class="form-control" id="inputMileageStart">
+                        </div>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputMileageStop">เลขไมล์สิ้นสุด</label>
+                            <input type="text" class="form-control" id="inputMileageStop">
+                        </div>
+                    </div>
+
+                    <!-- ROW 6 : Fleet Card, Cash -->
                     <div class="form-row ">
-                        <div class="form-group col-sm-12 col-md-4">
-                            <label for="inputAllowance_hostel">ค่าที่พัก</label>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputFleetCard">ค่าน้ำมัน (Fleet Card)</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" style="text-align:end" id="inputAllowance_hostel" placeholder="0">
+                                <input type="text" class="form-control" style="text-align:end" id="inputFleetCard" placeholder="0">
                                 <div class="input-group-append">
                                     <span class="input-group-text">฿</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group col-sm-12 col-md-4">
-                            <label for="inputList">ค่าใช้จ่ายอื่นๆ</label>
-                            <input type="text" class="form-control" id="inputList" placeholder="Ex. เลี้ยงลูกค้า">
-                        </div>
-                        <div class="form-group col-sm-12 col-md-4">
-                            <label for="inputList_amount">จำนวนเงิน</label>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputCash">ค่าน้ำมัน (เงินสด)</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" style="text-align:end" id="inputList_amount" placeholder="0">
+                                <input type="text" class="form-control" style="text-align:end" id="inputCash" placeholder="0">
                                 <div class="input-group-append">
                                     <span class="input-group-text">฿</span>
                                 </div>
@@ -334,42 +398,46 @@
                         </div>
                     </div>
 
-                    @*
-                    <td>@item.remark</td>
-                    <td>@item.status</td> *@
-
-                    <!-- ROW 5 : หมายเหตุ, รวม -->
-                    <div class="form-row">
-                        <div class="form-group col-sm-12 col-md-8">
-                            <label for="inputRemark">หมายเหตุ</label>
-                            <input type="text" class="form-control" id="inputRemark">
+                    <!-- ROW 7 : ค่าทางด่วน, ค่าใช้จ่ายอื่นๆ -->
+                    <div class="form-row ">
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputExpresswayTolls">ค่าทางด่วน</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" style="text-align:end" id="inputExpresswayTolls" placeholder="0">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">฿</span>
+                                </div>
+                            </div>
                         </div>
+                        <div class="form-group col-sm-12 col-md-6">
+                            <label for="inputOther">ค่าใช้จ่ายอื่นๆ</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" style="text-align:end" id="inputOther" placeholder="0">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">฿</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 8 : อัปเดตล่าสุด, ผู้ดำเนินการ, สถานะ -->
+                    <div class="form-row ">
                         <fieldset disabled class="col-sm-12 col-md-4">
                             <div class="form-group">
-                                <label for="disabledTextInputAllowance_sum">รวม</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" style="text-align:end" id="disabledTextInputAllowance_sum" placeholder="0">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">฿</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </fieldset>
-                    </div>
-
-                    <!-- ROW 6 : อัปเดตล่าสุด, ผู้ดำเนินการ -->
-                    <div class="form-row ">
-                        <fieldset disabled class="col-sm-12 col-md-6">
-                            <div class="form-group">
                                 <label for="disabledTextInputLastUpdated">อัปเดตล่าสุด</label>
-                                <input type="text" class="form-control" id="disabledTextInputLastUpdated" placeholder="08/10/2025 12:34:56">
+                                <input type="text" class="form-control" id="disabledTextInputLastUpdated" placeholder="08/10/25 09:34">
                             </div>
                         </fieldset>
-                        <fieldset disabled class="col-sm-12 col-md-6">
+                        <fieldset disabled class="col-sm-12 col-md-4">
                             <div class="form-group">
                                 <label for="disabledTextInputAdmin">ผู้ดำเนินการ</label>
                                 <input type="text" class="form-control" id="disabledTextInputAdmin" placeholder="Kriangkrai R.">
+                            </div>
+                        </fieldset>
+                        <fieldset disabled class="col-sm-12 col-md-4">
+                            <div class="form-group">
+                                <label for="disabledTextInputStatus">สถานะ</label>
+                                <input type="text" class="form-control" id="disabledTextInputStatus" placeholder="Manager Pending">
                             </div>
                         </fieldset>
                     </div>
@@ -445,22 +513,48 @@
                     $("#detailModal").modal("hide");
                 }
             });
-                
-        });
-        // หา Checkbox และ Input
-                const checkbox = document.getElementById('inlineCheckboxAllowance_other');
-                const input = document.getElementById('inputAllowance_other');
 
-        // เพิ่ม event listener สำหรับ Checkbox
-        checkbox.addEventListener('change', function() {
-            input.disabled = !this.checked; // ถ้าไม่ติ๊ก = disabled, ถ้าติ๊ก = enable
-        });
+            // หา Checkbox และ Input
+            const checkbox = document.getElementById('inlineCheckboxAllowance_other');
+            const input = document.getElementById('inputAllowance_other');
 
-        checkbox.addEventListener('change', function() {
-            input.disabled = !this.checked;
-            if (!this.checked) {
-                input.value = ''; // ล้างช่องเมื่อยกเลิกติ๊ก
+            // เพิ่ม event listener สำหรับ Checkbox
+            checkbox.addEventListener('change', function () {
+                input.disabled = !this.checked; // ถ้าไม่ติ๊ก = disabled, ถ้าติ๊ก = enable
+            });
+
+            checkbox.addEventListener('change', function () {
+                input.disabled = !this.checked;
+                if (!this.checked) {
+                    input.value = ''; // ล้างช่องเมื่อยกเลิกติ๊ก
+                }
+            });
+        });
+    </script>
+    <script>
+        document.getElementById('mode').addEventListener('change', function () {
+            const mode = this.value;
+            const carSelect = document.getElementById('car');
+            const carLabel = document.getElementById('car-label');
+            const employeeSelect = document.getElementById('employee');
+            const employeeLabel = document.getElementById('employee-label');
+
+            // ซ่อนทั้งสอง select และ label ก่อน
+            carSelect.classList.add('hidden');
+            carLabel.classList.add('hidden');
+            employeeSelect.classList.add('hidden');
+            employeeLabel.classList.add('hidden');
+
+            // แสดง select และ label ตามโหมดที่เลือก
+            if (mode === 'CAR') {
+                carSelect.classList.remove('hidden');
+                carLabel.classList.remove('hidden');
+            } else if (mode === 'DRIVER') {
+                employeeSelect.classList.remove('hidden');
+                employeeLabel.classList.remove('hidden');
             }
         });
     </script>
+
+
 }

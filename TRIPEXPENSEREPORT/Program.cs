@@ -12,6 +12,7 @@ builder.Services.AddTransient<ITrip, TripService>();
 builder.Services.AddTransient<IProvince, ProvinceService>();
 builder.Services.AddTransient<ICar, CarService>();
 builder.Services.AddTransient<IService, ServiceService>();
+builder.Services.AddTransient<IPersonal, PersonalService>();
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     // This lambda determines whether user consent for non-essential cookies is needed for a given request.

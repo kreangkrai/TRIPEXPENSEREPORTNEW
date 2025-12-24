@@ -3,13 +3,12 @@
     public class PersonalModel
     {
         public int id { get; set; }
-        public string code { get; set; }
+        public string trip { get; set; }
         public DateTime date { get; set; }
         public string driver { get; set; }
         public TimeSpan time_start { get; set; }
         public TimeSpan time_stop { get; set; }
         public string location { get; set; }
-        public string zipcode { get; set; }
         public string job { get; set; }
         public double cash { get; set; }
         public double ctbo { get; set; }

@@ -16,7 +16,7 @@ namespace TRIPEXPENSEREPORT.Controllers
         public IActionResult Index()
         {
             List<ProvinceModel> list = new List<ProvinceModel>();
-            List<DataModel> getTrips = Trip.GetDatasByID("059197", new DateTime(2025, 10, 1), new DateTime(2025, 10, 31));
+            List<DataModel> getTrips = Trip.GetDatasPersonalByEMPID("059197", new DateTime(2025, 10, 1), new DateTime(2025, 10, 31));
             getTrips = getTrips.OrderBy(o => o.date).ToList();
             var trips = getTrips.GroupBy(g => new { trip = g.trip.Substring(0, 8) }).Select(s => new TripModel()
             {

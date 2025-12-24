@@ -24,13 +24,12 @@ namespace TRIPEXPENSEREPORT.Service
                 }
                 string string_command = string.Format($@"
                     INSERT INTO 
-                        OriginalPersonal(code,
+                        OriginalPersonal(
                             driver,
                             date,
                             time_start,
                             time_stop,
                             location,
-                            zipcode,
                             job,
                             cash,
                             ctbo,
@@ -47,7 +46,7 @@ namespace TRIPEXPENSEREPORT.Service
                             approver,
                             last_date
                         )
-                        VALUES(@code,
+                        VALUES(
                             @driver,
                             @date,
                             @time_start,
@@ -70,17 +69,15 @@ namespace TRIPEXPENSEREPORT.Service
                             @approver,
                             @last_date
                         )");
+
                 using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
-                    cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.Add("@code", SqlDbType.Text);
-                    cmd.Parameters.Add("@driver", SqlDbType.Text);
+                    cmd.Parameters.Add("@driver", SqlDbType.VarChar, 100);
                     cmd.Parameters.Add("@date", SqlDbType.Date);
                     cmd.Parameters.Add("@time_start", SqlDbType.Time);
                     cmd.Parameters.Add("@time_stop", SqlDbType.Time);
-                    cmd.Parameters.Add("@location", SqlDbType.Text);
-                    cmd.Parameters.Add("@zipcode", SqlDbType.Text);
-                    cmd.Parameters.Add("@job", SqlDbType.Text);
+                    cmd.Parameters.Add("@location", SqlDbType.VarChar, 200);
+                    cmd.Parameters.Add("@job", SqlDbType.VarChar, 200);
                     cmd.Parameters.Add("@cash", SqlDbType.Float);
                     cmd.Parameters.Add("@ctbo", SqlDbType.Float);
                     cmd.Parameters.Add("@exp", SqlDbType.Float);
@@ -90,36 +87,35 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@km", SqlDbType.Int);
                     cmd.Parameters.Add("@program_km", SqlDbType.Int);
                     cmd.Parameters.Add("@auto_km", SqlDbType.Int);
-                    cmd.Parameters.Add("@description", SqlDbType.Text);
-                    cmd.Parameters.Add("@status", SqlDbType.Text);
-                    cmd.Parameters.Add("@gasoline", SqlDbType.Text);
-                    cmd.Parameters.Add("@approver", SqlDbType.Text);
+                    cmd.Parameters.Add("@description", SqlDbType.VarChar, -1);
+                    cmd.Parameters.Add("@status", SqlDbType.VarChar, 50);
+                    cmd.Parameters.Add("@gasoline", SqlDbType.VarChar, 100);
+                    cmd.Parameters.Add("@approver", SqlDbType.VarChar, 100);
                     cmd.Parameters.Add("@last_date", SqlDbType.DateTime);
 
-                    for (int i = 0; i < personals.Count; i++)
+                    foreach (var p in personals)
                     {
-                        cmd.Parameters[0].Value = personals[i].code;
-                        cmd.Parameters[1].Value = personals[i].driver;
-                        cmd.Parameters[2].Value = personals[i].date;
-                        cmd.Parameters[3].Value = personals[i].time_start;
-                        cmd.Parameters[4].Value = personals[i].time_stop;
-                        cmd.Parameters[5].Value = personals[i].location;
-                        cmd.Parameters[6].Value = personals[i].zipcode;
-                        cmd.Parameters[7].Value = personals[i].job;
-                        cmd.Parameters[8].Value = personals[i].cash;
-                        cmd.Parameters[9].Value = personals[i].ctbo;
-                        cmd.Parameters[10].Value = personals[i].exp;
-                        cmd.Parameters[11].Value = personals[i].pt;
-                        cmd.Parameters[12].Value = personals[i].mileage_start;
-                        cmd.Parameters[13].Value = personals[i].mileage_stop;
-                        cmd.Parameters[14].Value = personals[i].km;
-                        cmd.Parameters[15].Value = personals[i].program_km;
-                        cmd.Parameters[16].Value = personals[i].auto_km;
-                        cmd.Parameters[17].Value = personals[i].description;
-                        cmd.Parameters[18].Value = personals[i].status;
-                        cmd.Parameters[19].Value = personals[i].gasoline;
-                        cmd.Parameters[20].Value = personals[i].approver;
-                        cmd.Parameters[21].Value = personals[i].last_date;
+                        cmd.Parameters["@driver"].Value = (object)p.driver ?? DBNull.Value;
+                        cmd.Parameters["@date"].Value = (object)p.date ?? DBNull.Value;
+                        cmd.Parameters["@time_start"].Value = (object)p.time_start ?? DBNull.Value;
+                        cmd.Parameters["@time_stop"].Value = (object)p.time_stop ?? DBNull.Value;
+                        cmd.Parameters["@location"].Value = (object)p.location ?? DBNull.Value;
+                        cmd.Parameters["@job"].Value = (object)p.job ?? DBNull.Value;
+                        cmd.Parameters["@cash"].Value = p.cash;                  
+                        cmd.Parameters["@ctbo"].Value = p.ctbo;
+                        cmd.Parameters["@exp"].Value = p.exp;
+                        cmd.Parameters["@pt"].Value = p.pt;
+                        cmd.Parameters["@mileage_start"].Value = p.mileage_start;
+                        cmd.Parameters["@mileage_stop"].Value = p.mileage_stop;
+                        cmd.Parameters["@km"].Value = p.km;
+                        cmd.Parameters["@program_km"].Value = p.program_km;
+                        cmd.Parameters["@auto_km"].Value = p.auto_km;
+                        cmd.Parameters["@description"].Value = (object)p.description ?? DBNull.Value;
+                        cmd.Parameters["@status"].Value = (object)p.status ?? DBNull.Value;
+                        cmd.Parameters["@gasoline"].Value = (object)p.gasoline ?? DBNull.Value;
+                        cmd.Parameters["@approver"].Value = (object)p.approver ?? DBNull.Value;
+                        cmd.Parameters["@last_date"].Value = (object)p.last_date ?? DBNull.Value;
+
                         cmd.ExecuteNonQuery();
                     }
 
@@ -149,13 +145,12 @@ namespace TRIPEXPENSEREPORT.Service
                 }
                 string string_command = string.Format($@"
                     INSERT INTO 
-                        EditPersonal(code,
+                        EditPersonal(
                             driver,
                             date,
                             time_start,
                             time_stop,
                             location,
-                            zipcode,
                             job,
                             cash,
                             ctbo,
@@ -172,13 +167,12 @@ namespace TRIPEXPENSEREPORT.Service
                             approver,
                             last_date
                         )
-                        VALUES(@code,
+                        VALUES(
                             @driver,
                             @date,
                             @time_start,
                             @time_stop,
                             @location,
-                            @zipcode,
                             @job,
                             @cash,
                             @ctbo,
@@ -195,17 +189,16 @@ namespace TRIPEXPENSEREPORT.Service
                             @approver,
                             @last_date
                         )");
+
+
                 using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
-                    cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.Add("@code", SqlDbType.Text);
-                    cmd.Parameters.Add("@driver", SqlDbType.Text);
+                    cmd.Parameters.Add("@driver", SqlDbType.VarChar, 100);
                     cmd.Parameters.Add("@date", SqlDbType.Date);
                     cmd.Parameters.Add("@time_start", SqlDbType.Time);
                     cmd.Parameters.Add("@time_stop", SqlDbType.Time);
-                    cmd.Parameters.Add("@location", SqlDbType.Text);
-                    cmd.Parameters.Add("@zipcode", SqlDbType.Text);
-                    cmd.Parameters.Add("@job", SqlDbType.Text);
+                    cmd.Parameters.Add("@location", SqlDbType.VarChar, 200);
+                    cmd.Parameters.Add("@job", SqlDbType.VarChar, 200);
                     cmd.Parameters.Add("@cash", SqlDbType.Float);
                     cmd.Parameters.Add("@ctbo", SqlDbType.Float);
                     cmd.Parameters.Add("@exp", SqlDbType.Float);
@@ -215,36 +208,35 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@km", SqlDbType.Int);
                     cmd.Parameters.Add("@program_km", SqlDbType.Int);
                     cmd.Parameters.Add("@auto_km", SqlDbType.Int);
-                    cmd.Parameters.Add("@description", SqlDbType.Text);
-                    cmd.Parameters.Add("@status", SqlDbType.Text);
-                    cmd.Parameters.Add("@gasoline", SqlDbType.Text);
-                    cmd.Parameters.Add("@approver", SqlDbType.Text);
+                    cmd.Parameters.Add("@description", SqlDbType.VarChar, -1);
+                    cmd.Parameters.Add("@status", SqlDbType.VarChar, 50);
+                    cmd.Parameters.Add("@gasoline", SqlDbType.VarChar, 100);
+                    cmd.Parameters.Add("@approver", SqlDbType.VarChar, 100);
                     cmd.Parameters.Add("@last_date", SqlDbType.DateTime);
 
-                    for (int i = 0; i < personals.Count; i++)
+                    foreach (var p in personals)
                     {
-                        cmd.Parameters[0].Value = personals[i].code;
-                        cmd.Parameters[1].Value = personals[i].driver;
-                        cmd.Parameters[2].Value = personals[i].date;
-                        cmd.Parameters[3].Value = personals[i].time_start;
-                        cmd.Parameters[4].Value = personals[i].time_stop;
-                        cmd.Parameters[5].Value = personals[i].location;
-                        cmd.Parameters[6].Value = personals[i].zipcode;
-                        cmd.Parameters[7].Value = personals[i].job;
-                        cmd.Parameters[8].Value = personals[i].cash;
-                        cmd.Parameters[9].Value = personals[i].ctbo;
-                        cmd.Parameters[10].Value = personals[i].exp;
-                        cmd.Parameters[11].Value = personals[i].pt;
-                        cmd.Parameters[12].Value = personals[i].mileage_start;
-                        cmd.Parameters[13].Value = personals[i].mileage_stop;
-                        cmd.Parameters[14].Value = personals[i].km;
-                        cmd.Parameters[15].Value = personals[i].program_km;
-                        cmd.Parameters[16].Value = personals[i].auto_km;
-                        cmd.Parameters[17].Value = personals[i].description;
-                        cmd.Parameters[18].Value = personals[i].status;
-                        cmd.Parameters[19].Value = personals[i].gasoline;
-                        cmd.Parameters[20].Value = personals[i].approver;
-                        cmd.Parameters[21].Value = personals[i].last_date;
+                        cmd.Parameters["@driver"].Value = (object)p.driver ?? DBNull.Value;
+                        cmd.Parameters["@date"].Value = (object)p.date ?? DBNull.Value;
+                        cmd.Parameters["@time_start"].Value = (object)p.time_start ?? DBNull.Value;
+                        cmd.Parameters["@time_stop"].Value = (object)p.time_stop ?? DBNull.Value;
+                        cmd.Parameters["@location"].Value = (object)p.location ?? DBNull.Value;
+                        cmd.Parameters["@job"].Value = (object)p.job ?? DBNull.Value;
+                        cmd.Parameters["@cash"].Value = p.cash;
+                        cmd.Parameters["@ctbo"].Value = p.ctbo;
+                        cmd.Parameters["@exp"].Value = p.exp;
+                        cmd.Parameters["@pt"].Value = p.pt;
+                        cmd.Parameters["@mileage_start"].Value = p.mileage_start;
+                        cmd.Parameters["@mileage_stop"].Value = p.mileage_stop;
+                        cmd.Parameters["@km"].Value = p.km;
+                        cmd.Parameters["@program_km"].Value = p.program_km;
+                        cmd.Parameters["@auto_km"].Value = p.auto_km;
+                        cmd.Parameters["@description"].Value = (object)p.description ?? DBNull.Value;
+                        cmd.Parameters["@status"].Value = (object)p.status ?? DBNull.Value;
+                        cmd.Parameters["@gasoline"].Value = (object)p.gasoline ?? DBNull.Value;
+                        cmd.Parameters["@approver"].Value = (object)p.approver ?? DBNull.Value;
+                        cmd.Parameters["@last_date"].Value = (object)p.last_date ?? DBNull.Value;
+
                         cmd.ExecuteNonQuery();
                     }
 
@@ -300,13 +292,11 @@ namespace TRIPEXPENSEREPORT.Service
                 using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.AddWithValue("@code", personal.code);
                     cmd.Parameters.AddWithValue("@driver", personal.driver);
                     cmd.Parameters.AddWithValue("@date", personal.date);
                     cmd.Parameters.AddWithValue("@time_start", personal.time_start);
                     cmd.Parameters.AddWithValue("@time_stop", personal.time_stop);
                     cmd.Parameters.AddWithValue("@location", personal.location);
-                    cmd.Parameters.AddWithValue("@zipcode", personal.zipcode);
                     cmd.Parameters.AddWithValue("@job", personal.job);
                     cmd.Parameters.AddWithValue("@cash", personal.cash);
                     cmd.Parameters.AddWithValue("@ctbo", personal.ctbo);

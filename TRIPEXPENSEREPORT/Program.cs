@@ -1,4 +1,5 @@
 using TRIPEXPENSEREPORT.Interface;
+using TRIPEXPENSEREPORT.Models;
 using TRIPEXPENSEREPORT.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,8 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.CheckConsentNeeded = context => false;
     options.MinimumSameSitePolicy = SameSiteMode.None;
 });
+
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 builder.Services.AddSession(option =>
 {

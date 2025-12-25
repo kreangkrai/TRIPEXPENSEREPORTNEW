@@ -17,13 +17,20 @@ namespace TRIPEXPENSEREPORT.Controllers
             Trip = trip;
             _googleMapsApiKey = options.Value.GoogleMapsApiKey;
         }
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            DateTime start = new DateTime(2025, 12, 22,8,0,0);
-            DateTime stop = new DateTime(2025, 12, 23,8,0,0);
+            
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDataPersonalCar()
+        {
+            DateTime start = new DateTime(2025, 12, 22, 8, 0, 0);
+            DateTime stop = new DateTime(2025, 12, 23, 8, 0, 0);
             List<DataModel> list = Trip.GetDatasPersonalByEMPID("059197", start, stop);
 
-            
+
             var model = new List<DataModel>
             {
                 new DataModel()
@@ -35,6 +42,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     job_id = "J23-0869",
                     location = "Home",
                     status = "START",
+                     mileage = 1235,
                     latitude = 13.7191453343649,
                     longitude = 100.739159613092,
 
@@ -48,6 +56,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     job_id = "J23-0869",
                     location = "HQ",
                     status = "CHECKIN",
+                     mileage = 1239,
                     latitude = 13.7191159343648,
                     longitude = 100.731959613091,
 
@@ -61,6 +70,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     job_id = "J23-0868",
                     location = "Home",
                     status = "STOP",
+                     mileage = 1241,
                     latitude = 13.7191153343647,
                     longitude = 100.731159613090,
 
@@ -74,6 +84,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     job_id = "J23-0868",
                     location = "Office",
                     status = "START",
+                     mileage = 1241,
                     latitude = 13.728952243326,
                     longitude = 100.728820927654,
 
@@ -87,35 +98,71 @@ namespace TRIPEXPENSEREPORT.Controllers
                     job_id = "J23-0869",
                     location = "Office",
                     status = "STOP",
+                     mileage = 1243,
                     latitude = 13.728912243325,
                     longitude = 100.721820927653,
 
                 },
-                //new PersonalModel()
-                //{
-                //    date = new DateTime (2025,24,12),
+                   new DataModel()
+                {
+                    date = new DateTime (2025,12, 25,9,0,0),
+                    driver = "059197",
+                    trip = "20251224082837",
+                    passenger = "",
+                    job_id = "J23-0868",
+                    location = "Office",
+                    status = "START",
+                     mileage = 1230,
+                    latitude = 13.728952243326,
+                    longitude = 100.728820927654,
 
-                //    driver = "Sarit T.",
-                //    time_start = new TimeSpan(8,30,00),
-                //    time_stop = new TimeSpan(17,30,00),
-                //    location = "Home-THIP SUGAR SUKHOTHAI",
-                //    cash = 500,
-                //    ctbo = 0,
-                //    exp = 0,
-                //    pt = 0,
-                //    mileage_start = 10000,
-                //    mileage_stop = 10200,
-                //    km = 200,
-                //    job = "J23-0869",
-                //    description = "Meeting with client",
-                //    status = "Pending"
-                //}
+                },
+                  new DataModel()
+                {
+                    date = new DateTime (2025,12, 25,10,30,0),
+                    driver = "059197",
+                    trip = "20251224082837",
+                    passenger = "",
+                    job_id = "J23-0869",
+                    location = "Office",
+                    status = "STOP",
+                    mileage = 1235,
+                    latitude = 13.728912243325,
+                    longitude = 100.721820927653,
+
+                },
             };
 
             Dictionary<DateTime, List<PersonalModel>> lookup = await ConvertToPersonalModels(model);
-            return View(model);
+            var result = lookup
+                .SelectMany(kvp => kvp.Value.Select(p => new
+                {
+                    date = kvp.Key,
+                    dateDisplay = kvp.Key.ToString("dd/MM/yyyy"),
+                    p.trip,
+                    p.driver,
+                    timeStart = p.time_start.ToString(@"hh\:mm"),
+                    timeStop = p.time_stop.ToString(@"hh\:mm"),
+                    p.location,
+                    p.job,
+                    p.cash,
+                    p.ctbo,
+                    p.exp,
+                    p.pt,
+                    p.mileage_start,
+                    p.mileage_stop,
+                    p.km,
+                    p.program_km,
+                    p.auto_km,
+                    p.description,
+                    p.status,
+                    p.gasoline
+                }))
+                .OrderBy(x => x.date)
+                .ThenBy(x => x.timeStart)
+                .ToList();
+            return Json(new { data = result });
         }
-
         public async Task<Dictionary<DateTime, List<PersonalModel>>> ConvertToPersonalModels(List<DataModel> dataList)
         {
             var result = new Dictionary<DateTime, List<PersonalModel>>();
@@ -136,7 +183,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                 {
                     string origin = $"{latlng.first.latitude.ToString()},{latlng.first.longitude.ToString()}";
                     string destination = $"{latlng.second.latitude.ToString()},{latlng.second.longitude.ToString()}";
-                    sum_dist += await GetDistanceKmAsync(origin, destination);
+                    //sum_dist += await GetDistanceKmAsync(origin, destination);
                 }
                 double distanceKm = sum_dist;
                 int autoKm = (int)Math.Round(distanceKm);

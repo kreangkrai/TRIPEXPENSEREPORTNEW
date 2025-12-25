@@ -4,6 +4,16 @@
 }
 
 <style>
+
+    #table_personal tbody tr:hover {
+        cursor: pointer;
+        background-color: #f0f8ff !important;
+    }
+
+    #table_personal tbody tr.table-selected {
+        background-color: #d0e8ff !important;
+        font-weight: bold;
+    }
     .hidden {
         display: none;
     }
@@ -153,9 +163,26 @@
 
             <!-- Table -->
             <div class="scrollable-table table-responsive-lg">
-                <table class="table table-striped table-bordered ">
+                <table id="table_personal" class="table table-striped table-bordered ">
                     <thead class="bg-primary text-white align-content-center text-center">
                         <tr>
+                            @* <th>วันที่</th>
+                            <th>เริ่ม</th>
+                            <th>สิ้นสุด</th>
+                            <th>สถานที่</th>
+                            <th>งาน</th>
+                            <th>เงินสด</th>
+                            <th>CTBO</th>
+                            <th>EXP</th>
+                            <th>P/T</th>
+                            <th>ไมล์เริ่ม</th>
+                            <th>ไมล์สิ้นสุด</th>
+                            <th>ระยะทาง (km)</th>
+                            <th>Program KM</th>
+                            <th>Auto KM</th>
+                            <th>รายละเอียด</th>
+                            <th>สถานะ</th>
+                            <th>น้ำมัน</th> *@
                             <th>วันที่</th>
                             <th>Job</th>
                             <th>ตั้งแต่เวลา</th>
@@ -167,33 +194,26 @@
                             <th>เลขไมล์เริ่มต้น</th>
                             <th>เลขไมล์สิ้นสุด</th>
                             <th>ระยะทาง</th>
+                            <th>รวมระยะทาง</th>
                             <th>รายละเอียด</th>
                             <th>สถานะ</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr class="clickable-row align-content-center text-center"
-                                style="color:#444444">
-
-                                <td>@item.date.ToString("dd/MM/yyyy")</td>
-                                <td>@item.job</td>
-                                <td>8:30</td>
-                                <td>17:30</td>
-                                <td>@item.location</td>
-                                <td>@item.ctbo</td>
-                                <td>@item.exp</td>
-                                <td>@item.pt</td>
-                                <td>@item.mileage_start</td>
-                                <td>@item.mileage_stop</td>
-                                <td>@item.km</td>
-                                <td>@item.description</td>
-                                <td>@item.status</td>
-                            </tr>
-                        }
+                        
                     </tbody>
+                    <tfoot class="table-warning text-black fw-bold">
+                        <tr>
+                            <th colspan="5" class="text-center">ยอดรวมทั้งหมด</th>
+                            <th id="totalCTBO" class="text-end">0.00</th>
+                            <th id="totalEXP" class="text-end">0.00</th>
+                            <th id="totalPT" class="text-end">0.00</th>
+                            <th colspan="3"></th>
+                            <th id="totalKM" class="text-end">0</th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </tfoot>
                 </table>
 
                 <!-- Button below Table -->
@@ -457,104 +477,223 @@
 </div>
 
 @section Scripts {
+    
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script>
+        let personals = [];
+        var table_personal;
         $(document).ready(function () {
-            $(".clickable-row").click(function () {
-                var date = $(this).data("date");
-                var time = $(this).data("time");
-                var customer = $(this).data("customer");
-                var zipcode = $(this).data("zipcode");
-                var jobNo = $(this).data("jobno");
-                var allowanceProvince = $(this).data("allowance-province");
-                var allowance1_4 = $(this).data("allowance-1-4");
-                var allowance4_8 = $(this).data("allowance-4-8");
-                var allowance8 = $(this).data("allowance-8");
-                var allowanceOther = $(this).data("allowance-other");
-                var allowanceHostel = $(this).data("allowance-hostel");
-                var list = $(this).data("list");
-                var description = $(this).data("description");
-                var remark = $(this).data("remark");
-                var status = $(this).data("status");
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth() , 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            $('#date_start').val(formatDateForInput(firstDay));
+            $('#date_end').val(formatDateForInput(lastDay));
 
-                $("#modalDate").text(date || "-");
-                $("#modalTime").text(time || "-");
-                $("#modalCustomer").text(customer || "-");
-                $("#modalZipcode").text(zipcode || "-");
-                $("#modalJobNo").text(jobNo || "-");
-                $("#modalAllowanceProvince").text(allowanceProvince || "-");
-                $("#modalAllowance1_4").text(allowance1_4 || "-");
-                $("#modalAllowance4_8").text(allowance4_8 || "-");
-                $("#modalAllowance8").text(allowance8 || "-");
-                $("#modalAllowanceOther").text(allowanceOther || "-");
-                $("#modalAllowanceHostel").text(allowanceHostel || "-");
-                $("#modalList").text(list || "-");
-                $("#modalDescription").text(description || "-");
-                $("#modalRemark").text(remark || "-");
-                $("#modalStatus").text(status || "-");
-
-                $("#detailModal").modal("show");
-            });
-
-            // ปิด Modal
-            $(".close, [data-dismiss='modal']").click(function () {
-                $("#detailModal").modal("hide");
-            });
-
-            // ฟังก์ชันปุ่มใน Modal (ตัวอย่าง)
-            $("#editButton").click(function () {
-                alert("บันทึกข้อมูลสำเร็จ: " + $("#modalDate").text() + " เวลา " + $("#modalTime").text());
-                // เพิ่มโค้ดสำหรับการแก้ไข (เช่น Redirect หรือ Form)
-            });
-
-            $("#deleteButton").click(function () {
-                if (confirm("คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้?")) {
-                    alert("ลบข้อมูล: " + $("#modalDate").text());
-                    // เพิ่มโค้ดสำหรับการลบ (เช่น AJAX Call)
-                    $("#detailModal").modal("hide");
-                }
-            });
-
-            // หา Checkbox และ Input
-            const checkbox = document.getElementById('inlineCheckboxAllowance_other');
-            const input = document.getElementById('inputAllowance_other');
-
-            // เพิ่ม event listener สำหรับ Checkbox
-            checkbox.addEventListener('change', function () {
-                input.disabled = !this.checked; // ถ้าไม่ติ๊ก = disabled, ถ้าติ๊ก = enable
-            });
-
-            checkbox.addEventListener('change', function () {
-                input.disabled = !this.checked;
-                if (!this.checked) {
-                    input.value = ''; // ล้างช่องเมื่อยกเลิกติ๊ก
-                }
-            });
+            LoadPersonalCarTable();
         });
-    </script>
-    <script>
-        document.getElementById('mode').addEventListener('change', function () {
-            const mode = this.value;
-            const carSelect = document.getElementById('car');
-            const carLabel = document.getElementById('car-label');
-            const employeeSelect = document.getElementById('employee');
-            const employeeLabel = document.getElementById('employee-label');
 
-            // ซ่อนทั้งสอง select และ label ก่อน
-            carSelect.classList.add('hidden');
-            carLabel.classList.add('hidden');
-            employeeSelect.classList.add('hidden');
-            employeeLabel.classList.add('hidden');
+        function formatDateForInput(date) {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0'); // เดือน +1 เพราะเริ่มจาก 0
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
 
-            // แสดง select และ label ตามโหมดที่เลือก
-            if (mode === 'CAR') {
-                carSelect.classList.remove('hidden');
-                carLabel.classList.remove('hidden');
-            } else if (mode === 'DRIVER') {
-                employeeSelect.classList.remove('hidden');
-                employeeLabel.classList.remove('hidden');
+        async function GetPersonalCar() {
+            let datas = [];
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetDataPersonalCar", "PersonalCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: {  },
+                success: function (response) {
+                    datas = response;
+                }
+            });
+            return datas;
+        }
+
+        async function LoadPersonalCarTable() {
+            const data = await GetPersonalCar();
+            table_personal = $('#table_personal').DataTable({
+                destroy: true,
+                data: data,
+                order: [[0, 'asc']],
+                paging: false,
+                info: false,
+                searching: true,
+                drawCallback: function () {
+                    mergeDateRows();
+                },
+                footerCallback: function (row, data, start, end, display) {
+                    const api = this.api();
+
+                    const sum = (columnIndex) => {
+                        return api.column(columnIndex, { page: 'all' }).data().reduce((a, b) => {
+                            return a + (parseFloat(b) || 0);
+                        }, 0);
+                    };
+
+                    const totalCTBO = sum(5);
+                    const totalEXP = sum(6);
+                    const totalPT = sum(7);
+                    const totalKM = sum(10);
+
+                    $('#totalCTBO').html(totalCTBO.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalEXP').html(totalEXP.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalPT').html(totalPT.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalKM').html(totalKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                },
+                columns: [
+                    { data: 'dateDisplay', className: 'text-center fw-bold' },             
+                    { data: 'job' },                                                        
+                    { data: 'timeStart', className: 'text-center' },                        
+                    { data: 'timeStop', className: 'text-center' },                        
+                    { data: 'location' },                                              
+                    {
+                        data: 'ctbo',
+                        className: 'text-center',
+                        //render: $.fn.dataTable.render.number(',', '.', 2)
+                    },                                                                      
+                    {
+                        data: 'exp',
+                        className: 'text-center',
+                        //render: $.fn.dataTable.render.number(',', '.', 2)
+                    },                                                                      
+                    {
+                        data: 'pt',
+                        className: 'text-center',
+                        //render: $.fn.dataTable.render.number(',', '.', 2)
+                    },                                                                      
+                    {
+                        data: 'mileage_start',
+                        className: 'text-center',
+                        //render: $.fn.dataTable.render.number(',', '.', 0)
+                    },                                                                      
+                    {
+                        data: 'mileage_stop',
+                        className: 'text-center',
+                        //render: $.fn.dataTable.render.number(',', '.', 0)
+                    },                                                                     
+                    {
+                        data: 'km',
+                        className: 'text-center fw-bold',
+                        //render: data => data ? data.toLocaleString('th-TH') : '0'
+                    },                                                                      
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: ''
+                    },
+                    { data: 'description' },                                               
+                    {
+                        data: 'status',
+                        className: 'text-center',
+                        render: function (data) {
+                            const badges = {
+                                'Processing': 'bg-warning',
+                                'Approved': 'bg-success',
+                                'Pending': 'bg-info'
+                            };
+                            const cls = badges[data] || 'bg-secondary';
+                            return `<span class="badge ${cls}">${data || '-'}</span>`;
+                        }
+                    }                                                                       
+                ]
+            });
+
+            $('#table_personal tbody').on('click', 'tr', function () {
+                const rowData = table_personal.row(this).data();
+                if (!rowData) {
+                    const $row = $(this);
+                    const prevRowData = table_personal.row($row.prev()).data();
+                    if (prevRowData) rowData = prevRowData;
+                }
+
+                if (rowData) {                   
+                    $(this).toggleClass('table-selected');
+                    console.log(rowData);
+                    // Show Modal
+                }
+            });
+            mergeDateRows();
+        }
+       
+        async function GetPersonalCar() {
+            let response = await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetDataPersonalCar", "PersonalCarUser")',
+                contentType: "application/json",
+                dataType: "json"
+            });
+
+            return response.data;
+        }
+        function mergeDateRows() {
+            const api = table_personal;
+            if (!api || api.rows().count() === 0) return;
+
+            const dateColIdx = 0;  
+            const sumKmColIdx = 11;
+
+            let currentGroupDate = null;
+            let groupRows = [];
+            let groupTotalKm = 0;
+
+            api.rows({ page: 'current' }).nodes().to$().each(function () {
+                const $row = $(this);
+                const rowData = api.row(this).data();
+                if (!rowData) return;
+
+                const thisDate = rowData.dateDisplay;
+
+                if (currentGroupDate !== thisDate) {
+
+                    if (groupRows.length > 0) {
+                        applyGroupMerge(groupRows, groupTotalKm, dateColIdx, sumKmColIdx);
+                    }
+                    currentGroupDate = thisDate;
+                    groupRows = [$row];
+                    groupTotalKm = rowData.km || 0;
+                } else {
+                    groupRows.push($row);
+                    groupTotalKm += rowData.km || 0;
+                }
+            });
+
+            if (groupRows.length > 0) {
+                applyGroupMerge(groupRows, groupTotalKm, dateColIdx, sumKmColIdx);
             }
-        });
+        }
+
+        function applyGroupMerge(groupRows, totalKm, dateColIdx, sumKmColIdx) {
+            const rowCount = groupRows.length;
+            const $firstRow = groupRows[0];
+
+            $firstRow.find('td').eq(dateColIdx)
+                .attr('rowspan', rowCount)
+                .css({ 'vertical-align': 'middle', 'background-color': '#e3f2fd', 'font-weight': 'bold' });
+
+            $firstRow.find('td').eq(sumKmColIdx)
+                .attr('rowspan', rowCount)
+                .html(`<strong style="color:#d84315; font-size:1.1em;">${totalKm.toLocaleString('th-TH')}</strong>`)
+                .css({
+                    'vertical-align': 'middle',
+                    'background-color': '#E3F2FD',
+                    'text-align': 'center'
+                });
+
+            if (rowCount > 1) {
+                for (let i = 1; i < groupRows.length; i++) {
+                    groupRows[i].find('td').eq(dateColIdx).remove();
+                    groupRows[i].find('td').eq(sumKmColIdx).remove();
+                }
+            }
+        }
     </script>
-
-
 }

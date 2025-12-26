@@ -3,7 +3,7 @@
     public class PersonalModel
     {
         public int id { get; set; }
-        public string trip { get; set; }
+        public string code { get; set; }
         public DateTime date { get; set; }
         public string driver { get; set; }
         public TimeSpan time_start { get; set; }

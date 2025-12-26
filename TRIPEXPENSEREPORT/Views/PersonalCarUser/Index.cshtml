@@ -14,35 +14,10 @@
         background-color: #d0e8ff !important;
         font-weight: bold;
     }
+
     .hidden {
         display: none;
     }
-
-    input[type="checkbox"] {
-        transition: all 0.3s ease; /* ทำให้เปลี่ยนสี/ขนาดนุ่มนวล */
-    }
-
-        input[type="checkbox"]:checked {
-            transform: scale(1.15); /* ขยายนิดนึงตอนกด */
-            background-color: #1e90ff
-        }
-
-    /* สไตล์สำหรับ input */
-    input[type="text"] {
-        transition: opacity 0.3s ease, background-color 0.3s ease; /* แอนิเมชันนุ่มนวล */
-    }
-        /* input ตอน disable */
-        input[type="text"]:disabled {
-            cursor: not-allowed;
-            /* opacity: 0.4; */ /* จางลง */
-            /* background-color: #e9ecef; */ /* สีเทาอ่อน */
-        }
-        /* input ตอน enable */
-        input[type="text"]:not(:disabled) {
-            opacity: 1; /* ชัดเจน */
-            /* background-color: #ffffff; */ /* สีขาวตอนกรอกได้ */
-        }
-
 </style>
 
 
@@ -67,15 +42,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="employee" style="color:#555555" id="employee-label" >ชื่อผู้ขับ:</label>
-                    <select name="employees" id="employee" class="mb-3 form-control" style="border-radius:5px">
-                        <option value="NULL">Please Select...</option>
-                        <option value="EM001">Sarit T.</option>
-                        <option value="EM002">Kriangkrai R.</option>
-                        <option value="EM003">Jirawat J.</option>
-                        <option value="EM004">Chakrit R.</option>
+                    <label for="employee" style="color:#555555" id="employee-label">ชื่อผู้ขับ:</label>
+                    <select id="select_driver" class="mb-3 form-control" style="border-radius:5px">
                     </select>
-                    <button class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <button id="btn_search" class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                         ค้นหา
                     </button>
                 </div>
@@ -162,27 +132,10 @@
             </div>
 
             <!-- Table -->
-            <div class="scrollable-table table-responsive-lg">
-                <table id="table_personal" class="table table-striped table-bordered ">
-                    <thead class="bg-primary text-white align-content-center text-center">
+            <div class="table-responsive-lg" style="height: 700px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table id="table_personal" class="table table-bordered table-hover table-sm compact">
+                    <thead class="bg-primary text-white text-center sticky-top" style="position: sticky; top: 0; z-index: 10;">
                         <tr>
-                            @* <th>วันที่</th>
-                            <th>เริ่ม</th>
-                            <th>สิ้นสุด</th>
-                            <th>สถานที่</th>
-                            <th>งาน</th>
-                            <th>เงินสด</th>
-                            <th>CTBO</th>
-                            <th>EXP</th>
-                            <th>P/T</th>
-                            <th>ไมล์เริ่ม</th>
-                            <th>ไมล์สิ้นสุด</th>
-                            <th>ระยะทาง (km)</th>
-                            <th>Program KM</th>
-                            <th>Auto KM</th>
-                            <th>รายละเอียด</th>
-                            <th>สถานะ</th>
-                            <th>น้ำมัน</th> *@
                             <th>วันที่</th>
                             <th>Job</th>
                             <th>ตั้งแต่เวลา</th>
@@ -199,9 +152,7 @@
                             <th>สถานะ</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        
                     </tbody>
                     <tfoot class="table-warning text-black fw-bold">
                         <tr>
@@ -215,89 +166,88 @@
                         </tr>
                     </tfoot>
                 </table>
-
-                <!-- Button below Table -->
-                <div class="row kanit-medium d-flex justify-content-center g-0">
-                    <!-- Button Send & Export -->
-                    <div class="col-md-2 bg-light p-2">
-                        <button class="btn btn-success w-100" data-toggle="modal" data-target="#sendModal"
-                                style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                            <i class="fas fa-download"></i> Send & Export
-                        </button>
-                    </div>
-                    <!-- Button Cancel Send -->
-                    <div class="col-md-2 bg-light p-2">
-                        <button class="btn btn-danger w-100" data-toggle="modal" data-target="#cancelModal"
-                                style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                            Cancel Send
-                        </button>
-                    </div>
+            </div>
+            <!-- Button below Table -->
+            <div class="row kanit-medium d-flex justify-content-center g-0">
+                <!-- Button Send & Export -->
+                <div class="col-md-2 bg-light p-2">
+                    <button class="btn btn-success w-100" data-toggle="modal" data-target="#sendModal"
+                            style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <i class="fas fa-download"></i> Send & Export
+                    </button>
                 </div>
+                <!-- Button Cancel Send -->
+                <div class="col-md-2 bg-light p-2">
+                    <button class="btn btn-danger w-100" data-toggle="modal" data-target="#cancelModal"
+                            style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        Cancel Send
+                    </button>
+                </div>
+            </div>
 
-                <!-- Modal: Send & Export -->
-                <div class="modal fade " id="sendModal" tabindex="-1" role="dialog" aria-labelledby="sendModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
+            <!-- Modal: Send & Export -->
+            <div class="modal fade " id="sendModal" tabindex="-1" role="dialog" aria-labelledby="sendModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
 
-                            <!-- Modal Header -->
-                            <div class="modal-header"
-                                 style="background: #34ba7c;
+                        <!-- Modal Header -->
+                        <div class="modal-header"
+                             style="background: #34ba7c;
                                 background: linear-gradient(90deg, rgba(52, 186, 124, 1) 0%, rgba(0, 138, 112, 1) 100%); color: white; border-bottom: none;">
-                                <h5 class="modal-title" id="cancelModalLabel">Confirm Send & Export</h5>
-                                <!-- Close Button -->
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true" style="color:white">&times;</span>
-                                </button>
-                            </div>
-                            <!-- Modal Body -->
-                            <div class="modal-body">
-                                <text style="color:#555555">คุณต้องการส่งข้อมูล วันที่ 01/10/2025 - 15/10/2025 ใช่หรือไม่?</text>
-                                <label style="color: red; text-align: left; display: block;">
-                                    * หลังจากผู้ดูแลอนุมัติแล้ว จะไม่สามารถยกเลิกหรือแก้ไขข้อมูลที่ส่งได้
-                                </label>
+                            <h5 class="modal-title" id="cancelModalLabel">Confirm Send & Export</h5>
+                            <!-- Close Button -->
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true" style="color:white">&times;</span>
+                            </button>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="modal-body">
+                            <text style="color:#555555">คุณต้องการส่งข้อมูล วันที่ 01/10/2025 - 15/10/2025 ใช่หรือไม่?</text>
+                            <label style="color: red; text-align: left; display: block;">
+                                * หลังจากผู้ดูแลอนุมัติแล้ว จะไม่สามารถยกเลิกหรือแก้ไขข้อมูลที่ส่งได้
+                            </label>
 
-                            </div>
-                            <!-- Footer Button -->
-                            <div class="modal-footer">
+                        </div>
+                        <!-- Footer Button -->
+                        <div class="modal-footer">
 
-                                <button type="button" class="btn btn-secondary" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-dismiss="modal">
-                                    ปิด
-                                </button>
-                                <button type="button" id="BtnSendExport" class="btn btn-success" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                    ยืนยันการส่ง
-                                </button>
-                            </div>
+                            <button type="button" class="btn btn-secondary" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-dismiss="modal">
+                                ปิด
+                            </button>
+                            <button type="button" id="BtnSendExport" class="btn btn-success" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                ยืนยันการส่ง
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Modal: Cancel Send -->
-                <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
-                    <div class="modal-dialog " role="document">
-                        <div class="modal-content">
-                            <!-- Modal Header -->
-                            <div class="modal-header"
-                                 style="background: #ff2929;
+            <!-- Modal: Cancel Send -->
+            <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+                <div class="modal-dialog " role="document">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header"
+                             style="background: #ff2929;
                                  background: linear-gradient(90deg, rgba(255, 41, 41, 1) 0%, rgba(161, 0, 0, 1) 100%); color: white; border-bottom: none;">
-                                <h5 class="modal-title" id="cancelModalLabel">Cancel Send</h5>
-                                <!-- Close Button -->
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true" style="color:white">&times;</span>
-                                </button>
-                            </div>
-                            <!-- Modal Body -->
-                            <div class="modal-body">
-                                <text style="color:red; font-size:18px">คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการส่งข้อมูล <br>วันที่ 01/10/2025 - 15/10/2025 </text>
-                            </div>
-                            <!-- Footer Button -->
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-dismiss="modal">
-                                    ปิด
-                                </button>
-                                <button type="button" id="BtnCancelSend" class="btn btn-danger" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                    ยืนยันการยกเลิก
-                                </button>
-                            </div>
+                            <h5 class="modal-title" id="cancelModalLabel">Cancel Send</h5>
+                            <!-- Close Button -->
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true" style="color:white">&times;</span>
+                            </button>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="modal-body">
+                            <text style="color:red; font-size:18px">คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการส่งข้อมูล <br>วันที่ 01/10/2025 - 15/10/2025 </text>
+                        </div>
+                        <!-- Footer Button -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-dismiss="modal">
+                                ปิด
+                            </button>
+                            <button type="button" id="BtnCancelSend" class="btn btn-danger" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                ยืนยันการยกเลิก
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -476,21 +426,25 @@
     </div>
 </div>
 
+<partial name="ModalSpin" />
+
 @section Scripts {
-    
+
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script>
         let personals = [];
         var table_personal;
-        $(document).ready(function () {
+        $(document).ready(async function () {
             const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth() , 1);
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
             const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            
+
             $('#date_start').val(formatDateForInput(firstDay));
             $('#date_end').val(formatDateForInput(lastDay));
 
-            LoadPersonalCarTable();
+            const driver = await Getdrivers();
+            GenerateDriverOption(driver);
+
         });
 
         function formatDateForInput(date) {
@@ -500,29 +454,16 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        async function GetPersonalCar() {
-            let datas = [];
-            await $.ajax({
-                type: "GET",
-                url: '@Url.Action("GetDataPersonalCar", "PersonalCarUser")',
-                contentType: 'application/x-www-form-urlencoded',
-                data: {  },
-                success: function (response) {
-                    datas = response;
-                }
-            });
-            return datas;
-        }
 
-        async function LoadPersonalCarTable() {
-            const data = await GetPersonalCar();
+        async function LoadPersonalCarTable(emp_id, start, stop) {
+            const data = await GetPersonalCar(emp_id, start, stop);
             table_personal = $('#table_personal').DataTable({
                 destroy: true,
                 data: data,
                 order: [[0, 'asc']],
                 paging: false,
                 info: false,
-                searching: true,
+                searching: false,
                 drawCallback: function () {
                     mergeDateRows();
                 },
@@ -550,47 +491,75 @@
                     });
                 },
                 columns: [
-                    { data: 'dateDisplay', className: 'text-center fw-bold' },             
-                    { data: 'job' },                                                        
-                    { data: 'timeStart', className: 'text-center' },                        
-                    { data: 'timeStop', className: 'text-center' },                        
-                    { data: 'location' },                                              
+                    { data: 'dateDisplay', className: 'text-center fw-bold' },
+                    { data: 'job' ,className: 'text-center' },
+                    {
+                        data: 'timeStart', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    {
+                        data: 'timeStop', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    { data: 'location' },
                     {
                         data: 'ctbo',
                         className: 'text-center',
+                        render: function (data) {                           
+                            return data || '';
+                        }
                         //render: $.fn.dataTable.render.number(',', '.', 2)
-                    },                                                                      
+                    },
                     {
                         data: 'exp',
                         className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
                         //render: $.fn.dataTable.render.number(',', '.', 2)
-                    },                                                                      
+                    },
                     {
                         data: 'pt',
                         className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
                         //render: $.fn.dataTable.render.number(',', '.', 2)
-                    },                                                                      
+                    },
                     {
                         data: 'mileage_start',
                         className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
                         //render: $.fn.dataTable.render.number(',', '.', 0)
-                    },                                                                      
+                    },
                     {
                         data: 'mileage_stop',
                         className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
                         //render: $.fn.dataTable.render.number(',', '.', 0)
-                    },                                                                     
+                    },
                     {
                         data: 'km',
                         className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
                         //render: data => data ? data.toLocaleString('th-TH') : '0'
-                    },                                                                      
+                    },
                     {
                         data: null,
                         className: 'text-center fw-bold',
-                        defaultContent: ''
+                        defaultContent: '',
                     },
-                    { data: 'description' },                                               
+                    { data: 'description' },
                     {
                         data: 'status',
                         className: 'text-center',
@@ -601,10 +570,11 @@
                                 'Pending': 'bg-info'
                             };
                             const cls = badges[data] || 'bg-secondary';
-                            return `<span class="badge ${cls}">${data || '-'}</span>`;
+                            return `<span class="badge ${cls}">${data || ''}</span>`;
                         }
-                    }                                                                       
+                    }
                 ]
+
             });
 
             $('#table_personal tbody').on('click', 'tr', function () {
@@ -615,7 +585,7 @@
                     if (prevRowData) rowData = prevRowData;
                 }
 
-                if (rowData) {                   
+                if (rowData) {
                     $(this).toggleClass('table-selected');
                     console.log(rowData);
                     // Show Modal
@@ -623,22 +593,57 @@
             });
             mergeDateRows();
         }
-       
-        async function GetPersonalCar() {
+
+        async function GetPersonalCar(emp_id, start, stop) {
+            //$('#SpinModal').modal();
             let response = await $.ajax({
                 type: "GET",
                 url: '@Url.Action("GetDataPersonalCar", "PersonalCarUser")',
                 contentType: "application/json",
-                dataType: "json"
+                dataType: "json",
+                data: { emp_id, start, stop },
             });
-
+           // $('#SpinModal').modal('hide');
             return response.data;
+        }
+
+        $('#date_end').on('change', async function () {
+            const driver = await Getdrivers();
+            GenerateDriverOption(driver);
+        });
+
+        $('#btn_search').on('click', function () {
+            const emp_id = $('#select_driver').val();
+            const start = $('#date_start').val();
+            const stop = $('#date_end').val();
+
+            if (emp_id !== "" && emp_id !== null) {
+                LoadPersonalCarTable(emp_id, start, stop);
+            } else {
+                alert('Please Select Driver');
+            }           
+        });
+
+        async function Getdrivers() {
+            let drivers = [];
+            const start = $('#date_start').val();
+            const stop = $('#date_end').val();
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("Getdrivers", "PersonalCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { start, stop },
+                success: function (response) {
+                    drivers = response;
+                }
+            });
+            return drivers;
         }
         function mergeDateRows() {
             const api = table_personal;
             if (!api || api.rows().count() === 0) return;
 
-            const dateColIdx = 0;  
+            const dateColIdx = 0;
             const sumKmColIdx = 11;
 
             let currentGroupDate = null;
@@ -677,22 +682,42 @@
 
             $firstRow.find('td').eq(dateColIdx)
                 .attr('rowspan', rowCount)
-                .css({ 'vertical-align': 'middle', 'background-color': '#e3f2fd', 'font-weight': 'bold' });
+                .css({ 'vertical-align': 'middle', 'background-color': '#e3f2fd', 'font-weight': '500' });
 
-            $firstRow.find('td').eq(sumKmColIdx)
+            if (totalKm === 0) {
+                $firstRow.find('td').eq(sumKmColIdx)
+                    .attr('rowspan', rowCount)
+                    .html(`<strong style="color:#d84315; font-size:1em;"></strong>`)
+                    .css({
+                        'vertical-align': 'middle',
+                        'background-color': '#ffffff',
+                        'text-align': 'center'
+                    });
+            }else{
+                $firstRow.find('td').eq(sumKmColIdx)
                 .attr('rowspan', rowCount)
-                .html(`<strong style="color:#d84315; font-size:1.1em;">${totalKm.toLocaleString('th-TH')}</strong>`)
+                .html(`<strong style="color:#d84315; font-size:1em;">${totalKm.toLocaleString('th-TH')}</strong>`)
                 .css({
                     'vertical-align': 'middle',
-                    'background-color': '#E3F2FD',
-                    'text-align': 'center'
+                    'background-color': '#ffffff',
+                    'text-align': 'center',
+                    'font-weight': '500'
                 });
+            }
 
             if (rowCount > 1) {
                 for (let i = 1; i < groupRows.length; i++) {
                     groupRows[i].find('td').eq(dateColIdx).remove();
                     groupRows[i].find('td').eq(sumKmColIdx).remove();
                 }
+            }
+        }
+
+        async function GenerateDriverOption(drivers) {
+            $('#select_driver').empty();
+            $('#select_driver').append(`<option value="" selected disabled>Please Select Driver</option>`);
+            for (let i = 0; i < drivers.length; i++) {
+                $('#select_driver').append(`<option value="${drivers[i].emp_id}">${drivers[i].name}</option>`);
             }
         }
     </script>

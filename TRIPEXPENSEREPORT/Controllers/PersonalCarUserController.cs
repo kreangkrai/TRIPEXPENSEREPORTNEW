@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
+using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -24,146 +26,100 @@ namespace TRIPEXPENSEREPORT.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDataPersonalCar()
+        public IActionResult GetDrivers(DateTime start,DateTime stop)
         {
-            DateTime start = new DateTime(2025, 12, 22, 8, 0, 0);
-            DateTime stop = new DateTime(2025, 12, 23, 8, 0, 0);
-            List<DataModel> list = Trip.GetDatasPersonalByEMPID("059197", start, stop);
-
-
-            var model = new List<DataModel>
-            {
-                new DataModel()
-                {
-                    date = new DateTime (2025,12,24,8,30,0),
-                    driver = "059197",
-                    trip = "20251224072838",
-                    passenger = "",
-                    job_id = "J23-0869",
-                    location = "Home",
-                    status = "START",
-                     mileage = 1235,
-                    latitude = 13.7191453343649,
-                    longitude = 100.739159613092,
-
-                },
-                 new DataModel()
-                {
-                    date = new DateTime (2025,12,24,10,25,0),
-                    driver = "059197",
-                    trip = "20251224072838",
-                    passenger = "",
-                    job_id = "J23-0869",
-                    location = "HQ",
-                    status = "CHECKIN",
-                     mileage = 1239,
-                    latitude = 13.7191159343648,
-                    longitude = 100.731959613091,
-
-                },
-                 new DataModel()
-                {
-                    date = new DateTime (2025,12, 24,11,0,0),
-                    driver = "059197",
-                    trip = "20251224072838",
-                    passenger = "",
-                    job_id = "J23-0868",
-                    location = "Home",
-                    status = "STOP",
-                     mileage = 1241,
-                    latitude = 13.7191153343647,
-                    longitude = 100.731159613090,
-
-                },
-                 new DataModel()
-                {
-                    date = new DateTime (2025,12, 24,9,0,0),
-                    driver = "059197",
-                    trip = "20251224082837",
-                    passenger = "",
-                    job_id = "J23-0868",
-                    location = "Office",
-                    status = "START",
-                     mileage = 1241,
-                    latitude = 13.728952243326,
-                    longitude = 100.728820927654,
-
-                },
-                  new DataModel()
-                {
-                    date = new DateTime (2025,12, 24,10,30,0),
-                    driver = "059197",
-                    trip = "20251224082837",
-                    passenger = "",
-                    job_id = "J23-0869",
-                    location = "Office",
-                    status = "STOP",
-                     mileage = 1243,
-                    latitude = 13.728912243325,
-                    longitude = 100.721820927653,
-
-                },
-                   new DataModel()
-                {
-                    date = new DateTime (2025,12, 25,9,0,0),
-                    driver = "059197",
-                    trip = "20251224082837",
-                    passenger = "",
-                    job_id = "J23-0868",
-                    location = "Office",
-                    status = "START",
-                     mileage = 1230,
-                    latitude = 13.728952243326,
-                    longitude = 100.728820927654,
-
-                },
-                  new DataModel()
-                {
-                    date = new DateTime (2025,12, 25,10,30,0),
-                    driver = "059197",
-                    trip = "20251224082837",
-                    passenger = "",
-                    job_id = "J23-0869",
-                    location = "Office",
-                    status = "STOP",
-                    mileage = 1235,
-                    latitude = 13.728912243325,
-                    longitude = 100.721820927653,
-
-                },
-            };
-
-            Dictionary<DateTime, List<PersonalModel>> lookup = await ConvertToPersonalModels(model);
-            var result = lookup
-                .SelectMany(kvp => kvp.Value.Select(p => new
-                {
-                    date = kvp.Key,
-                    dateDisplay = kvp.Key.ToString("dd/MM/yyyy"),
-                    p.trip,
-                    p.driver,
-                    timeStart = p.time_start.ToString(@"hh\:mm"),
-                    timeStop = p.time_stop.ToString(@"hh\:mm"),
-                    p.location,
-                    p.job,
-                    p.cash,
-                    p.ctbo,
-                    p.exp,
-                    p.pt,
-                    p.mileage_start,
-                    p.mileage_stop,
-                    p.km,
-                    p.program_km,
-                    p.auto_km,
-                    p.description,
-                    p.status,
-                    p.gasoline
-                }))
-                .OrderBy(x => x.date)
-                .ThenBy(x => x.timeStart)
-                .ToList();
-            return Json(new { data = result });
+            stop = stop.AddDays(1);
+            List<EmployeeModel> drivers = Personal.GetPesonalDrivers(start, stop);
+            return Json(drivers);
         }
-        public async Task<Dictionary<DateTime, List<PersonalModel>>> ConvertToPersonalModels(List<DataModel> dataList)
+
+        [HttpGet]
+        public async Task<IActionResult> GetDataPersonalCar(string emp_id,DateTime start , DateTime stop)
+        {
+            stop = stop.AddDays(1);
+            List<PersonalModel> personals = Personal.GetPersonalsByDate(emp_id, start, stop);
+            List<DataModel> list = Trip.GetDatasPersonalByEMPID(emp_id, start, stop);
+
+            List<DataModel> datas = new List<DataModel>();
+            List<DateTime> dates = new List<DateTime>();
+            DateTime now = DateTime.Now;
+            int last = DateTime.DaysInMonth(now.Year, now.Month);
+            for (DateTime d = new DateTime (now.Year,now.Month,1); d<= new DateTime (now.Year,now.Month,last); d= d.AddDays(1))
+            {
+                if (list.Any(a=>a.date.Date == d.Date))
+                {
+                    List<DataModel> data =list.Where(a=>a.date.Date==d.Date).ToList();
+                    datas.AddRange(data);
+                }
+                else
+                {
+                    List<DataModel> data = new List<DataModel>()
+                    {
+                       new DataModel()
+                       {
+                            date = d,
+                            driver = "",
+                            trip = "",
+                            passenger = "",
+                            job_id = "",
+                            location = "",
+                            status = "",
+                            mileage = 0,
+                       }
+                    };
+                    datas.AddRange(data);
+                }
+            }
+
+            List<PersonalModel> lookup = await ConvertToPersonalModels(datas);
+
+            var code_personal = personals.Select(d => d.code).ToHashSet();
+            List<PersonalModel> new_datas = lookup.Where(w=> !code_personal.Contains(w.code)).ToList();
+
+            List<PersonalModel> insert_datas = new_datas.Where(w => w.driver != "").ToList();
+            string message = Personal.EditInserts(insert_datas);
+            if (message == "Success")
+            {
+                List<PersonalModel> datas_personal = new List<PersonalModel>();
+                datas_personal.AddRange(new_datas);
+                datas_personal.AddRange(personals);
+
+                var result = datas_personal
+                    .Select(k => new
+                    {
+                        date = k.date,
+                        dateDisplay = k.date.ToString("dd/MM/yyyy"),
+                        code = k.code,
+                        driver = k.driver,
+                        timeStart = k.time_start.ToString(@"hh\:mm"),
+                        timeStop = k.time_stop.ToString(@"hh\:mm"),
+                        location = k.location,
+                        job = k.job,
+                        cash = k.cash,
+                        ctbo = k.ctbo,
+                        exp = k.exp,
+                        pt = k.pt,
+                        mileage_start = k.mileage_start,
+                        mileage_stop = k.mileage_stop,
+                        km = k.km,
+                        program_km = k.program_km,
+                        auto_km = k.auto_km,
+                        description = k.description,
+                        status = k.status,
+                        gasoline = k.gasoline
+                    })
+                    .OrderBy(x => x.date)
+                    .ThenBy(x => x.timeStart)
+                    .ToList();
+                return Json(new { data = result });
+            }
+            else
+            {
+                return Json(new { data = new List<PersonalModel>() });
+            }
+        }
+
+        public async Task<Dictionary<DateTime, List<PersonalModel>>> ConvertToDictPersonalModels(List<DataModel> dataList)
         {
             var result = new Dictionary<DateTime, List<PersonalModel>>();
 
@@ -175,7 +131,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                 var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
 
                 var start = items[0];
-                var stop = items[items.Count-1];
+                var stop = items[items.Count - 1];
 
                 var pair_latlan = tripGroup.Zip(tripGroup.Skip(1), (a, b) => new { first = a, second = b }).ToList();
                 double sum_dist = 0;
@@ -193,11 +149,12 @@ namespace TRIPEXPENSEREPORT.Controllers
                 {
                     has_loc.Add(item.location);
                 }
-                string loc = string.Join(",",has_loc.ToArray());
-                
+                string loc = string.Join(",", has_loc.ToArray());
+
+                string code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
                 var personal = new PersonalModel
                 {
-                    trip = start.trip,
+                    code = code,
                     date = date,
                     driver = start.driver,
                     job = start.job_id,
@@ -207,7 +164,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     auto_km = autoKm,
                     km = stop.mileage - start.mileage,
                     description = "",
-                    status = "Processing",
+                    status = start.date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Processing" : "",
                     last_date = DateTime.Now,
                     cash = items.Sum(s => s.cash),
                     ctbo = 0,
@@ -229,6 +186,68 @@ namespace TRIPEXPENSEREPORT.Controllers
             return result;
         }
 
+        public async Task<List<PersonalModel>> ConvertToPersonalModels(List<DataModel> dataList)
+        {
+            var result = new List<PersonalModel>();
+
+            var grouped = dataList.GroupBy(d => new { d.date.Date, d.trip });
+
+            foreach (var tripGroup in grouped)
+            {
+                var date = tripGroup.Key.Date;
+                var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
+
+                var start = items[0];
+                var stop = items[items.Count - 1];
+
+                var pair_latlan = tripGroup.Zip(tripGroup.Skip(1), (a, b) => new { first = a, second = b }).ToList();
+                double sum_dist = 0;
+                foreach (var latlng in pair_latlan)
+                {
+                    string origin = $"{latlng.first.latitude.ToString()},{latlng.first.longitude.ToString()}";
+                    string destination = $"{latlng.second.latitude.ToString()},{latlng.second.longitude.ToString()}";
+                    //sum_dist += await GetDistanceKmAsync(origin, destination);
+                }
+                double distanceKm = sum_dist;
+                int autoKm = (int)Math.Round(distanceKm);
+
+                HashSet<string> has_loc = new HashSet<string>();
+                foreach (var item in items)
+                {
+                    has_loc.Add(item.location);
+                }
+                string loc = string.Join(",", has_loc.ToArray());
+
+                string code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
+                var personal = new PersonalModel
+                {
+                    code = code,
+                    date = date,
+                    driver = start.driver,
+                    job = start.job_id,
+                    location = loc,
+                    time_start = start.date.TimeOfDay,
+                    time_stop = stop.date.TimeOfDay,
+                    auto_km = autoKm,
+                    km = stop.mileage - start.mileage,
+                    description = "",
+                    status = start.date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Processing" : "",
+                    last_date = DateTime.Now,
+                    cash = items.Sum(s => s.cash),
+                    ctbo = 0,
+                    exp = 0,
+                    pt = 0,
+                    mileage_start = start.mileage,
+                    mileage_stop = stop.mileage,
+                    program_km = (int)Math.Round(stop.distance, 0),
+                    gasoline = "",
+                    approver = "",
+                };
+                result.Add(personal);
+            }
+
+            return result;
+        }
         public async Task<double> GetDistanceKmAsync(string origin, string destination)
         {
             string apiKey = _googleMapsApiKey;

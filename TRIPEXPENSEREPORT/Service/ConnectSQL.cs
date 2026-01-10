@@ -17,7 +17,7 @@ namespace TRIPEXPENSEREPORT.Service
             return con;
         }
 
-        public SqlConnection Open_CTL_Connect()
+        public SqlConnection OpenCTLConnect()
         {
             con = new SqlConnection("Data Source = 192.168.15.12, 1433; Initial Catalog = CTL; User Id = sa; Password = p@ssw0rd;TrustServerCertificate=True; Timeout = 120");
             return con;

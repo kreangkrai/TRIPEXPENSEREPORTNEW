@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using System.Globalization;
+using TRIPEXPENSEREPORT.CTLInterfaces;
+using TRIPEXPENSEREPORT.CTLModels;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -13,10 +17,12 @@ namespace TRIPEXPENSEREPORT.Controllers
         private readonly string _googleMapsApiKey;
         private IPersonal Personal;
         private ITrip Trip;
-        public PersonalCarUserController(IPersonal personal, ITrip trip, IOptions<AppSettings> options)
+        private IHoliday Holiday;
+        public PersonalCarUserController(IPersonal personal, ITrip trip, IHoliday holiday, IOptions<AppSettings> options)
         {
             Personal = personal;
             Trip = trip;
+            Holiday = holiday;
             _googleMapsApiKey = options.Value.GoogleMapsApiKey;
         }
         public IActionResult Index()
@@ -25,18 +31,68 @@ namespace TRIPEXPENSEREPORT.Controllers
             return View();
         }
 
-        [HttpGet]
-        public IActionResult GetDrivers(DateTime start,DateTime stop)
+        [HttpDelete]
+        public IActionResult DeleteData(string code)
         {
-            stop = stop.AddDays(1);
-            List<EmployeeModel> drivers = Personal.GetPesonalDrivers(start, stop);
+            string message = Personal.DeleteByCode(code);
+            return Json(message);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateData(string str)
+        {
+            PersonalModel personal = JsonConvert.DeserializeObject<PersonalModel>(str);
+            DateTime dt = DateTime.ParseExact(personal.date.ToString("dd/MM/yyy"), "MM/dd/yyyy", CultureInfo.InvariantCulture);
+            personal.date = dt;
+            personal.last_date = DateTime.Now;
+            personal.status = "Processing";
+            PersonalModel old_personal = Personal.GetPersonalsByCode(personal.code);
+            if (old_personal.driver != null)
+            {
+                personal.approver = old_personal.approver;
+                personal.auto_km = old_personal.auto_km;
+                personal.gasoline = old_personal.gasoline;               
+                personal.program_km = old_personal.program_km;
+                personal.cash = old_personal.cash;
+                personal.status = old_personal.status;
+                personal.date = old_personal.date;
+                personal.driver = old_personal.driver;
+            }
+            string message = Personal.UpdateByCode(personal);
+            return Json(message);
+        }
+
+        [HttpGet]
+        public IActionResult GetDrivers(string month)
+        {
+            var parts = month.Split('-');
+            if (parts.Length != 2
+                || !int.TryParse(parts[0], out int year)
+                || !int.TryParse(parts[1], out int mon))
+            {
+                return BadRequest("รูปแบบเดือนไม่ถูกต้อง");
+            }
+
+            DateTime start = new DateTime(year, mon, 1);
+            DateTime stop = start.AddMonths(1).AddDays(-1);
+            List<EmployeeModel> drivers = Personal.GetPesonalDrivers(start,stop);
             return Json(drivers);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDataPersonalCar(string emp_id,DateTime start , DateTime stop)
+        public async Task<IActionResult> GetDataPersonalCar(string emp_id,string month)
         {
-            stop = stop.AddDays(1);
+            var parts = month.Split('-');
+            if (parts.Length != 2
+                || !int.TryParse(parts[0], out int year)
+                || !int.TryParse(parts[1], out int mon))
+            {
+                return BadRequest("รูปแบบเดือนไม่ถูกต้อง");
+            }
+
+            DateTime start = new DateTime(year, mon, 1);
+            DateTime stop = start.AddMonths(1).AddDays(-1);
+
             List<PersonalModel> personals = Personal.GetPersonalsByDate(emp_id, start, stop);
             List<DataModel> list = Trip.GetDatasPersonalByEMPID(emp_id, start, stop);
 
@@ -111,7 +167,9 @@ namespace TRIPEXPENSEREPORT.Controllers
                     .OrderBy(x => x.date)
                     .ThenBy(x => x.timeStart)
                     .ToList();
-                return Json(new { data = result });
+
+                List<HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
+                return Json(new { data = result,holidays = holidays });
             }
             else
             {

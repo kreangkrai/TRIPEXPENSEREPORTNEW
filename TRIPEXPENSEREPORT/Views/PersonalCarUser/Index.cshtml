@@ -18,6 +18,11 @@
     .hidden {
         display: none;
     }
+
+    tr.holiday-row {
+        background-color: #e9ecef !important; /* เทาอ่อน */
+        /* หรือ #dee2e6, #ced4da ตามชอบ */
+    }
 </style>
 
 
@@ -32,13 +37,8 @@
                 </h5>
 
                 <div class="mb-2">
-                    <label for="date_start" style="color:#555555">วันที่เริ่มต้น:</label>
-                    <input type="date" class="form-control" id="date_start" placeholder="วันที่ (dd/mm/yyyy)" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="date_end" style="color:#555555">วันที่สิ้นสุด:</label>
-                    <input type="date" class="form-control" id="date_end" placeholder="วันที่ (dd/mm/yyyy)" />
+                    <label for="month_start" style="color:#555555">เดือน:</label>
+                    <input type="month" class="form-control" id="month_start" />
                 </div>
 
                 <div class="form-group">
@@ -57,10 +57,10 @@
         background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);
         display: flex; justify-content: space-between; align-items: center;">
                 รถส่วนตัว
-                <button class="btn btn-success" data-toggle="modal" data-target="#AddTripModal"
+               @*  <button class="btn btn-success" data-toggle="modal" data-target="#AddTripModal"
                         style="width:100px; text-align:end; border-radius:20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                     <i class="fa-solid fa-plus"></i> เพิ่มทริป
-                </button>
+                </button> *@
             </h4>
 
             <!-- Add Trip Modal -->
@@ -166,6 +166,63 @@
                         </tr>
                     </tfoot>
                 </table>
+
+                <div id="div_summary" class="row">
+                    <div class="col-md-5 col-xl-5">
+                        <table class="table table-sm table-condensed no-border" style="background-color:grey;height:250px">
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" style="vertical-align:middle">
+                                        <span>1)  C = COMPANY'S CAR, T = TAXI, B = BUS, O = OTHER (Pls. specific)</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="vertical-align:middle">
+                                        <span>2)  A/EXP = ACTUAL EXPENSES BY COMPANY'S CAR, TAXI, BUS (WITH RECEIPTS IF AVAILABLE)</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="vertical-align:middle">
+                                        <span>3)  P/T = PARKING FEE , TOLL FEE (WITH RECEIPT)</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="vertical-align:middle">
+                                        <span>4)  OWN CAR  - MILAGE :  START-ENGING =  MILAGE FROM BEGINNING  TO ENDING  PER TRIP  KMS = KILOMETERS MADE PER TRIP</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">
+                                        <label class="btn btn-primary">
+                                            <input id="state_bensin" class="form-control" type="checkbox"> Bensin
+                                        </label>
+                                    </td>
+                                    <td class="text-left">
+                                        <label class="btn btn-primary">
+                                            <input id="state_diesel" class="form-control" type="checkbox"> Diesel
+                                        </label>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-7 col-xl-7">
+                        <div style="background-color:#ECF0F5;height:auto;overflow-x:auto">
+                            <table class="table compact table-sm table-condensed" id="table_summary" style="border:1px;border-style:solid;border-color:black;border-collapse:collapse;height:250px">
+                                <thead style="background-color:white;color:white">
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- Button below Table -->
             <div class="row kanit-medium d-flex justify-content-center g-0">
@@ -177,12 +234,12 @@
                     </button>
                 </div>
                 <!-- Button Cancel Send -->
-                <div class="col-md-2 bg-light p-2">
+                @* <div class="col-md-2 bg-light p-2">
                     <button class="btn btn-danger w-100" data-toggle="modal" data-target="#cancelModal"
                             style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                         Cancel Send
                     </button>
-                </div>
+                </div> *@
             </div>
 
             <!-- Modal: Send & Export -->
@@ -269,64 +326,67 @@
             </div>
             <div class="modal-body kanit-regular" style="color:#444444">
                 <form>
-                    <!-- ROW 1 : วันที่, รถบริษัท, ทะเบียนรถ -->
+                    <div class="form-row ">
+                        <fieldset disabled class="col-sm-12 col-md-12">
+                            <div class="form-group">
+                                <label for="edit_code"></label>
+                                <input type="text" class="form-control" id="edit_code">
+                            </div>
+                        </fieldset>
+                    </div>
                     <div class="form-row ">
                         <fieldset disabled class="col-sm-12 col-md-4">
                             <div class="form-group">
-                                <label for="disabledTextInputDate">วันที่</label>
-                                <input type="text" class="form-control" id="disabledTextInputDate" placeholder="08/10/2025">
+                                <label for="edit_date">วันที่</label>
+                                <input type="text" class="form-control" id="edit_date">
                             </div>
                         </fieldset>
-                        <fieldset disabled class="col-sm-12 col-md-4">
+                        <fieldset disabled class="col-sm-12 col-md-8">
                             <div class="form-group">
-                                <label for="disabledTextInputCar">รถบริษัท</label>
-                                <input type="text" class="form-control" id="disabledTextInputCar" placeholder="CAR#99">
-                            </div>
-                        </fieldset>
-                        <fieldset disabled class="col-sm-12 col-md-4">
-                            <div class="form-group">
-                                <label for="disabledTextInputLicensePlate">ทะเบียนรถ</label>
-                                <input type="text" class="form-control" id="disabledTextInputLicensePlate" placeholder="กก-1111">
+                                <label for="edit_driver">ผู้ขับรถ</label>
+                                <input type="text" class="form-control" id="edit_driver">
                             </div>
                         </fieldset>
                     </div>
 
                     <!-- ROW 2 : ผู้ขับรถ, Job -->
                     <div class="form-row">
-                        <fieldset disabled class="col-sm-12 col-md-6">
-                            <div class="form-group">
-                                <label for="disabledTextInputDriver">ผู้ขับรถ</label>
-                                <input type="text" class="form-control" id="disabledTextInputDriver" placeholder="Sarit T.">
-                            </div>
-                        </fieldset>
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputJob">Job</label>
-                            <input type="text" class="form-control" id="inputJob" placeholder="Jxx-xxxx">
+
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_job">Job</label>
+                            <input type="text" class="form-control" id="edit_job" placeholder="Jxx-xxxx">
+                        </div>
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_time_start">เวลาเริ่มต้น</label>
+                            <input type="time" class="form-control" id="edit_time_start">
+                        </div>
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_time_stop">เวลาสิ้นสุด</label>
+                            <input type="time" class="form-control" id="edit_time_stop">
                         </div>
                     </div>
 
-                    <!-- ROW 3 : เวลาเริ่มต้น, เวลาสิ้นสุด -->
                     <div class="form-row">
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputTimeStart">เวลาเริ่มต้น</label>
-                            <input type="time" class="form-control" id="inputTimeStart" placeholder="Jxx-xxxx">
+                        <div class="form-group col-sm-12 col-md-12">
+                            <label for="edit_location">การเดินทาง</label>
+                            <input type="text" class="form-control" id="edit_location" placeholder="Ex. Home-CTL(HQ)-Home">
                         </div>
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputTimeStop">เวลาสิ้นสุด</label>
-                            <input type="time" class="form-control" id="inputTimeStop" placeholder="Jxx-xxxx">
-                        </div>
+
                     </div>
 
-                    <!-- ROW 4 : การเดินทาง, ระยะทาง -->
                     <div class="form-row">
-                        <div class="form-group col-sm-12 col-md-9">
-                            <label for="inputDestination">การเดินทาง</label>
-                            <input type="text" class="form-control" id="inputDestination" placeholder="Ex. Home-CTL(HQ)-Home">
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_mileage_start">เลขไมล์เริ่มต้น</label>
+                            <input type="number" class="form-control" id="edit_mileage_start">
                         </div>
-                        <div class="form-group col-sm-12 col-md-3">
-                            <label for="inputDistance">ระยะทาง</label>
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_mileage_stop">เลขไมล์สิ้นสุด</label>
+                            <input type="number" class="form-control" id="edit_mileage_stop">
+                        </div>
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_distance">ระยะทาง</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" style="text-align:end" id="inputDistance" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_distance" placeholder="0" disabled>
                                 <div class="input-group-append">
                                     <span class="input-group-text">กม.</span>
                                 </div>
@@ -334,33 +394,29 @@
                         </div>
                     </div>
 
-                    <!-- ROW 5 : เลขไมล์เริ่มต้น, เลขไมล์สิ้นสุด -->
-                    <div class="form-row">
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputMileageStart">เลขไมล์เริ่มต้น</label>
-                            <input type="text" class="form-control" id="inputMileageStart">
-                        </div>
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputMileageStop">เลขไมล์สิ้นสุด</label>
-                            <input type="text" class="form-control" id="inputMileageStop">
-                        </div>
-                    </div>
-
-                    <!-- ROW 6 : Fleet Card, Cash -->
                     <div class="form-row ">
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputFleetCard">ค่าน้ำมัน (Fleet Card)</label>
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_ctbo">CTBO</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" style="text-align:end" id="inputFleetCard" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_ctbo" placeholder="0">
                                 <div class="input-group-append">
                                     <span class="input-group-text">฿</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputCash">ค่าน้ำมัน (เงินสด)</label>
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_exp">EXP</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" style="text-align:end" id="inputCash" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_exp" placeholder="0">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">฿</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-12 col-md-4">
+                            <label for="edit_pt">PT</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_pt" placeholder="0">
                                 <div class="input-group-append">
                                     <span class="input-group-text">฿</span>
                                 </div>
@@ -368,30 +424,16 @@
                         </div>
                     </div>
 
-                    <!-- ROW 7 : ค่าทางด่วน, ค่าใช้จ่ายอื่นๆ -->
                     <div class="form-row ">
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputExpresswayTolls">ค่าทางด่วน</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" style="text-align:end" id="inputExpresswayTolls" placeholder="0">
-                                <div class="input-group-append">
-                                    <span class="input-group-text">฿</span>
-                                </div>
+                        <fieldset class="col-sm-12 col-md-12">
+                            <div class="form-group">
+                                <label for="edit_description">รายละเอียด</label>
+                                <textarea class="form-control" id="edit_description" rows="2"></textarea>
                             </div>
-                        </div>
-                        <div class="form-group col-sm-12 col-md-6">
-                            <label for="inputOther">ค่าใช้จ่ายอื่นๆ</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" style="text-align:end" id="inputOther" placeholder="0">
-                                <div class="input-group-append">
-                                    <span class="input-group-text">฿</span>
-                                </div>
-                            </div>
-                        </div>
+                        </fieldset>
                     </div>
-
                     <!-- ROW 8 : อัปเดตล่าสุด, ผู้ดำเนินการ, สถานะ -->
-                    <div class="form-row ">
+                    @* <div class="form-row ">
                         <fieldset disabled class="col-sm-12 col-md-4">
                             <div class="form-group">
                                 <label for="disabledTextInputLastUpdated">อัปเดตล่าสุด</label>
@@ -410,11 +452,14 @@
                                 <input type="text" class="form-control" id="disabledTextInputStatus" placeholder="Manager Pending">
                             </div>
                         </fieldset>
-                    </div>
+                    </div> *@
                 </form>
             </div>
             <!-- Footer Button -->
             <div class="modal-footer kanit-regular">
+                <button type="button" id="BtnDelete" class="btn btn-danger col-sm-3 col-md-3" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    ลบ
+                </button>
                 <button type="button" class="btn btn-outline-danger col-sm-3 col-md-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-dismiss="modal">
                     ยกเลิก
                 </button>
@@ -433,37 +478,57 @@
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script>
         let personals = [];
+        let holidays = [];
         var table_personal;
         $(document).ready(async function () {
             const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            const month = today.toISOString().slice(0,7);
 
-            $('#date_start').val(formatDateForInput(firstDay));
-            $('#date_end').val(formatDateForInput(lastDay));
+            $('#month_start').val(month);
 
             const driver = await Getdrivers();
             GenerateDriverOption(driver);
 
         });
 
-        function formatDateForInput(date) {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0'); // เดือน +1 เพราะเริ่มจาก 0
-            const dd = String(date.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
-        }
+        async function LoadPersonalCarTable(emp_id, month) {
 
-
-        async function LoadPersonalCarTable(emp_id, start, stop) {
-            const data = await GetPersonalCar(emp_id, start, stop);
+            const data = await GetPersonalCar(emp_id,month);
+             let datas = CalSummary(data, "Bensin", 31.5,35, 1);
+            GenerateSummaryTable(datas);
+            holidays = data.holidays;
+            const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
             table_personal = $('#table_personal').DataTable({
                 destroy: true,
-                data: data,
+                data: data.data,
                 order: [[0, 'asc']],
                 paging: false,
                 info: false,
                 searching: false,
+                        createdRow: function (row, data, dataIndex) {
+            const dateDisplay = data.dateDisplay || data.date;
+
+            let year, month, day;
+            if (dateDisplay.includes('-')) {
+                [year, month, day] = dateDisplay.split('-').map(Number);
+            } else if (dateDisplay.includes('/')) {
+                [day, month, year] = dateDisplay.split('/').map(Number);
+            } else {
+                console.error('Invalid date format:', dateDisplay);
+                return;
+            }
+            const date = new Date(Date.UTC(year, month - 1, day));
+
+            const dayOfWeek = date.getUTCDay();
+            const dateKey = date.toISOString().split('T')[0];
+
+            const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+            const isHoliday = holidayDates.has(dateKey);
+
+            if (isWeekend || isHoliday) {
+                $(row).addClass('table-secondary bg-opacity-50');
+            }
+        },
                 drawCallback: function () {
                     mergeDateRows();
                 },
@@ -509,7 +574,7 @@
                     {
                         data: 'ctbo',
                         className: 'text-center',
-                        render: function (data) {                           
+                        render: function (data) {
                             return data || '';
                         }
                         //render: $.fn.dataTable.render.number(',', '.', 2)
@@ -587,52 +652,179 @@
 
                 if (rowData) {
                     $(this).toggleClass('table-selected');
-                    console.log(rowData);
-                    // Show Modal
+
+                    let code = rowData.code;
+                    const date = rowData.dateDisplay;
+                    let driver = rowData.driver;
+                    const job = rowData.job;
+                    const time_start = rowData.timeStart;
+                    const time_stop = rowData.timeStop;
+                    const location = rowData.location;
+                    const mileage_start = rowData.mileage_start;
+                    const mileage_stop = rowData.mileage_stop;
+                    const distance = rowData.km;
+                    const ctbo = rowData.ctbo;
+                    const exp = rowData.exp;
+                    const pt = rowData.pt;
+                    const description = rowData.description;
+
+                    if (driver === ""){
+                        driver = $('#select_driver').val();
+                        code = driver + "" + formatDateTimeYYYYMMDDHHMMSS();
+                    }
+
+
+                    $('#edit_code').val(code);
+                    $('#edit_date').val(date);
+                    $('#edit_driver').val(driver);
+                    $('#edit_job').val(job);
+                    $('#edit_time_start').val(time_start);
+                    $('#edit_time_stop').val(time_stop);
+                    $('#edit_location').val(location);
+                    $('#edit_mileage_start').val(mileage_start);
+                    $('#edit_mileage_stop').val(mileage_stop);
+                    $('#edit_distance').val(distance);
+                    $('#edit_ctbo').val(ctbo);
+                    $('#edit_exp').val(exp);
+                    $('#edit_pt').val(pt);
+                    $('#edit_description').val(description);
+
+                    $('#detailModal').modal();
                 }
             });
             mergeDateRows();
         }
 
-        async function GetPersonalCar(emp_id, start, stop) {
-            //$('#SpinModal').modal();
-            let response = await $.ajax({
-                type: "GET",
-                url: '@Url.Action("GetDataPersonalCar", "PersonalCarUser")',
-                contentType: "application/json",
-                dataType: "json",
-                data: { emp_id, start, stop },
+        $('#edit_mileage_start , #edit_mileage_stop').on('change' ,function(){
+            const start = parseInt($('#edit_mileage_start').val());
+            const stop = parseInt($('#edit_mileage_stop').val());
+            const distance = stop - start;
+            $('#edit_distance').val(distance);
+        });
+
+        $('#BtnDelete').on('click',async function(){
+             const code = $('#edit_code').val();
+            await $.ajax({
+                type: "DELETE",
+                url: '@Url.Action("DeleteData", "PersonalCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { code },
+                success: function (response) {
+                     if (response === "Success"){
+                         const emp_id = $('#select_driver').val();
+                         const month = $('#month_start').val();
+                         LoadPersonalCarTable(emp_id, month);
+
+                      }else{
+                          alert(response);
+                      }
+                }
             });
-           // $('#SpinModal').modal('hide');
-            return response.data;
+            $('#detailModal').modal('hide');
+        });
+
+        $('#BtnSaveChange').on('click',async function(){
+            const code = $('#edit_code').val();
+                    const date = $('#edit_date').val();
+                    const driver = $('#edit_driver').val();
+                    const job =  $('#edit_job').val();
+                    const time_start = $('#edit_time_start').val();
+                    const time_stop = $('#edit_time_stop').val();
+                    const location =$('#edit_location').val();
+                    const mileage_start = $('#edit_mileage_start').val();
+                    const mileage_stop = $('#edit_mileage_stop').val();
+                    const distance = $('#edit_distance').val();
+                    const ctbo =  $('#edit_ctbo').val();
+                    const exp =  $('#edit_exp').val();
+                    const pt =  $('#edit_pt').val();
+                    const description = $('#edit_description').val();
+
+                    const str = JSON.stringify({
+                        'code': code,
+                        'date':date,
+                        'driver':driver,
+                        'job': job,
+                        'time_start':time_start,
+                        'time_stop':time_stop,
+                        'location':location,
+                        'mileage_start': mileage_start,
+                        'mileage_stop':mileage_stop,
+                        'km':distance,
+                        'ctbo':ctbo,
+                        'exp':exp,
+                        'pt':pt,
+                        'description':description
+                    });
+
+                await $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdateData", "PersonalCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { str },
+                success: function (response) {
+                     if (response === "Success"){
+                         const emp_id = $('#select_driver').val();
+                         const month = $('#month_start').val();
+                         LoadPersonalCarTable(emp_id, month);
+                        
+                      }else{
+                          alert(response);
+                      }
+                }
+            });
+            $('#detailModal').modal('hide');
+        });
+
+
+        async function GetPersonalCar(emp_id, month) {
+            const $modal = $('#SpinModal');
+            $modal.modal('show');
+
+            try {
+                const response = await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetDataPersonalCar", "PersonalCarUser")',
+                    dataType: "json",
+                    data: { emp_id, month },
+                });
+
+                return response;
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
+            }
         }
 
-        $('#date_end').on('change', async function () {
+        $('#month_start').on('change',async function(){
             const driver = await Getdrivers();
             GenerateDriverOption(driver);
         });
 
         $('#btn_search').on('click', function () {
             const emp_id = $('#select_driver').val();
-            const start = $('#date_start').val();
-            const stop = $('#date_end').val();
+            const month = $('#month_start').val();
 
             if (emp_id !== "" && emp_id !== null) {
-                LoadPersonalCarTable(emp_id, start, stop);
+                LoadPersonalCarTable(emp_id, month);
             } else {
                 alert('Please Select Driver');
-            }           
+            }
+            
         });
+
+
 
         async function Getdrivers() {
             let drivers = [];
-            const start = $('#date_start').val();
-            const stop = $('#date_end').val();
+            const month = $('#month_start').val();
             await $.ajax({
                 type: "GET",
                 url: '@Url.Action("Getdrivers", "PersonalCarUser")',
                 contentType: 'application/x-www-form-urlencoded',
-                data: { start, stop },
+                data: { month },
                 success: function (response) {
                     drivers = response;
                 }
@@ -720,5 +912,245 @@
                 $('#select_driver').append(`<option value="${drivers[i].emp_id}">${drivers[i].name}</option>`);
             }
         }
+
+        function formatDateTimeYYYYMMDDHHMMSS(date = new Date()) {
+            const pad = (n) => String(n).padStart(2, '0');
+
+            return (
+                date.getFullYear() +
+                pad(date.getMonth() + 1) +
+                pad(date.getDate()) +
+                pad(date.getHours()) +
+                pad(date.getMinutes()) +
+                pad(date.getSeconds())
+            );
+        }
+
+        function CalSummary(data_personal, Gastype, gasoline,commensurate, level) {
+                var level = level;
+                var a1 = [];
+                var a2 = [];
+                var a3 = [];
+                var a4 = [];
+                var a5 = [];
+                var a6 = [];
+                var a7 = [];
+                var a8 = [];
+                var ans = [];
+                var sumKm = 0;
+                var suma1 = 0;
+                var suma2 = 0;
+                var suma3 = 0;
+                var suma4 = 0;
+                var suma5 = 0;
+                var suma6 = 0;
+
+                let _month = $('#select_months :selected').text();
+                for (var i = 0; i < data_personal.length - 2; i++) {
+                    sumKm += data_personal[i].Mileage != "" ? parseInt(data_personal[i].Mileage) : 0;
+                }
+                if (level == "1" || level == "") {
+                    if (sumKm <= 1000) {
+                        suma1 = sumKm * 10.0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", sumKm.toString(), "AMOUNT", suma1.toString(), "BAHT"];
+                    } else {
+                        suma1 = 1000 * 10.0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                    }
+                    if (sumKm > 1000 && sumKm <= 2000) {
+                        suma2 = (sumKm - 1000) * 7.5;
+                        a2 = ["(1,001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", (sumKm - 1000).toString(), "AMOUNT", suma2.toString(), "BAHT"];
+                    } else {
+                        if (sumKm > 2000) {
+                            suma2 = 1000 * 7.5;
+                            a2 = ["(1,001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "1000", "AMOUNT", suma2.toString(), "BAHT"];
+                        } else {
+                            suma2 = 0;
+                            a2 = ["(1,001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                        }
+                    }
+
+                    if (sumKm > 2000 && sumKm <= 4000) {
+                        suma3 = (sumKm - 2000) * 5;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", (sumKm - 2000).toString(), "AMOUNT", suma3.toString(), "BAHT"];
+                    } else {
+                        if (sumKm > 4000) {
+                            suma3 = 2000 * 5;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                        } else {
+                            suma3 = 0;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                        }
+                    }
+                    if (sumKm > 4000) {
+                        suma4 = (sumKm - 4000) * 4;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", (sumKm - 4000).toString(), "AMOUNT", suma4.toString(), "BAHT"];
+                    } else {
+                        suma4 = 0;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                    }
+
+                    // Sum A/EXP, P_T
+                    suma5 = 0;
+                    //suma5 = sumEXP(data_personal) + sumPT(data_personal);
+                    a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+
+                    // Sum COMMENSURATE GASOLINE
+                    if (commensurate > 0) {
+                        suma6 = ((sumKm / 10.0) * (commensurate - 35)).toFixed(2);
+                    }
+                    a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+
+                    // Gasoline
+                    if (Gastype == "Bensin") {
+                        a7 = ["", "Bensin", gasoline.toString(), "", "", ""];
+                    } else if (Gastype == "Diesel") {
+                        a7 = ["", "Diesel", gasoline.toString(), "", "", ""];
+                    } else {
+                        a7 = ["", "", "0.0", "", "", ""];
+                    }
+
+                    // Sum Total
+                    var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
+                    a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+                }
+                if (level == "2") {
+                    if (sumKm <= 1000) {
+                        suma1 = 0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
+                    } else {
+                        suma1 = 0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                    }
+
+                    if (sumKm > 1000 && sumKm <= 2000) {
+                        suma2 = 0;
+                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                    } else {
+                        suma2 = 0;
+                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                    }
+
+                    if (sumKm > 2000 && sumKm <= 4000) {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                    } else {
+                        if (sumKm > 4000) {
+                            suma3 = 0;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                        } else {
+                            suma3 = 0;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                        }
+                    }
+                    if (sumKm > 4000) {
+                        suma4 = 0;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                    } else {
+                        suma4 = 0;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                    }
+
+                    // Sum A/EXP, P_T
+                    suma5 = 0;
+                    a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+
+                    // Sum COMMENSURATE GASOLINE
+                    suma6 = 0;
+                    a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+
+                    // Gasoline
+                    a7 = ["", "", "0.0", "", "", ""];
+
+                    // Sum Total
+                    var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
+                    a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+                }
+                if (level == "3") {
+                    if (sumKm <= 1000) {
+                        suma1 = 0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
+                    } else {
+                        suma1 = 1000 * 10.0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                    }
+                    if (sumKm > 1000 && sumKm <= 2000) {
+                        suma2 = 0;
+                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                    } else {
+                        suma2 = 2000 * 7.5;
+                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "2000", "AMOUNT", suma2.toString(), "BAHT"];
+                    }
+
+                    if (sumKm > 2000 && sumKm <= 4000) {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                    } else {
+                        if (sumKm > 4000) {
+                            suma3 = 0;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                        } else {
+                            suma3 = 0;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                        }
+                    }
+                    if (sumKm > 4000) {
+                        suma4 = 0;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                    } else {
+                        suma4 = 0;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                    }
+
+                    // Sum A/EXP, P_T
+                    suma5 = 0;
+                    a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+
+                    // Sum COMMENSURATE GASOLINE
+                    suma6 = 0;
+                    a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+
+                    // Gasoline
+                    a7 = ["", "", "0.0", "", "", ""];
+
+                    // Sum Total
+                    var sumall = 3000;
+                    a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+                }
+                ans = [a1, a2, a3, a4, a5, a6, a7, a8];
+
+                return ans;
+            }
+
+            let table_summary;
+            function GenerateSummaryTable(_datas) {
+                let datas = [];
+                for (let i = 0; i < _datas.length; i++) {
+                    datas.push([_datas[i][0], _datas[i][1], _datas[i][2], _datas[i][3], _datas[i][4], _datas[i][5]]);
+                }
+                if (table_summary !== undefined) {
+                    table_summary.destroy();
+                }
+                table_summary = $('#table_summary').DataTable({
+                    data: datas,
+                    columnDefs: [
+                        {
+                            //targets: [2],
+                            //className: "dt-left",
+                        },
+                    ],
+                    ordering: false,
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    rowCallback: function (row, data) {
+                        let amount = data[3];
+                        if (amount === "TOTAL") {
+                            $('td', row).css("font-weight", "bold");
+                            $('td', row).css("text-align", "center");
+                        }
+                    }
+                });
+            };
     </script>
 }

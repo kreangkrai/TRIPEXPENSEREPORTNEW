@@ -1,6 +1,7 @@
-﻿@model List<TRIPEXPENSEREPORT.Models.PersonalModel>
+﻿@model TRIPEXPENSEREPORT.Models.EmployeeModel
 @{
     ViewData["Title"] = "TE : รถส่วนตัว";
+    TRIPEXPENSEREPORT.CTLModels.EmployeeModel emp = ViewBag.Employee;
 }
 
 <style>
@@ -49,6 +50,12 @@
                         ค้นหา
                     </button>
                 </div>
+                <div class="form-group" id="div_export" hidden>
+                    <button class="btn btn-success w-100"
+                            style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <i class="fas fa-download"></i>Export
+                    </button>
+                </div>
             </div>
         </div>
         <!-- Main Content (ขวา) : Table  -->
@@ -62,75 +69,6 @@
                     <i class="fa-solid fa-plus"></i> เพิ่มทริป
                 </button> *@
             </h4>
-
-            <!-- Add Trip Modal -->
-            <div class="modal fade" id="AddTripModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-md" role="document">
-                    <!-- เพิ่ม modal-lg สำหรับขนาดใหญ่ -->
-                    <div class="modal-content">
-                        <div class="modal-header" style="background: #34ba7c;
-                                background: linear-gradient(90deg, rgba(52, 186, 124, 1) 0%, rgba(0, 138, 112, 1) 100%); color: white; border-bottom: none;">
-                            <h5 class="modal-title kanit-regular" id="detailModalLabel">เพิ่มข้อมูล (รถบริษัท)</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true" style="color: white;">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body kanit-regular" style="color:#444444">
-                            <form>
-                                <!-- ROW 1 : วันที่, ผู้ขับรถ -->
-                                <div class="form-row ">
-                                    <div class="form-group col-sm-12 col-md-6">
-                                        <label for="InputDate">วันที่</label>
-                                        <input type="date" class="form-control" id="InputDate">
-                                    </div>
-                                    <div class="form-group col-sm-12 col-md-6">
-                                        <label for="SelectDriver">ผู้ขับ</label>
-                                        <select class="form-control" id="SelectDriver">
-                                            <option value="NULL">Please Select...</option>
-                                            <option value="EM001">Sarit T.</option>
-                                            <option value="EM002">Kriangkrai R.</option>
-                                            <option value="EM003">Jirawat J.</option>
-                                            <option value="EM004">Chakrit R.</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- ROW 2 : รถบริษัท, ทะเบียนรถ -->
-                                <div class="form-row ">
-
-                                    <div class="form-group col-sm-12 col-md-6">
-                                        <label for="car" style="color:#555555" id="car-label">รถบริษัท:</label>
-                                        <select name="cars" id="car" class="form-control" style="border-radius:5px">
-                                            <option value="NULL">Please Select...</option>
-                                            <option value="CAR01">CAR#01</option>
-                                            <option value="CAR02">CAR#02</option>
-                                            <option value="CAR03">CAR#03</option>
-                                            <option value="CAR04">CAR#04</option>
-                                        </select>
-                                    </div>
-
-                                    <fieldset disabled class="col-sm-12 col-md-6">
-                                        <div class="form-group">
-                                            <label for="disabledTextInputLicensePlate">ป้ายทะเบียนรถ</label>
-                                            <input type="text" class="form-control" id="disabledTextInputLicensePlate" placeholder="กก-0000">
-                                        </div>
-                                    </fieldset>
-                                </div>
-                            </form>
-                        </div>
-                        <!-- Footer Button -->
-                        <div class="modal-footer kanit-regular">
-                            <button type="button" class="btn btn-outline-danger col-sm-3 col-md-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-dismiss="modal">
-                                ยกเลิก
-                            </button>
-                            <button type="button" id="BtnAddTrip" class="btn btn-success col-sm-3 col-md-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <i class="fa-solid fa-plus"></i> เพิ่ม
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Table -->
             <div class="table-responsive-lg" style="height: 700px; overflow-y: auto; border: 1px solid #dee2e6;">
                 <table id="table_personal" class="table table-bordered table-hover table-sm compact">
@@ -166,7 +104,7 @@
                         </tr>
                     </tfoot>
                 </table>
-
+                <div id="div_summary" hidden>
                 <div id="div_summary" class="row">
                     <div class="col-md-5 col-xl-5">
                         <table class="table table-sm table-condensed no-border" style="background-color:grey;height:250px">
@@ -223,16 +161,17 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
             <!-- Button below Table -->
             <div class="row kanit-medium d-flex justify-content-center g-0">
                 <!-- Button Send & Export -->
-                <div class="col-md-2 bg-light p-2">
+                @* <div class="col-md-2 bg-light p-2">
                     <button class="btn btn-success w-100" data-toggle="modal" data-target="#sendModal"
                             style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                         <i class="fas fa-download"></i> Send & Export
                     </button>
-                </div>
+                </div> *@
                 <!-- Button Cancel Send -->
                 @* <div class="col-md-2 bg-light p-2">
                     <button class="btn btn-danger w-100" data-toggle="modal" data-target="#cancelModal"
@@ -486,16 +425,31 @@
 
             $('#month_start').val(month);
 
-            const driver = await Getdrivers();
-            GenerateDriverOption(driver);
+            let drivers = await Getdrivers();
+            const emp = @Html.Raw(Json.Serialize(Model));;
+        if (emp.role !== "Admin")
+        {
+             drivers = drivers.filter(f=>f.emp_id == emp.emp_id).map(m=>m);
+        }
+
+        if (drivers.length > 0){
+        GenerateDriverOption(drivers);
+        $('#btn_search').prop('disabled',false);
+        }else{
+            alert('ไม่มีข้อมูลในการใช้งาน');
+            $('#btn_search').prop('disabled',true);
+        }
 
         });
 
         async function LoadPersonalCarTable(emp_id, month) {
 
             const data = await GetPersonalCar(emp_id,month);
-             let datas = CalSummary(data, "Bensin", 31.5,35, 1);
+            const gasoline = data.gasoline;
+            const gasoline_type = data.gasoline_type;
+            let datas = CalSummary(data, gasoline_type, gasoline);
             GenerateSummaryTable(datas);
+
             holidays = data.holidays;
             const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
             table_personal = $('#table_personal').DataTable({
@@ -505,6 +459,7 @@
                 paging: false,
                 info: false,
                 searching: false,
+                ordering:false,
                         createdRow: function (row, data, dataIndex) {
             const dateDisplay = data.dateDisplay || data.date;
 
@@ -630,7 +585,6 @@
                         className: 'text-center',
                         render: function (data) {
                             const badges = {
-                                'Processing': 'bg-warning',
                                 'Approved': 'bg-success',
                                 'Pending': 'bg-info'
                             };
@@ -643,7 +597,9 @@
             });
 
             $('#table_personal tbody').on('click', 'tr', function () {
+                
                 const rowData = table_personal.row(this).data();
+                if (rowData.status !== "Approved"){
                 if (!rowData) {
                     const $row = $(this);
                     const prevRowData = table_personal.row($row.prev()).data();
@@ -691,6 +647,9 @@
 
                     $('#detailModal').modal();
                 }
+                }else{
+                    alert('ข้อมูลถูกตรวจสอบแล้ว ไม่สามารถแก้ไขได้');
+                }
             });
             mergeDateRows();
         }
@@ -703,7 +662,7 @@
         });
 
         $('#BtnDelete').on('click',async function(){
-             const code = $('#edit_code').val();
+            const code = $('#edit_code').val();
             await $.ajax({
                 type: "DELETE",
                 url: '@Url.Action("DeleteData", "PersonalCarUser")',
@@ -813,9 +772,9 @@
                 alert('Please Select Driver');
             }
             
+            $('#div_summary').prop('hidden',false);
+            $('#div_export').prop('hidden',false);
         });
-
-
 
         async function Getdrivers() {
             let drivers = [];
@@ -926,8 +885,51 @@
             );
         }
 
-        function CalSummary(data_personal, Gastype, gasoline,commensurate, level) {
-                var level = level;
+        $('#state_bensin').on('change',async function(){
+            $('#state_diesel').prop('checked',false);
+            const emp_id = $('#select_driver').val();
+                         const month = $('#month_start').val();
+            const gasoline_type = "Bensin";
+            await $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdatePersonalGasoline", "PersonalCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { emp_id,month,gasoline_type },
+                success: function (response) {
+                     if (response === "Success"){                        
+                         LoadPersonalCarTable(emp_id, month);
+
+                      }else{
+                          alert(response);
+                      }
+                }
+            });
+
+        });
+
+        $('#state_diesel').on('change',async function(){
+             $('#state_bensin').prop('checked',false);
+             const emp_id = $('#select_driver').val();
+             const month = $('#month_start').val();
+            const gasoline_type = "Diesel";
+            await $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdatePersonalGasoline", "PersonalCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { emp_id,month,gasoline_type },
+                success: function (response) {
+                     if (response === "Success"){
+                         
+                         LoadPersonalCarTable(emp_id, month);
+
+                      }else{
+                          alert(response);
+                      }
+                }
+            });
+        });
+
+        function CalSummary(data_personal, Gastype,commensurate) {
                 var a1 = [];
                 var a2 = [];
                 var a3 = [];
@@ -937,7 +939,6 @@
                 var a7 = [];
                 var a8 = [];
                 var ans = [];
-                var sumKm = 0;
                 var suma1 = 0;
                 var suma2 = 0;
                 var suma3 = 0;
@@ -945,11 +946,34 @@
                 var suma5 = 0;
                 var suma6 = 0;
 
-                let _month = $('#select_months :selected').text();
-                for (var i = 0; i < data_personal.length - 2; i++) {
-                    sumKm += data_personal[i].Mileage != "" ? parseInt(data_personal[i].Mileage) : 0;
+                 const data = data_personal.data;
+
+                 const sumKm = data.reduce((acc, curr) => {
+                      return acc + (Number(curr.km) || 0);
+                    }, 0);
+        
+                const sumEXP_PT = data.reduce((acc, curr) => {
+                  const exp = Number(curr.exp) || 0;
+                  const pt  = Number(curr.pt)  || 0;
+
+                  return {
+                    sumEXP: acc.sumEXP + exp,
+                    sumPT:  acc.sumPT  + pt
+                  };
+                }, { sumEXP: 0, sumPT: 0 });
+
+                const emp =  @Html.Raw(Json.Serialize(emp));
+
+                if (Gastype.gasoline_type == "Bensin") {
+                    $('#state_bensin').prop('checked',true);
+                    $('#state_diesel').prop('checked',false);
                 }
-                if (level == "1" || level == "") {
+                else if (Gastype.gasoline_type == "Diesel"){
+                     $('#state_bensin').prop('checked',false);
+                    $('#state_diesel').prop('checked',true);
+                }
+                
+                if (!emp.position.includes('Manager') && !emp.position.includes('DirectorX')) {
                     if (sumKm <= 1000) {
                         suma1 = sumKm * 10.0;
                         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", sumKm.toString(), "AMOUNT", suma1.toString(), "BAHT"];
@@ -991,21 +1015,23 @@
                     }
 
                     // Sum A/EXP, P_T
-                    suma5 = 0;
-                    //suma5 = sumEXP(data_personal) + sumPT(data_personal);
+                    suma5 = sumEXP_PT.sumEXP + sumEXP_PT.sumPT;
                     a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
 
                     // Sum COMMENSURATE GASOLINE
-                    if (commensurate > 0) {
-                        suma6 = ((sumKm / 10.0) * (commensurate - 35)).toFixed(2);
+
+                    if (Gastype.gasoline_type == "Bensin") {
+                        suma6 = ((sumKm / 10.0) * (commensurate.sohol - 35)).toFixed(2);
+                    }else if (Gastype.gasoline_type == "Diesel"){
+                        suma6 = ((sumKm / 10.0) * (commensurate.diesel - 35)).toFixed(2);
                     }
                     a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
 
                     // Gasoline
-                    if (Gastype == "Bensin") {
-                        a7 = ["", "Bensin", gasoline.toString(), "", "", ""];
-                    } else if (Gastype == "Diesel") {
-                        a7 = ["", "Diesel", gasoline.toString(), "", "", ""];
+                    if (Gastype.gasoline_type == "Bensin") {
+                        a7 = ["", "Bensin", commensurate.sohol.toString(), "", "", ""];
+                    } else if (Gastype.gasoline_type == "Diesel") {
+                        a7 = ["", "Diesel", commensurate.diesel.toString(), "", "", ""];
                     } else {
                         a7 = ["", "", "0.0", "", "", ""];
                     }
@@ -1014,7 +1040,7 @@
                     var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
                     a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
                 }
-                if (level == "2") {
+                else {
                     if (sumKm <= 1000) {
                         suma1 = 0;
                         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
@@ -1066,57 +1092,57 @@
                     var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
                     a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
                 }
-                if (level == "3") {
-                    if (sumKm <= 1000) {
-                        suma1 = 0;
-                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
-                    } else {
-                        suma1 = 1000 * 10.0;
-                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
-                    }
-                    if (sumKm > 1000 && sumKm <= 2000) {
-                        suma2 = 0;
-                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
-                    } else {
-                        suma2 = 2000 * 7.5;
-                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "2000", "AMOUNT", suma2.toString(), "BAHT"];
-                    }
+                // if (level == "3") {
+                //     if (sumKm <= 1000) {
+                //         suma1 = 0;
+                //         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
+                //     } else {
+                //         suma1 = 1000 * 10.0;
+                //         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                //     }
+                //     if (sumKm > 1000 && sumKm <= 2000) {
+                //         suma2 = 0;
+                //         a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                //     } else {
+                //         suma2 = 2000 * 7.5;
+                //         a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "2000", "AMOUNT", suma2.toString(), "BAHT"];
+                //     }
 
-                    if (sumKm > 2000 && sumKm <= 4000) {
-                        suma3 = 0;
-                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
-                    } else {
-                        if (sumKm > 4000) {
-                            suma3 = 0;
-                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
-                        } else {
-                            suma3 = 0;
-                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
-                        }
-                    }
-                    if (sumKm > 4000) {
-                        suma4 = 0;
-                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
-                    } else {
-                        suma4 = 0;
-                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
-                    }
+                //     if (sumKm > 2000 && sumKm <= 4000) {
+                //         suma3 = 0;
+                //         a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                //     } else {
+                //         if (sumKm > 4000) {
+                //             suma3 = 0;
+                //             a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                //         } else {
+                //             suma3 = 0;
+                //             a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                //         }
+                //     }
+                //     if (sumKm > 4000) {
+                //         suma4 = 0;
+                //         a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                //     } else {
+                //         suma4 = 0;
+                //         a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                //     }
 
-                    // Sum A/EXP, P_T
-                    suma5 = 0;
-                    a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+                //     // Sum A/EXP, P_T
+                //     suma5 = 0;
+                //     a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
 
-                    // Sum COMMENSURATE GASOLINE
-                    suma6 = 0;
-                    a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+                //     // Sum COMMENSURATE GASOLINE
+                //     suma6 = 0;
+                //     a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
 
-                    // Gasoline
-                    a7 = ["", "", "0.0", "", "", ""];
+                //     // Gasoline
+                //     a7 = ["", "", "0.0", "", "", ""];
 
-                    // Sum Total
-                    var sumall = 3000;
-                    a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
-                }
+                //     // Sum Total
+                //     var sumall = 3000;
+                //     a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+                // }
                 ans = [a1, a2, a3, a4, a5, a6, a7, a8];
 
                 return ans;

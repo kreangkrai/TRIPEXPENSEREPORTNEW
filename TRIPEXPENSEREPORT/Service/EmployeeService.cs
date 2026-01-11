@@ -12,7 +12,7 @@ namespace TRIPEXPENSEREPORT.Service
         public EmployeeService()
         {
             connect = new ConnectSQL();
-            con = connect.OpenConnect();
+            con = connect.OpenReportConnect();
         }
         public List<EmployeeModel> GetEmployees()
         {
@@ -23,7 +23,7 @@ namespace TRIPEXPENSEREPORT.Service
                 {
                     con.Open();
                 }
-                string strCmd = string.Format($@"SELECT emp_id,name,department,role FROM Employees");
+                string strCmd = string.Format($@"SELECT emp_id,name,department,location ,role FROM Employees");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
@@ -35,7 +35,8 @@ namespace TRIPEXPENSEREPORT.Service
                             emp_id = dr["emp_id"].ToString(),
                             name = dr["name"].ToString(),
                             department = dr["department"].ToString(),
-                            role = dr["role"].ToString()
+                            role = dr["role"].ToString(),
+                            location = dr["location"].ToString(),
                         };
                         employees.Add(employee);
                     }
@@ -65,27 +66,31 @@ namespace TRIPEXPENSEREPORT.Service
                         OriginalPersonal(emp_id,
                             name,
                             department,
+                            location,
                             role
                         )
                         VALUES(@emp_id,
                             @name,
                             @department,
+                            @location,
                             @role
                         )");
                 using (SqlCommand cmd = new SqlCommand(string_command, con))
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.Add("@emp_id", SqlDbType.Text);
-                    cmd.Parameters.Add("@name", SqlDbType.Text);
-                    cmd.Parameters.Add("@department", SqlDbType.Text);
-                    cmd.Parameters.Add("@role", SqlDbType.Text);
+                    cmd.Parameters.Add("@emp_id", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@name", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@department", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@location", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@role", SqlDbType.NVarChar);
 
                     for (int i = 0; i < employees.Count; i++)
                     {
                         cmd.Parameters[0].Value = employees[i].emp_id;
                         cmd.Parameters[1].Value = employees[i].name;
                         cmd.Parameters[2].Value = employees[i].department;
-                        cmd.Parameters[3].Value = employees[i].role;
+                        cmd.Parameters[3].Value = employees[i].location;
+                        cmd.Parameters[4].Value = employees[i].role;
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -117,6 +122,7 @@ namespace TRIPEXPENSEREPORT.Service
                         Employees SET
   	                    name = @name,
                         department = @department,
+                        location = @location,
                         role = @role
                         WHERE emp_id = @emp_id");
                 using (SqlCommand cmd = new SqlCommand(string_command, con))
@@ -125,6 +131,7 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@emp_id", employee.emp_id);
                     cmd.Parameters.AddWithValue("@name", employee.name);
                     cmd.Parameters.AddWithValue("@department", employee.department);
+                    cmd.Parameters.AddWithValue("@location", employee.location);
                     cmd.Parameters.AddWithValue("@role", employee.role);
                     cmd.ExecuteNonQuery();
                 }

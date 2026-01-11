@@ -1,5 +1,3 @@
-using TRIPEXPENSEREPORT.CTLInterfaces;
-using TRIPEXPENSEREPORT.CTLServices;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 using TRIPEXPENSEREPORT.Service;
@@ -15,8 +13,11 @@ builder.Services.AddTransient<ITrip, TripService>();
 builder.Services.AddTransient<IProvince, ProvinceService>();
 builder.Services.AddTransient<ICar, CarService>();
 builder.Services.AddTransient<IService, ServiceService>();
+builder.Services.AddTransient<IEmployee, EmployeeService>();
 builder.Services.AddTransient<IPersonal, PersonalService>();
-builder.Services.AddTransient<IHoliday, HolidayService>();
+builder.Services.AddTransient<IGasoline, GasolineService>();
+builder.Services.AddTransient<TRIPEXPENSEREPORT.CTLInterfaces.IHoliday, TRIPEXPENSEREPORT.CTLServices.HolidayService>();
+builder.Services.AddTransient<TRIPEXPENSEREPORT.CTLInterfaces.IEmployee, TRIPEXPENSEREPORT.CTLServices.EmployeeService>();
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     // This lambda determines whether user consent for non-essential cookies is needed for a given request.

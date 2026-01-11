@@ -43,7 +43,7 @@ namespace TRIPEXPENSEREPORT.Controllers
 
                         if (_user != null)
                         {
-                            HttpContext.Session.SetString("userId", _user.name);
+                            HttpContext.Session.SetString("userId", _user.emp_id);
                             HttpContext.Session.Set("Image", image);
                             HttpContext.Session.SetString("Role", _user.role);
                             return RedirectToAction("Index", "Home");

@@ -5,8 +5,6 @@ using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
-using TRIPEXPENSEREPORT.CTLInterfaces;
-using TRIPEXPENSEREPORT.CTLModels;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -17,18 +15,45 @@ namespace TRIPEXPENSEREPORT.Controllers
         private readonly string _googleMapsApiKey;
         private IPersonal Personal;
         private ITrip Trip;
-        private IHoliday Holiday;
-        public PersonalCarUserController(IPersonal personal, ITrip trip, IHoliday holiday, IOptions<AppSettings> options)
+        private CTLInterfaces.IHoliday Holiday;
+        private CTLInterfaces.IEmployee CTLEmployees;
+        private IEmployee Employees;
+        private IGasoline Gasoline;
+        public PersonalCarUserController(IPersonal personal, ITrip trip, CTLInterfaces.IHoliday holiday, CTLInterfaces.IEmployee ctlEmployees, IEmployee employees, IGasoline gasoline, IOptions<AppSettings> options)
         {
             Personal = personal;
             Trip = trip;
             Holiday = holiday;
+            CTLEmployees = ctlEmployees;
+            Employees = employees;
+            Gasoline = gasoline;
             _googleMapsApiKey = options.Value.GoogleMapsApiKey;
         }
         public IActionResult Index()
         {
-            
-            return View();
+
+            if (HttpContext.Session.GetString("userId") != null)
+            {
+                string emp_id = HttpContext.Session.GetString("userId");
+                List<EmployeeModel> employees = Employees.GetEmployees();
+                EmployeeModel employee = employees.Where(w=>w.emp_id == emp_id).FirstOrDefault();
+                HttpContext.Session.SetString("Role", employee.role);
+                HttpContext.Session.SetString("Name", employee.name);
+                HttpContext.Session.SetString("Department", employee.department);
+                HttpContext.Session.SetString("Location", employee.location);
+
+
+                List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
+                CTLModels.EmployeeModel emp = emps.Where(w=>w.emp_id==emp_id).FirstOrDefault();
+                
+                ViewBag.Employee = emp;
+
+                return View(employee);
+            }
+            else
+            {
+                return RedirectToAction("Index", "Account");
+            }
         }
 
         [HttpDelete]
@@ -39,13 +64,26 @@ namespace TRIPEXPENSEREPORT.Controllers
         }
 
         [HttpPost]
+        public IActionResult UpdatePersonalGasoline(string emp_id,string month,string gasoline_type)
+        {
+            PersonalGasolineModel model = new PersonalGasolineModel()
+            {
+                emp_id = emp_id,
+                month = month,
+                gasoline_type = gasoline_type
+            };
+            string message = Personal.UpdatePersonalGasoline(model);
+            return Json(message);
+        }
+
+        [HttpPost]
         public IActionResult UpdateData(string str)
         {
             PersonalModel personal = JsonConvert.DeserializeObject<PersonalModel>(str);
             DateTime dt = DateTime.ParseExact(personal.date.ToString("dd/MM/yyy"), "MM/dd/yyyy", CultureInfo.InvariantCulture);
             personal.date = dt;
             personal.last_date = DateTime.Now;
-            personal.status = "Processing";
+            personal.status = "Pending";
             PersonalModel old_personal = Personal.GetPersonalsByCode(personal.code);
             if (old_personal.driver != null)
             {
@@ -136,6 +174,15 @@ namespace TRIPEXPENSEREPORT.Controllers
             string message = Personal.EditInserts(insert_datas);
             if (message == "Success")
             {
+                // Insert Personal Gasoline default Bensin
+                PersonalGasolineModel personalGasoline = new PersonalGasolineModel()
+                {
+                    emp_id = emp_id,
+                    month = month,
+                    gasoline_type = "Bensin"
+                };
+                message = Personal.InsertPersonalGasoline(personalGasoline);
+
                 List<PersonalModel> datas_personal = new List<PersonalModel>();
                 datas_personal.AddRange(new_datas);
                 datas_personal.AddRange(personals);
@@ -153,7 +200,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                         job = k.job,
                         cash = k.cash,
                         ctbo = k.ctbo,
-                        exp = k.exp,
+                        exp = k.exp + k.cash,
                         pt = k.pt,
                         mileage_start = k.mileage_start,
                         mileage_stop = k.mileage_stop,
@@ -168,8 +215,10 @@ namespace TRIPEXPENSEREPORT.Controllers
                     .ThenBy(x => x.timeStart)
                     .ToList();
 
-                List<HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
-                return Json(new { data = result,holidays = holidays });
+                List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
+                GasolineModel gasoline = Gasoline.GetGasolineByMonth(month);
+                PersonalGasolineModel gasoline_type = Personal.GetPersonalGasoline(emp_id, month);
+                return Json(new { data = result, holidays = holidays, gasoline = gasoline , gasoline_type = gasoline_type });
             }
             else
             {
@@ -222,7 +271,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     auto_km = autoKm,
                     km = stop.mileage - start.mileage,
                     description = "",
-                    status = start.date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Processing" : "",
+                    status = start.date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Pending" : "",
                     last_date = DateTime.Now,
                     cash = items.Sum(s => s.cash),
                     ctbo = 0,
@@ -289,7 +338,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     auto_km = autoKm,
                     km = stop.mileage - start.mileage,
                     description = "",
-                    status = start.date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Processing" : "",
+                    status = start.date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Pending" : "",
                     last_date = DateTime.Now,
                     cash = items.Sum(s => s.cash),
                     ctbo = 0,

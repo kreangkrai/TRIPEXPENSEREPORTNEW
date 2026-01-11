@@ -1,8 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using NPOI.SS.Formula.Functions;
+using OfficeOpenXml;
 using System.Data;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
+using static Azure.Core.HttpHeader;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace TRIPEXPENSEREPORT.Service
@@ -876,6 +878,166 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return "Success";
+        }
+
+        public Stream ExportPersonalNormal(FileInfo path, List<PersonalModel> personals, string month, CTLModels.EmployeeModel emp, GasolineModel gasoline, PersonalGasolineModel gasoline_type)
+        {
+            Stream stream = new MemoryStream();
+            if (path.Exists)
+            {              
+                using (ExcelPackage p = new ExcelPackage(path))
+                {
+                    ExcelWorksheet worksheet = p.Workbook.Worksheets["Travelling Expense"];
+
+                    double sum = 0;
+                    int startRows = 16;
+                    var parts = month.Split('-');
+                    if (parts.Length != 2
+                        || !int.TryParse(parts[0], out int year)
+                        || !int.TryParse(parts[1], out int mon))
+                    {
+                        return null;
+                    }
+                    
+
+                    DateTime start = new DateTime(year, mon, 1);
+                    DateTime stop = start.AddMonths(1).AddDays(-1);
+                    for (DateTime date = start;date <= stop;date = date.AddDays(1))
+                    {
+                        List<PersonalModel> pers = personals.Where(w => w.date.Date == date.Date).ToList();
+                        worksheet.Cells["B" + (startRows)].Value = date.ToString("dd/MM/yyyy");
+                        if (pers.Count > 0)
+                        {
+                            string time_start = pers.FirstOrDefault().time_start.ToString(@"hh\:mm");
+                            string time_stop = pers.FirstOrDefault().time_stop.ToString(@"hh\:mm");
+                            string destination = pers.FirstOrDefault().location.ToString();
+                            double ctbo = pers.Select(s => s.ctbo).Sum();
+                            double exp = pers.Select(s => s.exp).Sum();
+                            double pt = pers.Select(s => s.pt).Sum();
+                            string mileage_start = pers.FirstOrDefault().mileage_start.ToString();
+                            string mileage_stop = pers.FirstOrDefault().mileage_stop.ToString();
+                            int km = pers.Select(s=>s.km).Sum();
+                            if (pers.Count > 1)
+                            {
+                                time_stop = pers.LastOrDefault().time_stop.ToString(@"hh\:mm");
+                                destination = string.Join(',', pers.Select(s => s.location).ToArray());
+                                mileage_stop = pers.LastOrDefault().mileage_stop.ToString();
+                            }
+
+                            worksheet.Cells["C" + (startRows)].Value = time_start;
+                            worksheet.Cells["D" + (startRows)].Value = time_stop;
+                            worksheet.Cells["E" + (startRows)].Value = pers[0].job;
+                            worksheet.Cells["F" + (startRows)].Value = destination;
+                            worksheet.Cells["K" + (startRows)].Value = ctbo;
+                            worksheet.Cells["L" + (startRows)].Value = exp;
+                            worksheet.Cells["M" + (startRows)].Value = pt;
+                            worksheet.Cells["N" + (startRows)].Value = mileage_start;
+                            worksheet.Cells["O" + (startRows)].Value = mileage_stop;
+                            worksheet.Cells["P" + (startRows)].Value = km;
+                        }
+                        startRows++;
+                    }
+
+                    worksheet.Cells["D9"].Value = emp.name_en;
+                    worksheet.Cells["D11"].Value = emp.department;
+                    worksheet.Cells["N9"].Value = DateTime.Now.ToString("dd/MM/yyyy");
+                    worksheet.Cells["N11"].Value = month;
+                    //Name
+                    worksheet.Cells["B53"].Value = emp.name_en;
+                    worksheet.Cells["C53"].Value = "";
+                    worksheet.Cells["D53"].Value = "";
+                    worksheet.Cells["E53"].Value = "";
+
+                    //Date Approve
+                    worksheet.Cells["B55"].Value = DateTime.Now.ToString("dd/MM/yyyy");
+                    worksheet.Cells["C55"].Value = "";
+                    worksheet.Cells["D55"].Value =  "";
+                    worksheet.Cells["E55"].Value =  "";
+
+                    if (!emp.position.Contains("Manager") && !emp.position.Contains("Director")) // Sale
+                    {
+                        int km = personals.Sum(s => s.km);
+                        if (km <= 1000)
+                        {
+                            worksheet.Cells["N51"].Value = km;
+                            worksheet.Cells["P51"].Value = km * 10.0;
+                        }
+                        else
+                        {
+                            worksheet.Cells["N51"].Value = 1000;
+                            worksheet.Cells["P51"].Value = 1000 * 10.0;
+                            if (km > 1000 && km <= 2000)
+                            {
+                                worksheet.Cells["N52"].Value = km - 1000;
+                                worksheet.Cells["P52"].Value = (km - 1000) * 7.5;
+                            }
+                            else
+                            {
+                                worksheet.Cells["N52"].Value = 1000;
+                                worksheet.Cells["P52"].Value = 1000 * 7.5;
+
+                                if (km > 2000 && km <= 4000)
+                                {
+                                    worksheet.Cells["N53"].Value = km - 2000;
+                                    worksheet.Cells["P53"].Value = (km - 2000) * 5;
+                                }
+                                else
+                                {
+                                    if (km > 4000)
+                                    {
+                                        worksheet.Cells["N53"].Value = 2000;
+                                        worksheet.Cells["P53"].Value = 2000 * 5;
+                                    }
+                                    else
+                                    {
+                                        worksheet.Cells["N53"].Value = 0;
+                                        worksheet.Cells["P53"].Value = 0;
+                                    }
+                                }
+
+                                if (km > 4000)
+                                {
+                                    worksheet.Cells["N54"].Value = km - 4000;
+                                    worksheet.Cells["P54"].Value = (km - 4000) * 4;
+                                }
+                                else
+                                {
+                                    worksheet.Cells["N54"].Value = 0;
+                                    worksheet.Cells["P54"].Value = 0;
+                                }
+                            }
+                        }
+                        //COMMENSURATE GASOLINE
+                        if (gasoline_type.gasoline_type == "Bensin")
+                        {
+                            worksheet.Cells["M57"].Value = gasoline.sohol;
+                        }
+                        else
+                        {
+                            worksheet.Cells["M57"].Value = gasoline.diesel;
+                        }
+
+                            // Sum A/EXP, P_T
+                            worksheet.Cells["P55"].Formula = "=L50";
+
+                        // Sum All
+                        worksheet.Cells["P59"].Formula = "=SUM(P51:P56)";
+
+                    }
+                    else //if (emp.position.Contains("Operation"))
+                    {
+                        worksheet.Cells["P59"].Value = sum;
+                    }
+                    //else if (level == "3")
+                    //{
+                    //    worksheet.Cells["P59"].Value = 3000;
+                    //}
+
+                    p.SaveAs(stream);
+                    stream.Position = 0;
+                }
+            }
+            return stream;
         }
     }
 }

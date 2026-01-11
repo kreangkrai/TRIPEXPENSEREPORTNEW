@@ -51,7 +51,7 @@
                     </button>
                 </div>
                 <div class="form-group" id="div_export" hidden>
-                    <button class="btn btn-success w-100"
+                    <button class="btn btn-success w-100" id="btn_export"
                             style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                         <i class="fas fa-download"></i>Export
                     </button>
@@ -1178,5 +1178,11 @@
                     }
                 });
             };
+
+            $('#btn_export').on('click', function () {
+             const emp_id = $('#select_driver').val();
+             const month = $('#month_start').val();
+            location.href = '@Url.Action("Export", "PersonalCarUser")?emp_id='+ emp_id + '&month=' + month;
+        });
     </script>
 }

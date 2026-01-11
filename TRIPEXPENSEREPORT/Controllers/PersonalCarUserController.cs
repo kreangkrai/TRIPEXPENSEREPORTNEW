@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
+using System.Security;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -19,7 +20,8 @@ namespace TRIPEXPENSEREPORT.Controllers
         private CTLInterfaces.IEmployee CTLEmployees;
         private IEmployee Employees;
         private IGasoline Gasoline;
-        public PersonalCarUserController(IPersonal personal, ITrip trip, CTLInterfaces.IHoliday holiday, CTLInterfaces.IEmployee ctlEmployees, IEmployee employees, IGasoline gasoline, IOptions<AppSettings> options)
+        private readonly IWebHostEnvironment hostingEnvironment;
+        public PersonalCarUserController(IPersonal personal, ITrip trip, CTLInterfaces.IHoliday holiday, CTLInterfaces.IEmployee ctlEmployees, IEmployee employees, IGasoline gasoline, IOptions<AppSettings> options, IWebHostEnvironment _hostingEnvironment)
         {
             Personal = personal;
             Trip = trip;
@@ -28,6 +30,7 @@ namespace TRIPEXPENSEREPORT.Controllers
             Employees = employees;
             Gasoline = gasoline;
             _googleMapsApiKey = options.Value.GoogleMapsApiKey;
+            hostingEnvironment = _hostingEnvironment;
         }
         public IActionResult Index()
         {
@@ -404,6 +407,32 @@ namespace TRIPEXPENSEREPORT.Controllers
             }
 
             return 0;
+        }
+
+        public IActionResult Export(string emp_id,string month)
+        {
+            var parts = month.Split('-');
+            if (parts.Length != 2
+                || !int.TryParse(parts[0], out int year)
+                || !int.TryParse(parts[1], out int mon))
+            {
+                return BadRequest("รูปแบบเดือนไม่ถูกต้อง");
+            }
+
+            DateTime start = new DateTime(year, mon, 1);
+            DateTime stop = start.AddMonths(1).AddDays(-1);
+            List<PersonalModel> personals = Personal.GetPersonalsByDate(emp_id, start, stop);
+
+            List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
+            CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();
+
+            GasolineModel gasoline = Gasoline.GetGasolineByMonth(month);
+            PersonalGasolineModel gasoline_type = Personal.GetPersonalGasoline(emp_id, month);
+
+            string timestamp = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToUpper().Replace(':', '_').Replace('.', '_').Replace(' ', '_').Trim();
+            var templateFileInfo = new FileInfo(Path.Combine(hostingEnvironment.ContentRootPath, "./wwwroot/Template", "แบบฟอร์มรถยนต์ส่วนบุคคล.xlsx"));
+            var stream = Personal.ExportPersonalNormal(templateFileInfo, personals, month, emp, gasoline,gasoline_type);
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "แบบฟอร์มรถยนต์ส่วนบุคคล_" + emp_id + "_" + timestamp + ".xlsx");
         }
     }
 }

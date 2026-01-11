@@ -17,5 +17,7 @@ namespace TRIPEXPENSEREPORT.Interface
         PersonalGasolineModel GetPersonalGasoline(string emp_id,string month);
         string InsertPersonalGasoline(PersonalGasolineModel personal);
         string UpdatePersonalGasoline(PersonalGasolineModel personal);
+
+        Stream ExportPersonalNormal(FileInfo path, List<PersonalModel> personals, string month,CTLModels.EmployeeModel emp, GasolineModel gasoline, PersonalGasolineModel gasoline_type);
     }
 }

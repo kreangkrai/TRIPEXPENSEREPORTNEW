@@ -18,7 +18,7 @@
         display: none;
     }
 
-   tr.holiday-row {
+    tr.holiday-row {
         background-color: #e9ecef !important;
     }
 
@@ -57,7 +57,7 @@
                         <select name="employees" id="select_drivers" class="mb-3 form-control" style="border-radius:5px">
                         </select>
                     </div>
-                    <div id="div_search"hidden>
+                    <div id="div_search" hidden>
                         <div class="form-group">
                             <button id="btn_search" class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                                 ค้นหา
@@ -101,7 +101,7 @@
                             <th>เลขไมล์เริ่มต้น</th>
                             <th>เลขไมล์สิ้นสุด</th>
                             <th>ระยะทาง</th>
-                            <th>รวมระยะทาง</th>                           
+                            <th>รวมระยะทาง</th>
                             <th>รายละเอียด</th>
                             <th>สถานะ</th>
                         </tr>
@@ -219,14 +219,13 @@
                         <fieldset disabled class="col-sm-12 col-md-4">
                             <div class="form-group">
                                 <label for="edit_date">วันที่</label>
-                                <input type="text" class="form-control" id="edit_date" placeholder="08/10/2025">
+                                <input type="text" class="form-control" id="edit_date">
                             </div>
                         </fieldset>
                         <fieldset class="col-sm-12 col-md-4">
                             <div class="form-group">
                                 <label for="edit_select_car">รถบริษัท</label>
                                 <select class="form-control" id="edit_select_car" disabled>
-
                                 </select>
                             </div>
                         </fieldset>
@@ -243,12 +242,12 @@
                         <fieldset disabled class="col-sm-12 col-md-6">
                             <div class="form-group">
                                 <label for="edit_driver">ผู้ขับรถ</label>
-                                <input type="text" class="form-control" id="edit_driver" placeholder="Sarit T.">
+                                <input type="text" class="form-control" id="edit_driver">
                             </div>
                         </fieldset>
                         <div class="form-group col-sm-12 col-md-6">
                             <label for="edit_job">Job</label>
-                            <input type="text" class="form-control" id="edit_job" placeholder="Jxx-xxxx">
+                            <input type="text" class="form-control" id="edit_job">
                         </div>
                     </div>
 
@@ -256,11 +255,11 @@
                     <div class="form-row">
                         <div class="form-group col-sm-12 col-md-6">
                             <label for="edit_time_start">เวลาเริ่มต้น</label>
-                            <input type="time" class="form-control" id="edit_time_start" placeholder="Jxx-xxxx">
+                            <input type="time" class="form-control" id="edit_time_start">
                         </div>
                         <div class="form-group col-sm-12 col-md-6">
                             <label for="edit_time_stop">เวลาสิ้นสุด</label>
-                            <input type="time" class="form-control" id="edit_time_stop" placeholder="Jxx-xxxx">
+                            <input type="time" class="form-control" id="edit_time_stop">
                         </div>
                     </div>
 
@@ -268,8 +267,8 @@
                     <div class="form-row">
                         <div class="form-group col-sm-12 col-md-12">
                             <label for="edit_location">การเดินทาง</label>
-                            <input type="text" class="form-control" id="edit_location" placeholder="Ex. Home-CTL(HQ)-Home">
-                        </div>                      
+                            <input type="text" class="form-control" id="edit_location">
+                        </div>
                     </div>
 
                     <!-- ROW 5 : เลขไมล์เริ่มต้น, เลขไมล์สิ้นสุด -->
@@ -336,6 +335,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-row ">
+                        <fieldset class="col-sm-12 col-md-12">
+                            <div class="form-group">
+                                <label for="edit_description">รายละเอียด</label>
+                                <textarea class="form-control" id="edit_description" rows="2"></textarea>
+                            </div>
+                        </fieldset>
+                    </div>
                 </form>
             </div>
             <!-- Footer Button -->
@@ -359,6 +366,7 @@
         let holidays = [];
         var table_company;
         let cars = [];
+        let employees = [];
         $(document).ready(async function () {
 
             const today = new Date();
@@ -453,7 +461,7 @@
 
         async function GenerateCarOption(cars) {
             $('#select_cars').empty();
-            $('#select_cars').append(`<option value="" selected disabled>Please Select Driver</option>`);
+            $('#select_cars').append(`<option value="" selected disabled>Please Select Car</option>`);
             for (let i = 0; i < cars.length; i++) {
                 $('#select_cars').append(`<option value="${cars[i].car_id}">${cars[i].car_id}</option>`);
             }
@@ -461,7 +469,7 @@
 
         async function GenerateAllCarOption(cars) {
             $('#edit_select_car').empty();
-            $('#edit_select_car').append(`<option value="" selected disabled>Please Select Driver</option>`);
+            $('#edit_select_car').append(`<option value="" selected disabled>Please Select Car</option>`);
             for (let i = 0; i < cars.length; i++) {
                 $('#edit_select_car').append(`<option value="${cars[i].car_id}">${cars[i].car_id}</option>`);
             }
@@ -525,7 +533,7 @@
         async function LoadCompanyCarTable(month, mode, driver, car) {
 
             const data = await GetData(month, mode, driver, car);
- 
+
             holidays = data.holidays;
             const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
             table_company = $('#table_company').DataTable({
@@ -591,7 +599,7 @@
                     { data: 'dateDisplay', className: 'text-center fw-bold' },
                     { data: 'job', className: 'text-center' },
                     { data: 'car_id', className: 'text-center' },
-                    { data: 'driver', className: 'text-center' },                   
+                    { data: 'driver', className: 'text-center' },
                     {
                         data: 'timeStart', className: 'text-center',
                         render: function (data) {
@@ -690,7 +698,7 @@
 
                     if (rowData) {
                         $(this).toggleClass('table-selected');
-                        const employees = await GetEmployees();
+                        employees = await GetEmployees();
                         let name = employees.filter(f => f.emp_id === rowData.driver).map(m => m.name_en)[0];
 
                         let code = rowData.code;
@@ -704,11 +712,12 @@
                         const mileage_start = rowData.mileage_start;
                         const mileage_stop = rowData.mileage_stop;
                         const distance = rowData.km;
-                        const ctbo = rowData.ctbo;
+                        const fleet = rowData.fleet;
+                        const cash = rowData.cash;
                         const exp = rowData.exp;
                         const pt = rowData.pt;
                         const description = rowData.description;
-                      
+
                         //console.log(car_id);
                         const license_plate = cars.filter(f => f.car_id === car_id).map(m => m.license_plate)[0];
                         if (car_id === "" || car_id === null) {
@@ -719,7 +728,7 @@
                         }else{
                             $('#edit_select_car').prop('disabled', true);
                         }
-                       
+
 
                         $('#edit_code').val(code);
                         $('#edit_date').val(date);
@@ -730,8 +739,9 @@
                         $('#edit_location').val(location);
                         $('#edit_mileage_start').val(mileage_start);
                         $('#edit_mileage_stop').val(mileage_stop);
-                        $('#edit_distance').val(distance);
-                        $('#edit_ctbo').val(ctbo);
+                        $('#edit_km').val(distance);
+                        $('#edit_fleet').val(fleet);
+                        $('#edit_cash').val(cash);
                         $('#edit_exp').val(exp);
                         $('#edit_pt').val(pt);
                         $('#edit_select_car').val(car_id);
@@ -753,6 +763,99 @@
             $('#edit_license_plate').val(license_plate);
         });
 
+        $('#BtnSaveChange').on('click',async function(){
+            const car_id = $('#edit_select_car').val();
+            if (car_id !== null){
+                    const code = $('#edit_code').val();
+                    const date = $('#edit_date').val();
+                    const d = employees.filter(f=>f.name_en.toLowerCase() === $('#edit_driver').val().toLowerCase()).map(m=>m.emp_id)[0];
+                    console.log(employees);
+                    const driver = d;
+                    const job =  $('#edit_job').val();
+                    const time_start = $('#edit_time_start').val();
+                    const time_stop = $('#edit_time_stop').val();
+                    const location =$('#edit_location').val();
+                    const mileage_start = $('#edit_mileage_start').val();
+                    const mileage_stop = $('#edit_mileage_stop').val();
+                    const distance = $('#edit_km').val();
+                    const fleet =  $('#edit_fleet').val();
+                      const cash =  $('#edit_cash').val();
+                    const exp =  $('#edit_exp').val();
+                    const pt =  $('#edit_pt').val();
+                    const description = $('#edit_description').val();
+
+                    const str = JSON.stringify({
+                        'code': code,
+                        'date':date,
+                        'car_id':car_id,
+                        'driver':driver,
+                        'job': job,
+                        'time_start':time_start,
+                        'time_stop':time_stop,
+                        'location':location,
+                        'mileage_start': mileage_start,
+                        'mileage_stop':mileage_stop,
+                        'km':distance,
+                        'fleet':fleet,
+                        'cash':cash,
+                        'exp':exp,
+                        'pt':pt,
+                        'description':description
+                    });
+
+                await $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdateData", "CompanyCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { str },
+                success: function (response) {
+                     if (response === "Success"){
+                         const month = $('#month_start').val();
+            const mode = $('#select_mode').val();
+            const driver = $('#select_drivers').val();
+            const car = $('#select_cars').val();
+                         LoadCompanyCarTable(month,mode,driver,car);
+
+                      }else{
+                          alert(response);
+                      }
+                }
+            });
+            $('#detailModal').modal('hide');
+            }else{
+                alert('ไม่มีรถ');
+            }
+        });
+
+        $('#BtnDelete').on('click',async function(){
+            const code = $('#edit_code').val();
+            await $.ajax({
+                type: "DELETE",
+                url: '@Url.Action("DeleteData", "CompanyCarUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { code },
+                success: function (response) {
+                     if (response === "Success"){
+                          const month = $('#month_start').val();
+            const mode = $('#select_mode').val();
+            const driver = $('#select_drivers').val();
+            const car = $('#select_cars').val();
+                         LoadCompanyCarTable(month,mode,driver,car);
+
+                      }else{
+                          alert(response);
+                      }
+                }
+            });
+            $('#detailModal').modal('hide');
+        });
+
+        $('#edit_mileage_start , #edit_mileage_stop').on('change' ,function(){
+            const start = parseInt($('#edit_mileage_start').val());
+            const stop = parseInt($('#edit_mileage_stop').val());
+            const distance = stop - start;
+            $('#edit_km').val(distance);
+        });
         function mergeDateRows() {
             const api = table_company;
             if (!api || api.rows().count() === 0) return;

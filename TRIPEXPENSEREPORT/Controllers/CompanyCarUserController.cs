@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -303,6 +305,35 @@ namespace TRIPEXPENSEREPORT.Controllers
             List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
             return Json(new { data = result, holidays = holidays });
 
+        }
+
+
+        [HttpPost]
+        public IActionResult UpdateData(string str)
+        {
+            CompanyModel company = JsonConvert.DeserializeObject<CompanyModel>(str);
+            DateTime dt = DateTime.ParseExact(company.date.ToString("dd/MM/yyy"), "MM/dd/yyyy", CultureInfo.InvariantCulture);
+            company.date = dt;
+            company.last_date = DateTime.Now;
+            company.status = "Pending";
+            CompanyModel old_company = Company.GetCompanyByCode(company.code);
+            if (old_company.car_id != null)
+            {
+                company.approver = old_company.approver;
+                company.auto_km = old_company.auto_km;
+                company.program_km = old_company.program_km;
+                company.status = old_company.status;
+                company.date = old_company.date;
+            }
+            string message = Company.UpdateByCode(company);
+            return Json(message);
+        }
+
+        [HttpDelete]
+        public IActionResult DeleteData(string code)
+        {
+            string message = Company.DeleteByCode(code);
+            return Json(message);
         }
 
         public async Task<Dictionary<DateTime, List<CompanyModel>>> ConvertToDictCompanyModels(List<DataModel> dataList)

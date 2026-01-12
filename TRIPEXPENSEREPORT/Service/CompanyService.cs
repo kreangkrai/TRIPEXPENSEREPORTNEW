@@ -568,193 +568,80 @@ namespace TRIPEXPENSEREPORT.Service
             return companies;
         }
 
-        //public string OriginalInserts(List<CompanyModel> companies)
-        //{
-        //    try
-        //    {
-        //        if (con.State == ConnectionState.Closed)
-        //        {
-        //            con.Open();
-        //        }
-        //        string string_command = string.Format($@"
-        //            INSERT INTO 
-        //                OriginalCompany(code,
-        //                    driver,
-        //                    date,
-        //                    car_id,
-        //                    time_start,
-        //                    time_stop,
-        //                    location,
-        //                    zipcode,
-        //                    job,
-        //                    fleet,
-        //                    cash,
-        //                    ctbo,
-        //                    exp,
-        //                    pt,
-        //                    mileage_start,
-        //                    mileage_stop,
-        //                    km,
-        //                    program_km,
-        //                    auto_km,
-        //                    description,
-        //                    status,
-        //                    approver,
-        //                    last_date
-        //                )
-        //                VALUES(@code,
-        //                    @driver,
-        //                    @date,
-        //                    @car_id,
-        //                    @time_start,
-        //                    @time_stop,
-        //                    @location,
-        //                    @zipcode,
-        //                    @job,
-        //                    @fleet,
-        //                    @cash,
-        //                    @ctbo,
-        //                    @exp,
-        //                    @pt,
-        //                    @mileage_start,
-        //                    @mileage_stop,
-        //                    @km,
-        //                    @program_km,
-        //                    @auto_km,
-        //                    @description,
-        //                    @status,
-        //                    @approver,
-        //                    @last_date
-        //                )");
-        //        using (SqlCommand cmd = new SqlCommand(string_command, con))
-        //        {
-        //            cmd.CommandType = CommandType.Text;
-        //            cmd.Parameters.Add("@code", SqlDbType.Text);
-        //            cmd.Parameters.Add("@driver", SqlDbType.Text);
-        //            cmd.Parameters.Add("@date", SqlDbType.Date);
-        //            cmd.Parameters.Add("@car_id", SqlDbType.Text);
-        //            cmd.Parameters.Add("@time_start", SqlDbType.Time);
-        //            cmd.Parameters.Add("@time_stop", SqlDbType.Time);
-        //            cmd.Parameters.Add("@location", SqlDbType.Text);
-        //            cmd.Parameters.Add("@zipcode", SqlDbType.Text);
-        //            cmd.Parameters.Add("@job", SqlDbType.Text);
-        //            cmd.Parameters.Add("@fleet", SqlDbType.Float);
-        //            cmd.Parameters.Add("@cash", SqlDbType.Float);
-        //            cmd.Parameters.Add("@ctbo", SqlDbType.Float);
-        //            cmd.Parameters.Add("@exp", SqlDbType.Float);
-        //            cmd.Parameters.Add("@pt", SqlDbType.Float);
-        //            cmd.Parameters.Add("@mileage_start", SqlDbType.Int);
-        //            cmd.Parameters.Add("@mileage_stop", SqlDbType.Int);
-        //            cmd.Parameters.Add("@km", SqlDbType.Int);
-        //            cmd.Parameters.Add("@program_km", SqlDbType.Int);
-        //            cmd.Parameters.Add("@auto_km", SqlDbType.Int);
-        //            cmd.Parameters.Add("@description", SqlDbType.Text);
-        //            cmd.Parameters.Add("@status", SqlDbType.Text);
-        //            cmd.Parameters.Add("@approver", SqlDbType.Text);
-        //            cmd.Parameters.Add("@last_date", SqlDbType.DateTime);
-
-        //            for (int i = 0; i < companies.Count; i++)
-        //            {
-        //                cmd.Parameters[0].Value = companies[i].code;
-        //                cmd.Parameters[1].Value = companies[i].driver;
-        //                cmd.Parameters[2].Value = companies[i].date;
-        //                cmd.Parameters[3].Value = companies[i].car_id;
-        //                cmd.Parameters[4].Value = companies[i].time_start;
-        //                cmd.Parameters[5].Value = companies[i].time_stop;
-        //                cmd.Parameters[6].Value = companies[i].location;
-        //                cmd.Parameters[7].Value = companies[i].zipcode;
-        //                cmd.Parameters[8].Value = companies[i].job;
-        //                cmd.Parameters[9].Value = companies[i].fleet;
-        //                cmd.Parameters[10].Value = companies[i].cash;
-        //                cmd.Parameters[11].Value = companies[i].ctbo;
-        //                cmd.Parameters[12].Value = companies[i].exp;
-        //                cmd.Parameters[13].Value = companies[i].pt;
-        //                cmd.Parameters[14].Value = companies[i].mileage_start;
-        //                cmd.Parameters[15].Value = companies[i].mileage_stop;
-        //                cmd.Parameters[16].Value = companies[i].km;
-        //                cmd.Parameters[17].Value = companies[i].program_km;
-        //                cmd.Parameters[18].Value = companies[i].auto_km;
-        //                cmd.Parameters[19].Value = companies[i].description;
-        //                cmd.Parameters[20].Value = companies[i].status;
-        //                cmd.Parameters[21].Value = companies[i].approver;
-        //                cmd.Parameters[22].Value = companies[i].last_date;
-        //                cmd.ExecuteNonQuery();
-        //            }
-
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ex.Message;
-        //    }
-        //    finally
-        //    {
-        //        if (con.State == ConnectionState.Open)
-        //        {
-        //            con.Close();
-        //        }
-        //    }
-        //    return "Success";
-        //}
-
         public string UpdateByCode(CompanyModel company)
         {
             try
             {
-                if (con.State == ConnectionState.Closed)
+                if (con_report.State == ConnectionState.Closed)
                 {
-                    con.Open();
+                    con_report.Open();
                 }
                 string string_command = string.Format($@"
-                    UPDATE 
-                        EditCompany SET
-                        driver = @driver,
-                        date = @date,
-                        car_id = @car_id,
-	                    time_start = @time_start,
-	                    time_stop = @time_stop,
-                        location = @location,
-                        job = @job,
-                        fleet = @fleet,
-						cash = @cash,
-                        ctbo = @ctbo,
-						exp = @exp,
-						pt = @pt,
-						mileage_start = @mileage_start,
-						mileage_stop = @mileage_stop,
-						km = @km,
-						program_km = @program_km,
-						auto_km = @auto_km,
-						description = @description,
-						status = @status,
-						approver = @approver,
-						last_date  = @last_date   	                                                          
-                        WHERE code = @code");
-                using (SqlCommand cmd = new SqlCommand(string_command, con))
+                    IF EXISTS (SELECT 1 FROM [dbo].[EditCompany] WHERE code = @code)
+                    BEGIN
+                            UPDATE 
+                                EditCompany SET
+                                driver = @driver,
+                                date = @date,
+                                car_id = @car_id,
+	                            time_start = @time_start,
+	                            time_stop = @time_stop,
+                                location = @location,
+                                job = @job,
+                                fleet = @fleet,
+						        cash = @cash,
+                                ctbo = @ctbo,
+						        exp = @exp,
+						        pt = @pt,
+						        mileage_start = @mileage_start,
+						        mileage_stop = @mileage_stop,
+						        km = @km,
+						        program_km = @program_km,
+						        auto_km = @auto_km,
+						        description = @description,
+						        status = @status,
+						        approver = @approver,
+						        last_date  = @last_date   	                                                          
+                                WHERE code = @code
+                            END
+                                ELSE
+                                BEGIN
+                                    INSERT INTO [dbo].[EditCompany] (
+                                        code, car_id ,driver, [date], time_start, time_stop, location, job,
+                                        fleet ,cash, ctbo, exp, pt, mileage_start, mileage_stop, km,
+                                        program_km, auto_km, description, status, approver, last_date
+                                    )
+                                    VALUES (
+                                        @code, @car_id ,@driver, @date, @time_start, @time_stop, @location, @job,
+                                        @fleet ,@cash, @ctbo, @exp, @pt, @mileage_start, @mileage_stop, @km,
+                                        @program_km, @auto_km, @description, @status, @approver, @last_date
+                                    );
+                                END");
+                using (SqlCommand cmd = new SqlCommand(string_command, con_report))
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.AddWithValue("@code", company.code);
-                    cmd.Parameters.AddWithValue("@driver", company.driver);
-                    cmd.Parameters.AddWithValue("@date", company.date);
-                    cmd.Parameters.AddWithValue("@car_id", company.car_id);
-                    cmd.Parameters.AddWithValue("@time_start", company.time_start);
-                    cmd.Parameters.AddWithValue("@time_stop", company.time_stop);
-                    cmd.Parameters.AddWithValue("@location", company.location);
-                    cmd.Parameters.AddWithValue("@job", company.job);
-                    cmd.Parameters.AddWithValue("@fleet", company.fleet);
-                    cmd.Parameters.AddWithValue("@cash", company.cash);
-                    cmd.Parameters.AddWithValue("@ctbo", company.ctbo);
-                    cmd.Parameters.AddWithValue("@exp", company.exp);
-                    cmd.Parameters.AddWithValue("@pt", company.pt);
-                    cmd.Parameters.AddWithValue("@mileage_start", company.mileage_start);
-                    cmd.Parameters.AddWithValue("@mileage_stop", company.mileage_stop);
-                    cmd.Parameters.AddWithValue("@km", company.km);
-                    cmd.Parameters.AddWithValue("@program_km", company.program_km);
-                    cmd.Parameters.AddWithValue("@auto_km", company.auto_km);
-                    cmd.Parameters.AddWithValue("@description", company.description);
-                    cmd.Parameters.AddWithValue("@status", company.status);
-                    cmd.Parameters.AddWithValue("@approver", company.approver);
-                    cmd.Parameters.AddWithValue("@last_date", company.last_date);
+                    cmd.Parameters.Add("@code", SqlDbType.NVarChar, 50).Value = company.code ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@driver", SqlDbType.NVarChar, 20).Value = company.driver ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@date", SqlDbType.Date).Value = company.date;   
+                    cmd.Parameters.Add("@car_id", SqlDbType.NVarChar, 50).Value = company.car_id ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@time_start", SqlDbType.Time).Value = company.time_start;     // หรือ datetime ถ้าเก็บทั้งวันที่+เวลา
+                    cmd.Parameters.Add("@time_stop", SqlDbType.Time).Value = company.time_stop;
+                    cmd.Parameters.Add("@location", SqlDbType.NVarChar, 200).Value = company.location ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@job", SqlDbType.NVarChar, 200).Value = company.job ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@fleet", SqlDbType.Float, 50).Value = company.fleet;
+                    cmd.Parameters.Add("@cash", SqlDbType.Float).Value = company.cash;           // หรือ int ถ้าเป็นจำนวนเต็ม
+                    cmd.Parameters.Add("@ctbo", SqlDbType.Float).Value = company.ctbo;
+                    cmd.Parameters.Add("@exp", SqlDbType.Float).Value = company.exp;
+                    cmd.Parameters.Add("@pt", SqlDbType.Float).Value = company.pt;
+                    cmd.Parameters.Add("@mileage_start", SqlDbType.Int).Value = company.mileage_start;
+                    cmd.Parameters.Add("@mileage_stop", SqlDbType.Int).Value = company.mileage_stop;
+                    cmd.Parameters.Add("@km", SqlDbType.Int).Value = company.km;
+                    cmd.Parameters.Add("@program_km", SqlDbType.Int).Value = company.program_km;
+                    cmd.Parameters.Add("@auto_km", SqlDbType.Int).Value = company.auto_km;
+                    cmd.Parameters.Add("@description", SqlDbType.NVarChar, 255).Value = company.description ?? (object)DBNull.Value; // -1 = max
+                    cmd.Parameters.Add("@status", SqlDbType.NVarChar, 20).Value = company.status ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@approver", SqlDbType.NVarChar, 100).Value = company.approver ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@last_date", SqlDbType.DateTime).Value = company.last_date;      // หรือ DateTime?
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -764,9 +651,9 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (con.State == ConnectionState.Open)
+                if (con_report.State == ConnectionState.Open)
                 {
-                    con.Close();
+                    con_report.Close();
                 }
             }
             return "Success";
@@ -855,6 +742,115 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return cars;
+        }
+
+        public CompanyModel GetCompanyByCode(string code)
+        {
+            CompanyModel company = new CompanyModel();
+            try
+            {
+                if (con_report.State == ConnectionState.Closed)
+                {
+                    con_report.Open();
+                }
+                string strCmd = string.Format($@"SELECT code,
+	                                            driver,
+	                                            date,
+	                                            car_id,
+	                                            time_start,
+	                                            time_stop,
+                                                location,
+                                                job,
+												fleet,
+												cash,
+                                                ctbo,
+												exp,
+												pt,
+												mileage_start,
+												mileage_stop,
+												km,
+												program_km,
+												auto_km,
+												description,
+												status,
+												approver,
+												last_date
+                                                FROM EditCompany
+                                                WHERE code = @code");
+                SqlCommand command = new SqlCommand(strCmd, con_report);
+                command.Parameters.AddWithValue("@code", code);
+                SqlDataReader dr = command.ExecuteReader();
+                if (dr.HasRows)
+                {
+                    while (dr.Read())
+                    {
+                        company = new CompanyModel()
+                        {
+                            code = dr["code"].ToString(),
+                            driver = dr["driver"].ToString(),
+                            date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            car_id = dr["car_id"].ToString(),
+                            time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
+                            time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
+                            location = dr["location"].ToString(),
+                            job = dr["job"].ToString(),
+                            fleet = dr["fleet"] != DBNull.Value ? Convert.ToDouble(dr["fleet"].ToString()) : 0,
+                            cash = dr["cash"] != DBNull.Value ? Convert.ToDouble(dr["cash"].ToString()) : 0,
+                            ctbo = dr["ctbo"] != DBNull.Value ? Convert.ToDouble(dr["ctbo"].ToString()) : 0,
+                            exp = dr["exp"] != DBNull.Value ? Convert.ToDouble(dr["exp"].ToString()) : 0,
+                            pt = dr["pt"] != DBNull.Value ? Convert.ToDouble(dr["pt"].ToString()) : 0,
+                            mileage_start = dr["mileage_start"] != DBNull.Value ? Convert.ToInt32(dr["mileage_start"].ToString()) : 0,
+                            mileage_stop = dr["mileage_stop"] != DBNull.Value ? Convert.ToInt32(dr["mileage_stop"].ToString()) : 0,
+                            km = dr["km"] != DBNull.Value ? Convert.ToInt32(dr["km"].ToString()) : 0,
+                            program_km = dr["program_km"] != DBNull.Value ? Convert.ToInt32(dr["program_km"].ToString()) : 0,
+                            auto_km = dr["auto_km"] != DBNull.Value ? Convert.ToInt32(dr["auto_km"].ToString()) : 0,
+                            description = dr["description"].ToString(),
+                            status = dr["status"].ToString(),
+                            approver = dr["approver"].ToString(),
+                            last_date = dr["last_date"] != DBNull.Value ? Convert.ToDateTime(dr["last_date"].ToString()) : DateTime.MinValue,
+                        };
+                    }
+                    dr.Close();
+                }
+            }
+            finally
+            {
+                if (con_report.State == ConnectionState.Open)
+                {
+                    con_report.Close();
+                }
+            }
+            return company;
+        }
+
+        public string DeleteByCode(string code)
+        {
+            try
+            {
+                if (con_report.State == ConnectionState.Closed)
+                {
+                    con_report.Open();
+                }
+                string string_command = string.Format($@"DELETE FROM EditCompany WHERE code = @code");
+                using (SqlCommand cmd = new SqlCommand(string_command, con_report))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@code", code);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con_report.State == ConnectionState.Open)
+                {
+                    con_report.Close();
+                }
+            }
+            return "Success";
         }
     }
 }

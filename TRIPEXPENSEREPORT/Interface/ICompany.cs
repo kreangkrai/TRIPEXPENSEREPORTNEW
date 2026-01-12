@@ -4,10 +4,16 @@ namespace TRIPEXPENSEREPORT.Interface
 {
     public interface ICompany
     {
-        string OriginalInserts(List<CompanyModel> companies);
+        //string OriginalInserts(List<CompanyModel> companies);
         string EditInserts(List<CompanyModel> companies);
+        List<CompanyModel> GetCompaniesByDate(DateTime start_date, DateTime stop_date);
+        List<CompanyModel> GetCompaniesByDriverDate(string driver,DateTime start_date, DateTime stop_date);
+        List<CompanyModel> GetCompaniesByCarDate(string car,DateTime start_date, DateTime stop_date);
         List<CompanyViewModel> GetOriginalCompaniesByDate(DateTime start_date, DateTime stop_date);
         List<CompanyViewModel> GetEditCompaniesByDate(DateTime start_date, DateTime stop_date);
         string UpdateByCode(CompanyModel company);
+
+        List<EmployeeModel> GetCompanyDrivers(DateTime start_date, DateTime stop_date);
+        List<CarModel> GetCompanyCars(DateTime start_date, DateTime stop_date);
     }
 }

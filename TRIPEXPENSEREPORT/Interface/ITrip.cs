@@ -7,5 +7,6 @@ namespace TRIPEXPENSEREPORT.Interface
         List<DataModel> GetDatasALLByEMPID(string emp_id , DateTime start , DateTime end );
         List<DataModel> GetDatasPersonalByEMPID(string emp_id, DateTime start, DateTime end);
         List<DataModel> GetDatasCompnayByEMPID(string emp_id, DateTime start, DateTime end);
+        List<DataModel> GetDatasCompnayByDate(DateTime start, DateTime end);
     }
 }

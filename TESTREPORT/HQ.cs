@@ -41,8 +41,8 @@ namespace TESTREPORT
                     location = "CTL(HQ)",
                     location_mode = "OTHER",
                     mode = "PERSONAL",
-                    status = "START",
-                    trip = DataModel.trip,
+                    //status = "START",
+                    //trip = DataModel.trip,
                     zipcode = DataModel.datas[i].zipcode
                 };
                 DataTripModel trip2 = new DataTripModel()
@@ -53,8 +53,8 @@ namespace TESTREPORT
                     location = "HOME",
                     location_mode = "OTHER",
                     mode = "PERSONAL",
-                    status = "STOP",
-                    trip = DataModel.trip,
+                    //status = "STOP",
+                    //trip = DataModel.trip,
                     zipcode = DataModel.datas[i].zipcode
                 };
                 trips.Add(trip1);

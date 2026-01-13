@@ -1,5 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
+using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System.Data;
+using System.Drawing;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
@@ -32,6 +35,7 @@ namespace TRIPEXPENSEREPORT.Service
                 string strCmd = string.Format($@"SELECT code,
 	                                            driver,
 	                                            date,
+                                                zipcode,
 	                                            car_id,
 	                                            time_start,
 	                                            time_stop,
@@ -66,6 +70,7 @@ namespace TRIPEXPENSEREPORT.Service
                             code = dr["code"].ToString(),
                             driver = dr["driver"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            zipcode = dr["zipcode"].ToString(),
                             car_id = dr["car_id"].ToString(),
                             time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
                             time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
@@ -112,6 +117,7 @@ namespace TRIPEXPENSEREPORT.Service
                 string strCmd = string.Format($@"SELECT code,
 	                                            driver,
 	                                            date,
+                                                zipcode,
 	                                            car_id,
 	                                            time_start,
 	                                            time_stop,
@@ -147,6 +153,7 @@ namespace TRIPEXPENSEREPORT.Service
                             code = dr["code"].ToString(),
                             driver = dr["driver"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            zipcode = dr["zipcode"].ToString(),
                             car_id = dr["car_id"].ToString(),
                             time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
                             time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
@@ -193,6 +200,7 @@ namespace TRIPEXPENSEREPORT.Service
                 string strCmd = string.Format($@"SELECT code,
 	                                            driver,
 	                                            date,
+                                                zipcode,
 	                                            car_id,
 	                                            time_start,
 	                                            time_stop,
@@ -228,6 +236,7 @@ namespace TRIPEXPENSEREPORT.Service
                             code = dr["code"].ToString(),
                             driver = dr["driver"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            zipcode = dr["zipcode"].ToString(),
                             car_id = dr["car_id"].ToString(),
                             time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
                             time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
@@ -275,6 +284,7 @@ namespace TRIPEXPENSEREPORT.Service
                         EditCompany(code,
                             driver,
                             date,
+                            zipcode,
                             car_id,
                             time_start,
                             time_stop,
@@ -298,6 +308,7 @@ namespace TRIPEXPENSEREPORT.Service
                         VALUES(@code,
                             @driver,
                             @date,
+                            @zipcode,
                             @car_id,
                             @time_start,
                             @time_stop,
@@ -326,6 +337,7 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@code", SqlDbType.NVarChar).Value = null;
                     cmd.Parameters.Add("@driver", SqlDbType.NVarChar);
                     cmd.Parameters.Add("@date", SqlDbType.Date);
+                    cmd.Parameters.Add("@zipcode", SqlDbType.NVarChar);
                     cmd.Parameters.Add("@car_id", SqlDbType.NVarChar);
                     cmd.Parameters.Add("@time_start", SqlDbType.Time);
                     cmd.Parameters.Add("@time_stop", SqlDbType.Time);
@@ -351,6 +363,7 @@ namespace TRIPEXPENSEREPORT.Service
                         cmd.Parameters["@code"].Value = item.code ?? (object)DBNull.Value;
                         cmd.Parameters["@driver"].Value = item.driver ?? (object)DBNull.Value;
                         cmd.Parameters["@date"].Value = item.date;
+                        cmd.Parameters["@zipcode"].Value = item.zipcode ?? (object)DBNull.Value;
                         cmd.Parameters["@car_id"].Value = item.car_id ?? (object)DBNull.Value;
                         cmd.Parameters["@time_start"].Value = item.time_start;
                         cmd.Parameters["@time_stop"].Value = item.time_stop;
@@ -583,6 +596,7 @@ namespace TRIPEXPENSEREPORT.Service
                                 EditCompany SET
                                 driver = @driver,
                                 date = @date,
+                                zipcode = @zipcode,
                                 car_id = @car_id,
 	                            time_start = @time_start,
 	                            time_stop = @time_stop,
@@ -607,12 +621,12 @@ namespace TRIPEXPENSEREPORT.Service
                                 ELSE
                                 BEGIN
                                     INSERT INTO [dbo].[EditCompany] (
-                                        code, car_id ,driver, [date], time_start, time_stop, location, job,
+                                        code, car_id ,driver, [date],zipcode, time_start, time_stop, location, job,
                                         fleet ,cash, ctbo, exp, pt, mileage_start, mileage_stop, km,
                                         program_km, auto_km, description, status, approver, last_date
                                     )
                                     VALUES (
-                                        @code, @car_id ,@driver, @date, @time_start, @time_stop, @location, @job,
+                                        @code, @car_id ,@driver, @date,@zipcode, @time_start, @time_stop, @location, @job,
                                         @fleet ,@cash, @ctbo, @exp, @pt, @mileage_start, @mileage_stop, @km,
                                         @program_km, @auto_km, @description, @status, @approver, @last_date
                                     );
@@ -622,7 +636,8 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.Add("@code", SqlDbType.NVarChar, 50).Value = company.code ?? (object)DBNull.Value;
                     cmd.Parameters.Add("@driver", SqlDbType.NVarChar, 20).Value = company.driver ?? (object)DBNull.Value;
-                    cmd.Parameters.Add("@date", SqlDbType.Date).Value = company.date;   
+                    cmd.Parameters.Add("@date", SqlDbType.Date).Value = company.date;
+                    cmd.Parameters.Add("@zipcode", SqlDbType.NVarChar, 50).Value = company.zipcode ?? (object)DBNull.Value;
                     cmd.Parameters.Add("@car_id", SqlDbType.NVarChar, 50).Value = company.car_id ?? (object)DBNull.Value;
                     cmd.Parameters.Add("@time_start", SqlDbType.Time).Value = company.time_start;     // หรือ datetime ถ้าเก็บทั้งวันที่+เวลา
                     cmd.Parameters.Add("@time_stop", SqlDbType.Time).Value = company.time_stop;
@@ -756,6 +771,7 @@ namespace TRIPEXPENSEREPORT.Service
                 string strCmd = string.Format($@"SELECT code,
 	                                            driver,
 	                                            date,
+                                                zipcode,
 	                                            car_id,
 	                                            time_start,
 	                                            time_stop,
@@ -789,6 +805,7 @@ namespace TRIPEXPENSEREPORT.Service
                             code = dr["code"].ToString(),
                             driver = dr["driver"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
+                            zipcode = dr["zipcode"].ToString(),
                             car_id = dr["car_id"].ToString(),
                             time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
                             time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
@@ -851,6 +868,130 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return "Success";
+        }
+
+        public Stream ExportCompanyNormal(FileInfo path, List<CompanyModel> companies, string month, CTLModels.EmployeeModel emp, List<CarModel> _cars)
+        {
+            Stream stream = new MemoryStream();
+            if (path.Exists)
+            {
+                using (ExcelPackage package = new ExcelPackage(path))
+                {
+                    var workbook = package.Workbook;
+                    var worksheet = workbook.Worksheets["template"];
+                    var parts = month.Split('-');
+                    if (parts.Length != 2
+                        || !int.TryParse(parts[0], out int year)
+                        || !int.TryParse(parts[1], out int mon))
+                    {
+                        return null;
+                    }
+                    DateTime start = new DateTime(year, mon, 1);
+                    DateTime stop = start.AddMonths(1).AddDays(-1);
+                    int startRows = 10;
+
+                    var cars = companies.GroupBy(g => g.car_id).Select(s => new { car = s.FirstOrDefault().car_id }).ToList();
+                    for (int j = 0; j < cars.Count; j++)
+                    {
+                        var _companies = companies.Where(w => w.car_id == cars[j].car).ToList();
+                        for (DateTime date = start; date <= stop; date = date.AddDays(1))
+                        {
+                           
+                            List<CompanyModel> comps = _companies.Where(w => w.date.Date == date.Date).ToList();
+
+                            if (comps.Count > 0)
+                            {
+                                string time_start = comps.FirstOrDefault().time_start.ToString(@"hh\:mm");
+                                string time_stop = comps.FirstOrDefault().time_stop.ToString(@"hh\:mm");
+                                string destination = comps.FirstOrDefault().location.ToString();
+                                double fleet = comps.Select(s => s.fleet).Sum();
+                                double cash = comps.Select(s => s.cash).Sum();
+                                double exp = comps.Select(s => s.exp).Sum();
+                                double pt = comps.Select(s => s.pt).Sum();
+                                string mileage_start = comps.FirstOrDefault().mileage_start.ToString();
+                                string mileage_stop = comps.FirstOrDefault().mileage_stop.ToString();
+                                int km = comps.Select(s => s.km).Sum();
+                                string job = comps.Where(w => w.job != "").FirstOrDefault().job.ToString();
+                                if (comps.Count > 1)
+                                {
+                                    time_stop = comps.LastOrDefault().time_stop.ToString(@"hh\:mm");
+                                    destination = string.Join(',', comps.Select(s => s.location).ToArray());
+                                    mileage_stop = comps.LastOrDefault().mileage_stop.ToString();
+                                }
+
+
+                                worksheet.Cells["A" + (startRows)].Value = date.ToString("dd/MM/yyyy");
+                                worksheet.Cells["B" + (startRows)].Value = time_start;
+                                worksheet.Cells["C" + (startRows)].Value = time_stop;
+                                worksheet.Cells["E" + (startRows)].Value = destination;
+                                worksheet.Cells["H" + (startRows)].Value = fleet;
+                                worksheet.Cells["I" + (startRows)].Value = cash;
+                                worksheet.Cells["J" + (startRows)].Value = pt;
+                                worksheet.Cells["K" + (startRows)].Value = exp;
+                                worksheet.Cells["L" + (startRows)].Value = mileage_start;
+                                worksheet.Cells["M" + (startRows)].Value = mileage_stop;
+                                worksheet.Cells["N" + (startRows)].Value = km;
+                                worksheet.Cells["O" + (startRows)].Value = job;
+                                startRows++;
+                            }
+                        }
+
+
+                        worksheet.Cells["O3"].Value = _cars.Where(w=>w.car_id == cars[j].car).Select(s=>s.license_plate).FirstOrDefault();
+                        worksheet.Cells["B5"].Value = emp.name_en;
+                        worksheet.Cells["K5"].Value = emp.department;
+                        worksheet.Cells["A44"].Value = emp.name_en;
+                        worksheet.Cells["A45"].Value = DateTime.Now.ToString("dd/MM/yyyy");
+
+
+                        worksheet.Cells["H42"].Formula = "=SUM(H10:H41)";
+                        worksheet.Cells["I42"].Formula = "=SUM(I10:I41)";
+                        worksheet.Cells["J42"].Formula = "=SUM(J10:J41)";
+                        worksheet.Cells["K42"].Formula = "=SUM(K10:K41)";
+                        worksheet.Cells["K43"].Formula = "=H42+J42+I42+K42";
+                        worksheet.Cells["N43"].Formula = "=SUM(N10:N41)";
+
+                        //Copy template to another sheets
+                        worksheet = workbook.Worksheets.Copy("template", cars[j].car);
+                        worksheet = workbook.Worksheets["template"];
+
+                        startRows = 10;
+                        for (int i = 0; i < _companies.Count; i++)
+                        {
+                            worksheet.Cells["A" + (i + startRows)].Value = "";
+                            worksheet.Cells["B" + (i + startRows)].Value = "";
+                            worksheet.Cells["C" + (i + startRows)].Value = "";
+                            worksheet.Cells["E" + (i + startRows)].Value = "";
+                            worksheet.Cells["H" + (i + startRows)].Value = "";
+                            worksheet.Cells["I" + (i + startRows)].Value = "";
+                            worksheet.Cells["J" + (i + startRows)].Value = "";
+                            worksheet.Cells["K" + (i + startRows)].Value = "";
+                            worksheet.Cells["L" + (i + startRows)].Value = "";
+                            worksheet.Cells["M" + (i + startRows)].Value = "";
+                            worksheet.Cells["N" + (i + startRows)].Value = "";
+                            worksheet.Cells["O" + (i + startRows)].Value = "";
+                        }
+
+                        worksheet.Cells["O3"].Value = "";
+                        worksheet.Cells["B5"].Value = "";
+                        worksheet.Cells["K5"].Value = "";
+                        worksheet.Cells["A44"].Value = "";
+                        worksheet.Cells["A45"].Value = "";
+
+                        worksheet.Cells["H42"].Formula = "=SUM(H10:H41)";
+                        worksheet.Cells["I42"].Formula = "=SUM(I10:I41)";
+                        worksheet.Cells["J42"].Formula = "=SUM(J10:J41)";
+                        worksheet.Cells["K42"].Formula = "=SUM(K10:K41)";
+                        worksheet.Cells["K43"].Formula = "=H42+J42+I42+K42";
+                        worksheet.Cells["N43"].Formula = "=SUM(N10:N41)";
+                    }
+
+                    package.SaveAs(stream);
+                    stream.Position = 0;
+                }
+            }
+
+            return stream;
         }
     }
 }

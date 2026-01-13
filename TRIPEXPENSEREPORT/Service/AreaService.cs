@@ -50,6 +50,6 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return areas;
-        }
+        }       
     }
 }

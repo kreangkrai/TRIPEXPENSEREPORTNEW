@@ -14,7 +14,7 @@ namespace TRIPEXPENSEREPORT.Service
             connect = new ConnectSQL();
             con = connect.OpenConnect();
         }
-        public List<DataModel> GetDatasALLByEMPID(string emp_id, DateTime start, DateTime end)
+        public List<DataModel> GetDatasPassengerALLByEMPID(string emp_id, DateTime start, DateTime end)
         {
             List<DataModel> trips = new List<DataModel>();
             try
@@ -23,60 +23,7 @@ namespace TRIPEXPENSEREPORT.Service
                 {
                     con.Open();
                 }
-                string strCmd = string.Format($@"SELECT '' AS car_id,
-                                           driver,
-                                           '' AS passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           distance,
-                                           speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           mileage,
-                                           cash,
-                                           0 AS fleetcard,
-                                           '' AS borrower,
-                                           'PERSONAL' AS mode
-                                    FROM Personal 
-                                    WHERE driver = @emp_id 
-                                      AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
-                                      AND status <> 'NA'
-
-                                    UNION ALL
-
-                                    SELECT car_id,
-                                           driver,
-                                           '' AS passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           distance,
-                                           speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           mileage,
-                                           cash,
-                                           fleetcard,
-                                           borrower,
-                                           'COMPANY' AS mode
-                                    FROM Company 
-                                    WHERE  driver = @emp_id 
-                                      AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
-                                      AND status <> 'NA'
-
-                                    UNION ALL
-
+                string strCmd = string.Format($@"
                                     SELECT '' AS car_id,
                                            '' AS driver,
                                            passenger,
@@ -99,7 +46,7 @@ namespace TRIPEXPENSEREPORT.Service
                                            'PUBLIC' AS mode
                                     FROM [Public] 
                                     WHERE passenger = @emp_id 
-                                      AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
+                                      AND date >= @start AND date <= @stop 
                                       AND status <> 'NA'
 
                                     UNION ALL
@@ -126,7 +73,7 @@ namespace TRIPEXPENSEREPORT.Service
                                            'PASSENGER PERSONAL' AS mode
                                     FROM Passenger_Personal 
                                     WHERE passenger = @emp_id 
-                                      AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
+                                      AND date >= @start AND date <= @stop
                                       AND status <> 'NA'
 
                                     UNION ALL
@@ -153,11 +100,13 @@ namespace TRIPEXPENSEREPORT.Service
                                            'PASSENGER COMPANY' AS mode
                                     FROM Passenger_Company 
                                     WHERE passenger = @emp_id 
-                                      AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
+                                      AND date >= @start AND date <= @stop  
                                       AND status <> 'NA';
                                     ");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@emp_id", emp_id);
+                command.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@stop", end.ToString("yyyy-MM-dd"));
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -232,10 +181,12 @@ namespace TRIPEXPENSEREPORT.Service
                                            'PERSONAL' AS mode
                                     FROM Personal 
                                     WHERE driver = @emp_id 
-                                      AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
+                                      AND date >= @start AND date <= @stop 
                                       AND status <> 'NA';");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@emp_id", emp_id);
+                command.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@stop", end.ToString("yyyy-MM-dd"));
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
@@ -310,10 +261,12 @@ namespace TRIPEXPENSEREPORT.Service
                                            'COMPANY' AS mode
                                     FROM Company 
                                     WHERE  driver = @emp_id 
-                                      AND date BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}' 
+                                      AND date >= @start AND date <= @stop
                                       AND status <> 'NA';");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@emp_id", emp_id);
+                command.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@stop", end.ToString("yyyy-MM-dd"));
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {

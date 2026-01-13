@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MathNet.Numerics.Distributions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,8 +21,10 @@ namespace TRIPEXPENSEREPORT.Controllers
         private CTLInterfaces.IEmployee CTLEmployees;
         private IEmployee Employees;
         private IGasoline Gasoline;
+        private IArea Area;
+        private IProvince Province;
         private readonly IWebHostEnvironment hostingEnvironment;
-        public PersonalCarUserController(IPersonal personal, ITrip trip, CTLInterfaces.IHoliday holiday, CTLInterfaces.IEmployee ctlEmployees, IEmployee employees, IGasoline gasoline, IOptions<AppSettings> options, IWebHostEnvironment _hostingEnvironment)
+        public PersonalCarUserController(IPersonal personal, ITrip trip, CTLInterfaces.IHoliday holiday, CTLInterfaces.IEmployee ctlEmployees, IEmployee employees, IGasoline gasoline, IArea area, IProvince province, IOptions<AppSettings> options, IWebHostEnvironment _hostingEnvironment)
         {
             Personal = personal;
             Trip = trip;
@@ -29,6 +32,8 @@ namespace TRIPEXPENSEREPORT.Controllers
             CTLEmployees = ctlEmployees;
             Employees = employees;
             Gasoline = gasoline;
+            Area = area;
+            Province = province;
             _googleMapsApiKey = options.Value.GoogleMapsApiKey;
             hostingEnvironment = _hostingEnvironment;
         }
@@ -167,6 +172,8 @@ namespace TRIPEXPENSEREPORT.Controllers
                     datas.AddRange(data);
                 }
             }
+            List<ProvinceModel> provinces = Province.GetProvinces();
+            
 
             List<PersonalModel> lookup = await ConvertToPersonalModels(datas);
 
@@ -212,7 +219,9 @@ namespace TRIPEXPENSEREPORT.Controllers
                         auto_km = k.auto_km,
                         description = k.description,
                         status = k.status,
-                        gasoline = k.gasoline
+                        gasoline = k.gasoline,
+                        zipcode = k.zipcode,
+                        province = provinces.Where(w=>w.zipcode == k.zipcode).Select(s=>s.province).FirstOrDefault()
                     })
                     .OrderBy(x => x.date)
                     .ThenBy(x => x.timeStart)
@@ -221,7 +230,8 @@ namespace TRIPEXPENSEREPORT.Controllers
                 List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
                 GasolineModel gasoline = Gasoline.GetGasolineByMonth(month);
                 PersonalGasolineModel gasoline_type = Personal.GetPersonalGasoline(emp_id, month);
-                return Json(new { data = result, holidays = holidays, gasoline = gasoline , gasoline_type = gasoline_type });
+               
+                return Json(new { data = result, holidays = holidays, gasoline = gasoline , gasoline_type = gasoline_type , provinces = provinces });
             }
             else
             {
@@ -285,6 +295,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     program_km = (int)Math.Round(stop.distance, 0),
                     gasoline = "",
                     approver = "",
+                    zipcode = ""
                 };
 
                 if (!result.ContainsKey(date))
@@ -302,10 +313,72 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             var grouped = dataList.GroupBy(d => new { d.date.Date, d.trip });
 
+            List<AreaModel> areas = Area.GetAreas();
+
             foreach (var tripGroup in grouped)
             {
                 var date = tripGroup.Key.Date;
                 var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
+                List<string> zipcodes = tripGroup.Select(s => s.zipcode).ToList();
+
+                string emp_id = items[0].driver;
+                string zipcode = "";
+                if (emp_id != "")
+                {
+                    HashSet<string> set_area = new HashSet<string>();
+                    CTLModels.EmployeeModel employee = CTLEmployees.GetEmployeeByID(emp_id);
+                    string emp_location = employee.location;
+                    if (emp_location.ToLower() == "hq")
+                    {
+                        foreach (var area in areas)
+                        {
+                            if (area.hq)
+                            {
+                                set_area.Add(area.code);
+                            }
+                        }
+                    }
+                    if (emp_location.ToLower() == "rbo")
+                    {
+                        foreach (var area in areas)
+                        {
+                            if (area.rbo)
+                            {
+                                set_area.Add(area.code);
+                            }
+                        }
+                    }
+                    if (emp_location.ToLower() == "kbo")
+                    {
+                        foreach (var area in areas)
+                        {
+                            if (area.kbo)
+                            {
+                                set_area.Add(area.code);
+                            }
+                        }
+                    }
+
+                    bool out_zone = false;
+
+                    foreach (var zip in zipcodes)
+                    {
+                        if (zip != "")
+                        {
+                            if (set_area.Contains(zip.Substring(0, 2)))
+                            {
+                                out_zone = true;
+                                zipcode = zip;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!out_zone)
+                    {
+                        zipcode = zipcodes[0];
+                    }
+                }
 
                 var start = items[0];
                 var stop = items[items.Count - 1];
@@ -352,6 +425,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     program_km = (int)Math.Round(stop.distance, 0),
                     gasoline = "",
                     approver = "",
+                    zipcode = zipcode
                 };
                 result.Add(personal);
             }

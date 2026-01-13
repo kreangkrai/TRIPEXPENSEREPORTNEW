@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NPOI.SS.Formula.Functions;
+using NPOI.SS.Formula.PTG;
 using System.Globalization;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
@@ -17,7 +20,10 @@ namespace TRIPEXPENSEREPORT.Controllers
         private CTLInterfaces.IEmployee CTLEmployees;
         private ITrip Trip;
         private CTLInterfaces.IHoliday Holiday;
-        public CompanyCarUserController(IEmployee employees, CTLInterfaces.IEmployee ctlEmployees, ICompany company, ITrip trip, CTLInterfaces.IHoliday holiday, ICar car,IOptions<AppSettings> options)
+        private IArea Area;
+        private IProvince Province;
+        private readonly IWebHostEnvironment hostingEnvironment;
+        public CompanyCarUserController(IEmployee employees, CTLInterfaces.IEmployee ctlEmployees, ICompany company, ITrip trip, CTLInterfaces.IHoliday holiday, ICar car, IArea area, IProvince province,IOptions<AppSettings> options, IWebHostEnvironment _hostingEnvironment)
         {
             Employees = employees;
             CTLEmployees = ctlEmployees;
@@ -25,6 +31,9 @@ namespace TRIPEXPENSEREPORT.Controllers
             Trip = trip;
             Holiday = holiday;
             Car = car;
+            Area = area;
+            Province = province;
+            hostingEnvironment = _hostingEnvironment;
             _googleMapsApiKey = options.Value.GoogleMapsApiKey;
         }
         public IActionResult Index()
@@ -190,6 +199,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                         auto_km = k.auto_km,
                         description = k.description,
                         status = k.status,
+                        zipcode = k.zipcode
                         
                     })
                     .OrderBy(x => x.date)
@@ -228,6 +238,7 @@ namespace TRIPEXPENSEREPORT.Controllers
             {
                 companies = Company.GetCompaniesByDriverDate(driver, start, stop);
             }
+            List<ProvinceModel> provinces = Province.GetProvinces();
 
             List<CompanyModel> datas = new List<CompanyModel>();
 
@@ -269,6 +280,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                             mileage_stop = 0,
                             program_km  = 0,
                             pt = 0,
+                            zipcode = ""
                        }
                     };
                     datas.AddRange(data);
@@ -298,12 +310,14 @@ namespace TRIPEXPENSEREPORT.Controllers
                         auto_km = k.auto_km,
                         description = k.description,
                         status = k.status,
+                        zipcode = k.zipcode,
+                        province = provinces.Where(w => w.zipcode == k.zipcode).Select(s => s.province).FirstOrDefault()
                     })
                     .OrderBy(x => x.date)
                     .ThenBy(x => x.timeStart)
                     .ToList();
             List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
-            return Json(new { data = result, holidays = holidays });
+            return Json(new { data = result, holidays = holidays, provinces = provinces });
 
         }
 
@@ -334,6 +348,42 @@ namespace TRIPEXPENSEREPORT.Controllers
         {
             string message = Company.DeleteByCode(code);
             return Json(message);
+        }
+
+        public IActionResult Export(string month,string mode,string driver,string car)
+        {
+            var parts = month.Split('-');
+            if (parts.Length != 2
+                || !int.TryParse(parts[0], out int year)
+                || !int.TryParse(parts[1], out int mon))
+            {
+                return BadRequest("รูปแบบเดือนไม่ถูกต้อง");
+            }
+
+            DateTime start = new DateTime(year, mon, 1);
+            DateTime stop = start.AddMonths(1).AddDays(-1);
+
+            List<CompanyModel> companies = new List<CompanyModel>();
+            if (mode == "Car")
+            {
+                companies = Company.GetCompaniesByCarDate(car, start, stop);
+            }
+            else
+            {
+                companies = Company.GetCompaniesByDriverDate(driver, start, stop);
+            }
+
+            string emp_id = HttpContext.Session.GetString("userId");
+
+            List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
+            CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();
+
+            List<CarModel> cars = Car.GetCars();
+
+            string timestamp = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToUpper().Replace(':', '_').Replace('.', '_').Replace(' ', '_').Trim();
+            var templateFileInfo = new FileInfo(Path.Combine(hostingEnvironment.ContentRootPath, "./wwwroot/Template", "แบบฟอร์มรายงานการใช้รถบริษัท.xlsx"));
+            var stream = Company.ExportCompanyNormal(templateFileInfo, companies, month, emp , cars);
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "แบบฟอร์มรายงานการใช้รถบริษัท_" + emp_id + "_" + timestamp + ".xlsx");
         }
 
         public async Task<Dictionary<DateTime, List<CompanyModel>>> ConvertToDictCompanyModels(List<DataModel> dataList)
@@ -393,6 +443,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     mileage_stop = stop.mileage,
                     program_km = (int)Math.Round(stop.distance, 0),
                     approver = "",
+                    zipcode = ""
                 };
 
                 if (!result.ContainsKey(date))
@@ -410,10 +461,72 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             var grouped = dataList.GroupBy(d => new { d.date.Date, d.trip });
 
+            List<AreaModel> areas = Area.GetAreas();
+
             foreach (var tripGroup in grouped)
             {
                 var date = tripGroup.Key.Date;
                 var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
+                List<string> zipcodes = tripGroup.Select(s => s.zipcode).ToList();
+
+                string emp_id = items[0].driver;
+                string zipcode = "";
+                if (emp_id != "")
+                {
+                    HashSet<string> set_area = new HashSet<string>();
+                    CTLModels.EmployeeModel employee = CTLEmployees.GetEmployeeByID(emp_id);
+                    string emp_location = employee.location;
+                    if (emp_location.ToLower() == "hq")
+                    {
+                        foreach (var area in areas)
+                        {
+                            if (area.hq)
+                            {
+                                set_area.Add(area.code);
+                            }
+                        }
+                    }
+                    if (emp_location.ToLower() == "rbo")
+                    {
+                        foreach (var area in areas)
+                        {
+                            if (area.rbo)
+                            {
+                                set_area.Add(area.code);
+                            }
+                        }
+                    }
+                    if (emp_location.ToLower() == "kbo")
+                    {
+                        foreach (var area in areas)
+                        {
+                            if (area.kbo)
+                            {
+                                set_area.Add(area.code);
+                            }
+                        }
+                    }
+
+                    bool out_zone = false;
+
+                    foreach (var zip in zipcodes)
+                    {
+                        if (zip != "")
+                        {
+                            if (set_area.Contains(zip.Substring(0, 2)))
+                            {
+                                out_zone = true;
+                                zipcode = zip;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!out_zone)
+                    {
+                        zipcode = zipcodes[0];
+                    }
+                }
 
                 var start = items[0];
                 var stop = items[items.Count - 1];
@@ -461,6 +574,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                     mileage_stop = stop.mileage,
                     program_km = (int)Math.Round(stop.distance, 0),
                     approver = "",
+                    zipcode = zipcode
                 };
                 result.Add(company);
             }

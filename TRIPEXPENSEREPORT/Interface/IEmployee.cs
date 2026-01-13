@@ -4,7 +4,7 @@ namespace TRIPEXPENSEREPORT.Interface
 {
     public interface IEmployee
     {
-        List<EmployeeModel> GetEmployees();
+        List<EmployeeModel> GetEmployees();      
         string Inserts(List<EmployeeModel> employees);
         string Update(EmployeeModel employee);
     }

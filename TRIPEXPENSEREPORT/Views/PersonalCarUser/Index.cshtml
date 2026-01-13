@@ -76,6 +76,7 @@
                         <tr>
                             <th>วันที่</th>
                             <th>Job</th>
+                            <th>จังหวัด</th>
                             <th>ตั้งแต่เวลา</th>
                             <th>ถึงเวลา</th>
                             <th>การเดินทาง</th>
@@ -94,7 +95,7 @@
                     </tbody>
                     <tfoot class="table-warning text-black fw-bold">
                         <tr>
-                            <th colspan="5" class="text-center">ยอดรวมทั้งหมด</th>
+                            <th colspan="6" class="text-center">ยอดรวมทั้งหมด</th>
                             <th id="totalCTBO" class="text-end">0.00</th>
                             <th id="totalEXP" class="text-end">0.00</th>
                             <th id="totalPT" class="text-end">0.00</th>
@@ -265,8 +266,8 @@
             </div>
             <div class="modal-body kanit-regular" style="color:#444444">
                 <form>
-                    <div class="form-row ">
-                        <fieldset disabled class="col-sm-12 col-md-12">
+                    <div class="form-row">
+                        <fieldset hidden class="col-sm-12 col-md-12">
                             <div class="form-group">
                                 <label for="edit_code"></label>
                                 <input type="text" class="form-control" id="edit_code">
@@ -280,10 +281,18 @@
                                 <input type="text" class="form-control" id="edit_date">
                             </div>
                         </fieldset>
-                        <fieldset disabled class="col-sm-12 col-md-8">
+                        <fieldset hidden class="col-sm-12 col-md-4">
                             <div class="form-group">
                                 <label for="edit_driver">ผู้ขับรถ</label>
                                 <input type="text" class="form-control" id="edit_driver">
+                            </div>
+                        </fieldset>
+                        <fieldset class="col-sm-12 col-md-8">
+                            <div class="form-group">
+                                <label for="edit_select_province">จังหวัด</label>
+                                <select class="form-control" id="edit_select_province">
+
+                                </select>
                             </div>
                         </fieldset>
                     </div>
@@ -293,7 +302,7 @@
 
                         <div class="form-group col-sm-12 col-md-4">
                             <label for="edit_job">Job</label>
-                            <input type="text" class="form-control" id="edit_job" placeholder="Jxx-xxxx">
+                            <input type="text" class="form-control" id="edit_job">
                         </div>
                         <div class="form-group col-sm-12 col-md-4">
                             <label for="edit_time_start">เวลาเริ่มต้น</label>
@@ -308,7 +317,7 @@
                     <div class="form-row">
                         <div class="form-group col-sm-12 col-md-12">
                             <label for="edit_location">การเดินทาง</label>
-                            <input type="text" class="form-control" id="edit_location" placeholder="Ex. Home-CTL(HQ)-Home">
+                            <input type="text" class="form-control" id="edit_location">
                         </div>
 
                     </div>
@@ -419,26 +428,26 @@
         let personals = [];
         let holidays = [];
         var table_personal;
+        let provinces = [];
         $(document).ready(async function () {
             const today = new Date();
-            const month = today.toISOString().slice(0,7);
+            const month = today.toISOString().slice(0, 7);
 
             $('#month_start').val(month);
 
             let drivers = await Getdrivers();
             const emp = @Html.Raw(Json.Serialize(Model));;
-        if (emp.role !== "Admin")
-        {
-             drivers = drivers.filter(f=>f.emp_id == emp.emp_id).map(m=>m);
-        }
+            if (emp.role !== "Admin") {
+                drivers = drivers.filter(f => f.emp_id == emp.emp_id).map(m => m);
+            }
 
-        if (drivers.length > 0){
-        GenerateDriverOption(drivers);
-        $('#btn_search').prop('disabled',false);
-        }else{
-            alert('ไม่มีข้อมูลในการใช้งาน');
-            $('#btn_search').prop('disabled',true);
-        }
+            if (drivers.length > 0) {
+                GenerateDriverOption(drivers);
+                $('#btn_search').prop('disabled', false);
+            } else {
+                alert('ไม่มีข้อมูลในการใช้งาน');
+                $('#btn_search').prop('disabled', true);
+            }
 
         });
 
@@ -447,10 +456,15 @@
             const data = await GetPersonalCar(emp_id,month);
             const gasoline = data.gasoline;
             const gasoline_type = data.gasoline_type;
+
             let datas = CalSummary(data, gasoline_type, gasoline);
             GenerateSummaryTable(datas);
 
             holidays = data.holidays;
+            provinces = data.provinces;
+            console.log(provinces);
+            GenerateProvinceOption(provinces);
+
             const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
             table_personal = $('#table_personal').DataTable({
                 destroy: true,
@@ -496,10 +510,10 @@
                         }, 0);
                     };
 
-                    const totalCTBO = sum(5);
-                    const totalEXP = sum(6);
-                    const totalPT = sum(7);
-                    const totalKM = sum(10);
+                    const totalCTBO = sum(6);
+                    const totalEXP = sum(7);
+                    const totalPT = sum(8);
+                    const totalKM = sum(11);
 
                     $('#totalCTBO').html(totalCTBO.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
                     $('#totalEXP').html(totalEXP.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
@@ -512,7 +526,8 @@
                 },
                 columns: [
                     { data: 'dateDisplay', className: 'text-center fw-bold' },
-                    { data: 'job' ,className: 'text-center' },
+                    { data: 'job', className: 'text-center' },
+                    { data: 'province' ,className: 'text-center' },
                     {
                         data: 'timeStart', className: 'text-center',
                         render: function (data) {
@@ -623,7 +638,6 @@
                     const exp = rowData.exp;
                     const pt = rowData.pt;
                     const description = rowData.description;
-
                     if (driver === ""){
                         driver = $('#select_driver').val();
                         code = driver + "" + formatDateTimeYYYYMMDDHHMMSS();
@@ -644,7 +658,7 @@
                     $('#edit_exp').val(exp);
                     $('#edit_pt').val(pt);
                     $('#edit_description').val(description);
-
+                    $('#edit_select_province').val(rowData.zipcode);
                     $('#detailModal').modal();
                 }
                 }else{
@@ -683,55 +697,61 @@
         });
 
         $('#BtnSaveChange').on('click',async function(){
-            const code = $('#edit_code').val();
-                    const date = $('#edit_date').val();
-                    const driver = $('#edit_driver').val();
-                    const job =  $('#edit_job').val();
-                    const time_start = $('#edit_time_start').val();
-                    const time_stop = $('#edit_time_stop').val();
-                    const location =$('#edit_location').val();
-                    const mileage_start = $('#edit_mileage_start').val();
-                    const mileage_stop = $('#edit_mileage_stop').val();
-                    const distance = $('#edit_distance').val();
-                    const ctbo =  $('#edit_ctbo').val();
-                    const exp =  $('#edit_exp').val();
-                    const pt =  $('#edit_pt').val();
-                    const description = $('#edit_description').val();
+             const zipcode = $('#edit_select_province').val();
+            if (zipcode !== null) {
+                const code = $('#edit_code').val();
+                const date = $('#edit_date').val();
+                const driver = $('#edit_driver').val();
+                const job = $('#edit_job').val();
+                const time_start = $('#edit_time_start').val();
+                const time_stop = $('#edit_time_stop').val();
+                const location = $('#edit_location').val();
+                const mileage_start = $('#edit_mileage_start').val();
+                const mileage_stop = $('#edit_mileage_stop').val();
+                const distance = $('#edit_distance').val();
+                const ctbo = $('#edit_ctbo').val();
+                const exp = $('#edit_exp').val();
+                const pt = $('#edit_pt').val();
+                const description = $('#edit_description').val();
 
-                    const str = JSON.stringify({
-                        'code': code,
-                        'date':date,
-                        'driver':driver,
-                        'job': job,
-                        'time_start':time_start,
-                        'time_stop':time_stop,
-                        'location':location,
-                        'mileage_start': mileage_start,
-                        'mileage_stop':mileage_stop,
-                        'km':distance,
-                        'ctbo':ctbo,
-                        'exp':exp,
-                        'pt':pt,
-                        'description':description
-                    });
+                const str = JSON.stringify({
+                    'code': code,
+                    'date': date,
+                    'driver': driver,
+                    'job': job,
+                    'time_start': time_start,
+                    'time_stop': time_stop,
+                    'location': location,
+                    'mileage_start': mileage_start,
+                    'mileage_stop': mileage_stop,
+                    'km': distance,
+                    'ctbo': ctbo,
+                    'exp': exp,
+                    'pt': pt,
+                    'description': description,
+                    'zipcode': zipcode
+                });
 
                 await $.ajax({
-                type: "POST",
-                url: '@Url.Action("UpdateData", "PersonalCarUser")',
-                contentType: 'application/x-www-form-urlencoded',
-                data: { str },
-                success: function (response) {
-                     if (response === "Success"){
-                         const emp_id = $('#select_driver').val();
-                         const month = $('#month_start').val();
-                         LoadPersonalCarTable(emp_id, month);
-                        
-                      }else{
-                          alert(response);
-                      }
-                }
-            });
-            $('#detailModal').modal('hide');
+                    type: "POST",
+                    url: '@Url.Action("UpdateData", "PersonalCarUser")',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: { str },
+                    success: function (response) {
+                        if (response === "Success") {
+                            const emp_id = $('#select_driver').val();
+                            const month = $('#month_start').val();
+                            LoadPersonalCarTable(emp_id, month);
+
+                        } else {
+                            alert(response);
+                        }
+                    }
+                });
+                $('#detailModal').modal('hide');
+            }else{
+                alert('ไม่มีจังหวัด');
+            }
         });
 
 
@@ -795,7 +815,7 @@
             if (!api || api.rows().count() === 0) return;
 
             const dateColIdx = 0;
-            const sumKmColIdx = 11;
+            const sumKmColIdx = 12;
 
             let currentGroupDate = null;
             let groupRows = [];
@@ -869,6 +889,14 @@
             $('#select_driver').append(`<option value="" selected disabled>Please Select Driver</option>`);
             for (let i = 0; i < drivers.length; i++) {
                 $('#select_driver').append(`<option value="${drivers[i].emp_id}">${drivers[i].name}</option>`);
+            }
+        }
+
+        async function GenerateProvinceOption(provinces) {
+            $('#edit_select_province').empty();
+            $('#edit_select_province').append(`<option value="" selected disabled>Please Select Province</option>`);
+            for (let i = 0; i < provinces.length; i++) {
+                $('#edit_select_province').append(`<option value="${provinces[i].zipcode}">${provinces[i].province}-${provinces[i].zipcode}</option>`);
             }
         }
 

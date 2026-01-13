@@ -6,6 +6,7 @@
         public string code { get; set; }
         public DateTime date { get; set; }
         public string driver { get; set; }
+        public string zipcode { get; set; }
         public string car_id { get; set; }
         public TimeSpan time_start { get; set; }
         public TimeSpan time_stop { get; set; }

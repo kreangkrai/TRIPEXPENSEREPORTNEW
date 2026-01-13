@@ -1,33 +1,11 @@
-﻿@model List<TRIPEXPENSEREPORT.Models.AllowanceModel>
+﻿@model TRIPEXPENSEREPORT.Models.EmployeeModel
 @{
     ViewData["Title"] = "TE : เบิกเงิน";
 }
 
 <style>
-    input[type="checkbox"] {
-        transition: all 0.3s ease; /* ทำให้เปลี่ยนสี/ขนาดนุ่มนวล */
-    }
-
-        input[type="checkbox"]:checked {
-            transform: scale(1.125); /* ขยายนิดนึงตอนกด */
-            background-color: #1e90ff
-        }
-
-    /* สไตล์สำหรับ input */
-    input[type="text"] {
-        transition: opacity 0.3s ease, background-color 0.3s ease; /* แอนิเมชันนุ่มนวล */
-    }
-        /* input ตอน disable */
-        input[type="text"]:disabled {
-            cursor: not-allowed;
-            /* opacity: 0.4; */ /* จางลง */
-            /* background-color: #e9ecef; */ /* สีเทาอ่อน */
-        }
-        /* input ตอน enable */
-        input[type="text"]:not(:disabled) {
-            opacity: 1; /* ชัดเจน */
-            /* background-color: #ffffff; */ /* สีขาวตอนกรอกได้ */
-        }
+    
+  
 </style>
 
 <div class="container-fluid">
@@ -41,24 +19,25 @@
                 </h5>
 
                 <div class="mb-2">
-                    <label for="date_start" style="color:#555555">วันที่เริ่มต้น:</label>
-                    <input type="date" class="form-control" id="date_start" placeholder="วันที่ (dd/mm/yyyy)" />
+                    <label for="month_start" style="color:#555555">เดือน:</label>
+                    <input type="month" class="form-control" id="month_start" placeholder="วันที่ (dd/mm/yyyy)" />
                 </div>
-
-                <div class="mb-2">
-                    <label for="date_end" style="color:#555555">วันที่สิ้นสุด:</label>
-                    <input type="date" class="form-control" id="date_end" placeholder="วันที่ (dd/mm/yyyy)" />
-                </div>
-
-                <label for="employee" style="color:#555555">ชื่อพนักงาน:</label>
-                <select name="employees" id="employee" class="mb-3 form-control" style="border-radius:5px">
-                    <option value="NULL">Please Select...</option>
-                    <option value="EM001">Sarit T.</option>
-                    <option value="EM002">Kriangkrai R.</option>
-                    <option value="EM003">Jirawat J.</option>
-                    <option value="EM004">Chakrit R.</option>
+                <label for="select_employee" style="color:#555555">ชื่อพนักงาน:</label>
+                <select name="employees" id="select_employee" class="mb-3 form-control" style="border-radius:5px">
                 </select>
-                <button class="btn btn-primary w-100 mb-2" style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">ค้นหา</button>
+                <div id="div_search">
+                    <div class="form-group">
+                        <button id="btn_search" class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            ค้นหา
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <button id="btn_export" class="btn btn-success w-100"
+                                style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <i class="fas fa-download"></i>Export
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -90,65 +69,10 @@
                             <th>สถานะ</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr data-date="@item.date.ToString("dd/MM/yyyy")"
-                                data-time="@item.date_start.ToString("HH:mm")"
-                                data-customer="@item.customer"
-                                data-zipcode="@item.zipcode"
-                                data-jobno="@item.job"
-                                data-allowance-province="@item.allowance_province"
-                                data-allowance-1-4="@item.allowance_1_4"
-                                data-allowance-4-8="@item.allowance_4_8"
-                                data-allowance-8="@item.allowance_8"
-                                data-allowance-other="@item.allowance_other"
-                                data-allowance-hostel="@item.allowance_hostel"
-                                data-list="@item.list"
-                                data-remark="@item.remark"
-                                data-status="@item.status"
-                                class="clickable-row align-content-center text-center"
-                                style="color:#444444">
-
-                                <td>@item.date.ToString("dd/MM/yyyy")</td>
-                                <td>@item.date_start.ToString("HH:mm")</td>
-                                <td>@item.customer</td>
-                                <td>@item.zipcode</td>
-                                <td>@item.job</td>
-                                <td>@item.allowance_province</td>
-                                <td>@item.allowance_1_4</td>
-                                <td>@item.allowance_4_8</td>
-                                <td>@item.allowance_8</td>
-                                <td>@item.allowance_other</td>
-                                <td>@item.allowance_hostel</td>
-                                <td>@item.list</td>
-                                <td>150</td> <!-- ค่าคงที่ในตัวอย่าง -->
-                                <td>300</td> <!-- ค่าคงที่ในตัวอย่าง -->
-                                <td>@item.remark</td>
-                                <td>@item.status</td>
-                            </tr>
-                        }
+                    <tbody>                       
                     </tbody>
                 </table>
-
-                <!-- Button below Table -->
-                <div class="row kanit-medium d-flex justify-content-center g-0">
-                    <!-- Button Send & Export -->
-                    <div class="col-md-2 bg-light p-2">
-                        <button class="btn btn-success w-100" data-toggle="modal" data-target="#sendModal"
-                                style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                            <i class="fas fa-download"></i> Send & Export
-                        </button>
-                    </div>
-                    <!-- Button Cancel Send -->
-                    <div class="col-md-2 bg-light p-2">
-                        <button class="btn btn-danger w-100" data-toggle="modal" data-target="#cancelModal"
-                                style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                            Cancel Send
-                        </button>
-                    </div>
-                </div>
-
+              
                 <!-- Modal: Send & Export -->
                 <div class="modal fade " id="sendModal" tabindex="-1" role="dialog" aria-labelledby="sendModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -387,80 +311,303 @@
         </div>
     </div>
 </div>
-
+<partial name="ModalSpin" />
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $(".clickable-row").click(function () {
-                var date = $(this).data("date");
-                var time = $(this).data("time");
-                var customer = $(this).data("customer");
-                var zipcode = $(this).data("zipcode");
-                var jobNo = $(this).data("jobno");
-                var allowanceProvince = $(this).data("allowance-province");
-                var allowance1_4 = $(this).data("allowance-1-4");
-                var allowance4_8 = $(this).data("allowance-4-8");
-                var allowance8 = $(this).data("allowance-8");
-                var allowanceOther = $(this).data("allowance-other");
-                var allowanceHostel = $(this).data("allowance-hostel");
-                var list = $(this).data("list");
-                var description = $(this).data("description");
-                var remark = $(this).data("remark");
-                var status = $(this).data("status");
+        let employees = [];
+        let holidays = [];
+        $(document).ready(async function () {
+            const today = new Date();
+            const month = today.toISOString().slice(0, 7);
+            $('#month_start').val(month);
+            employees = await GetEmployees();
+            GenerateEmployeeOption(employees);
+        });
 
-                $("#modalDate").text(date || "-");
-                $("#modalTime").text(time || "-");
-                $("#modalCustomer").text(customer || "-");
-                $("#modalZipcode").text(zipcode || "-");
-                $("#modalJobNo").text(jobNo || "-");
-                $("#modalAllowanceProvince").text(allowanceProvince || "-");
-                $("#modalAllowance1_4").text(allowance1_4 || "-");
-                $("#modalAllowance4_8").text(allowance4_8 || "-");
-                $("#modalAllowance8").text(allowance8 || "-");
-                $("#modalAllowanceOther").text(allowanceOther || "-");
-                $("#modalAllowanceHostel").text(allowanceHostel || "-");
-                $("#modalList").text(list || "-");
-                $("#modalDescription").text(description || "-");
-                $("#modalRemark").text(remark || "-");
-                $("#modalStatus").text(status || "-");
-
-                $("#detailModal").modal("show");
-            });
-
-            // ปิด Modal
-            $(".close, [data-dismiss='modal']").click(function () {
-                $("#detailModal").modal("hide");
-            });
-
-            // ฟังก์ชันปุ่มใน Modal (ตัวอย่าง)
-            $("#editButton").click(function () {
-                alert("บันทึกข้อมูลสำเร็จ: " + $("#modalDate").text() + " เวลา " + $("#modalTime").text());
-                // เพิ่มโค้ดสำหรับการแก้ไข (เช่น Redirect หรือ Form)
-            });
-
-            $("#deleteButton").click(function () {
-                if (confirm("คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้?")) {
-                    alert("ลบข้อมูล: " + $("#modalDate").text());
-                    // เพิ่มโค้ดสำหรับการลบ (เช่น AJAX Call)
-                    $("#detailModal").modal("hide");
+        async function GetEmployees() {
+            let data = [];
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetEmployees", "AllowanceUser")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { },
+                success: function (response) {
+                    data = response;
                 }
             });
-                
-        });
-        // หา Checkbox และ Input
-                const checkbox = document.getElementById('inlineCheckboxAllowance_other');
-                const input = document.getElementById('inputAllowance_other');
+            return data;
 
-        // เพิ่ม event listener สำหรับ Checkbox
-        checkbox.addEventListener('change', function() {
-            input.disabled = !this.checked; // ถ้าไม่ติ๊ก = disabled, ถ้าติ๊ก = enable
+        }
+
+        $('#btn_search').on('click', async function () {
+
+            const month = $('#month_start').val();
+            const emp_id = $('#select_employee').val();
+
+            LoadAllowanceTable(emp_id,month);
         });
 
-        checkbox.addEventListener('change', function() {
-            input.disabled = !this.checked;
-            if (!this.checked) {
-                input.value = ''; // ล้างช่องเมื่อยกเลิกติ๊ก
+        async function GetAllowance(emp_id, month) {
+            const $modal = $('#SpinModal');
+            $modal.modal('show');
+
+            try {
+                const response = await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetDataAllowance", "AllowanceUser")',
+                    dataType: "json",
+                    data: { emp_id, month },
+                });
+
+                return response;
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
             }
-        });
+        }
+
+        async function LoadAllowanceTable(emp_id, month) {
+
+            const data = await GetAllowance(emp_id, month);
+
+            holidays = data.holidays;
+            //provinces = data.provinces;
+            //GenerateProvinceOption(provinces);
+
+            const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
+            table_company = $('#table_company').DataTable({
+                destroy: true,
+                data: data.data,
+                order: [[0, 'asc']],
+                paging: false,
+                info: false,
+                searching: false,
+                ordering: false,
+                createdRow: function (row, data, dataIndex) {
+                    const dateDisplay = data.dateDisplay || data.date;
+
+                    let year, month, day;
+                    if (dateDisplay.includes('-')) {
+                        [year, month, day] = dateDisplay.split('-').map(Number);
+                    } else if (dateDisplay.includes('/')) {
+                        [day, month, year] = dateDisplay.split('/').map(Number);
+                    } else {
+                        console.error('Invalid date format:', dateDisplay);
+                        return;
+                    }
+                    const date = new Date(Date.UTC(year, month - 1, day));
+                    const dayOfWeek = date.getUTCDay();
+                    const dateKey = date.toISOString().split('T')[0];
+
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                    const isHoliday = holidayDates.has(dateKey);
+
+                    if (isWeekend || isHoliday) {
+                        $(row).addClass('table-secondary bg-opacity-50');
+                    }
+                },
+                drawCallback: function () {
+                    //mergeDateRows();
+                },
+                footerCallback: function (row, data, start, end, display) {
+                    const api = this.api();
+
+                    const sum = (columnIndex) => {
+                        return api.column(columnIndex, { page: 'all' }).data().reduce((a, b) => {
+                            return a + (parseFloat(b) || 0);
+                        }, 0);
+                    };
+
+                    const totalFleet = sum(8);
+                    const totalCash = sum(9);
+                    const totalPT = sum(10);
+                    const totalOther = sum(11);
+                    const totalKM = sum(14);
+
+                    $('#totalFleet').html(totalFleet.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalCash').html(totalCash.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalPT').html(totalPT.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalOther').html(totalOther.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalKM').html(totalKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                },
+                columns: [
+                    { data: 'dateDisplay', className: 'text-center fw-bold' },
+                    { data: 'job', className: 'text-center' },
+                    { data: 'province', className: 'text-center' },
+                    { data: 'car_id', className: 'text-center' },
+                    { data: 'driver', className: 'text-center' },
+                    {
+                        data: 'timeStart', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    {
+                        data: 'timeStop', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    { data: 'location' },
+                    {
+                        data: 'fleet',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'cash',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'pt',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'exp',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'mileage_start',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'mileage_stop',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'km',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: '',
+                    },
+                    { data: 'description', className: 'text-center' },
+                    {
+                        data: 'status',
+                        className: 'text-center',
+                        render: function (data) {
+                            const badges = {
+                                'Approved': 'bg-success',
+                                'Pending': 'bg-info'
+                            };
+                            const cls = badges[data] || 'bg-secondary';
+                            return `<span class="badge ${cls}">${data || ''}</span>`;
+                        }
+                    }
+                ]
+
+            });
+
+            $('#table_company tbody').on('click', 'tr', async function () {
+
+                const rowData = table_company.row(this).data();
+                if (rowData.status !== "Approved") {
+                    if (!rowData) {
+                        const $row = $(this);
+                        const prevRowData = table_personal.row($row.prev()).data();
+                        if (prevRowData) rowData = prevRowData;
+                    }
+                    cars = await GetCars();
+                    GenerateAllCarOption(cars);
+
+                    if (rowData) {
+                        $(this).toggleClass('table-selected');
+                        employees = await GetEmployees();
+                        let name = employees.filter(f => f.emp_id === rowData.driver).map(m => m.name_en)[0];
+
+                        let code = rowData.code;
+                        let car_id = rowData.car_id;
+                        const date = rowData.dateDisplay;
+                        let driver = name;
+                        const job = rowData.job;
+                        const time_start = rowData.timeStart;
+                        const time_stop = rowData.timeStop;
+                        const location = rowData.location;
+                        const mileage_start = rowData.mileage_start;
+                        const mileage_stop = rowData.mileage_stop;
+                        const distance = rowData.km;
+                        const fleet = rowData.fleet;
+                        const cash = rowData.cash;
+                        const exp = rowData.exp;
+                        const pt = rowData.pt;
+                        const description = rowData.description;
+
+                        //console.log(car_id);
+                        const license_plate = cars.filter(f => f.car_id === car_id).map(m => m.license_plate)[0];
+                        if (car_id === "" || car_id === null) {
+                            $('#edit_select_car').prop('disabled', false);
+                            let d = @Html.Raw(Json.Serialize(Model));
+                            driver = d.name;
+                            code = d.emp_id + "" + formatDateTimeYYYYMMDDHHMMSS();
+                        } else {
+                            $('#edit_select_car').prop('disabled', true);
+                        }
+
+
+                        $('#edit_code').val(code);
+                        $('#edit_date').val(date);
+                        $('#edit_driver').val(driver);
+                        $('#edit_job').val(job);
+                        $('#edit_time_start').val(time_start);
+                        $('#edit_time_stop').val(time_stop);
+                        $('#edit_location').val(location);
+                        $('#edit_mileage_start').val(mileage_start);
+                        $('#edit_mileage_stop').val(mileage_stop);
+                        $('#edit_km').val(distance);
+                        $('#edit_fleet').val(fleet);
+                        $('#edit_cash').val(cash);
+                        $('#edit_exp').val(exp);
+                        $('#edit_pt').val(pt);
+                        $('#edit_select_car').val(car_id);
+                        $('#edit_license_plate').val(license_plate);
+                        $('#edit_description').val(description);
+                        $('#edit_select_province').val(rowData.zipcode);
+                        $('#detailModal').modal();
+                    }
+                } else {
+                    alert('ข้อมูลถูกตรวจสอบแล้ว ไม่สามารถแก้ไขได้');
+                }
+            });
+            mergeDateRows();
+        }
+
+
+        function GenerateEmployeeOption(employees) {
+            $('#select_employee').empty();
+            $('#select_employee').append(`<option value="" selected disabled>Please Select Employee</option>`);
+            for (let i = 0; i < employees.length; i++) {
+                $('#select_employee').append(`<option value="${employees[i].emp_id}">${employees[i].name_en}</option>`);
+            }
+        }
+
     </script>
 }

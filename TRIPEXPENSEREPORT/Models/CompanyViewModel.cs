@@ -12,6 +12,7 @@
         public TimeSpan time_stop { get; set; }
         public string location { get; set; }
         public string zipcode { get; set; }
+        public string province { get; set; }
         public string job { get; set; }
         public double fleet { get; set; }
         public double cash { get; set; }

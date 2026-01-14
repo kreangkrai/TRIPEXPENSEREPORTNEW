@@ -796,9 +796,8 @@
             const zipcode = $('#edit_select_province').val();
             if (car_id !== null && zipcode !== null){
                     const code = $('#edit_code').val();
-                    const date = $('#edit_date').val();
+                const date = ddMMyyyyToISO($('#edit_date').val());
                     const d = employees.filter(f=>f.name_en.toLowerCase() === $('#edit_driver').val().toLowerCase()).map(m=>m.emp_id)[0];
-                    console.log(employees);
                     const driver = d;
                     const job =  $('#edit_job').val();
                     const time_start = $('#edit_time_start').val();
@@ -885,6 +884,24 @@
             const distance = stop - start;
             $('#edit_km').val(distance);
         });
+
+        function ddMMyyyyToISO(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string' || !dateStr.includes('/')) {
+                return dateStr || '';
+            }
+
+            const parts = dateStr.trim().split('/');
+            if (parts.length !== 3) return dateStr;
+
+            const [dd, mm, yyyy] = parts.map(p => p.trim());
+
+            // เผื่อเลขเดือน/วันไม่มี 0 นำหน้า
+            const paddedDD = dd.padStart(2, '0');
+            const paddedMM = mm.padStart(2, '0');
+
+            return `${yyyy}-${paddedMM}-${paddedDD}`;
+        }
+
         function mergeDateRows() {
             const api = table_company;
             if (!api || api.rows().count() === 0) return;

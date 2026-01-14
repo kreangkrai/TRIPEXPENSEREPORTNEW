@@ -462,7 +462,6 @@
 
             holidays = data.holidays;
             provinces = data.provinces;
-            console.log(provinces);
             GenerateProvinceOption(provinces);
 
             const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
@@ -700,7 +699,7 @@
              const zipcode = $('#edit_select_province').val();
             if (zipcode !== null) {
                 const code = $('#edit_code').val();
-                const date = $('#edit_date').val();
+                const date = ddMMyyyyToISO($('#edit_date').val());
                 const driver = $('#edit_driver').val();
                 const job = $('#edit_job').val();
                 const time_start = $('#edit_time_start').val();
@@ -810,6 +809,23 @@
             });
             return drivers;
         }
+        function ddMMyyyyToISO(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string' || !dateStr.includes('/')) {
+                return dateStr || '';
+            }
+
+            const parts = dateStr.trim().split('/');
+            if (parts.length !== 3) return dateStr;
+
+            const [dd, mm, yyyy] = parts.map(p => p.trim());
+
+            // เผื่อเลขเดือน/วันไม่มี 0 นำหน้า
+            const paddedDD = dd.padStart(2, '0');
+            const paddedMM = mm.padStart(2, '0');
+
+            return `${yyyy}-${paddedMM}-${paddedDD}`;
+        }
+
         function mergeDateRows() {
             const api = table_personal;
             if (!api || api.rows().count() === 0) return;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using OfficeOpenXml;
 using System.Data;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
@@ -9,34 +10,38 @@ namespace TRIPEXPENSEREPORT.Service
     {
         private IArea Area;
         private IUser User;
+        private IProvince Province;
         private CTLInterfaces.IEmployee Employee;
         ConnectSQL connect = null;
         SqlConnection con = null;
+        ConnectSQL connect_report = null;
+        SqlConnection con_report = null;
         public AllowanceService()
         {
             Area = new AreaService();
             User = new UserService();
+            Province = new ProvinceService();
             connect = new ConnectSQL();
+            connect_report = new ConnectSQL();
             Employee = new CTLServices.EmployeeService();
             con = connect.OpenConnect();
+            con_report = connect_report.OpenReportConnect();
         }
-        public List<AllowanceViewModel> GetEditAllowancesByDate(DateTime start_date, DateTime stop_date)
+        public List<AllowanceModel> GetEditAllowancesByDate(string emp_id,DateTime start_date, DateTime stop_date)
         {
-            List<AllowanceViewModel> allowances = new List<AllowanceViewModel>();
+            List<AllowanceModel> allowances = new List<AllowanceModel>();
             try
             {
-                if (con.State == ConnectionState.Closed)
+                if (con_report.State == ConnectionState.Closed)
                 {
-                    con.Open();
+                    con_report.Open();
                 }
                 string strCmd = string.Format($@"SELECT code,
-	                                           EditAllowance.emp_id,
-                                               emp1.name as emp_name,
-	                                           EditAllowance.zipcode,
-	                                           p.province
+	                                           emp_id,
+	                                           zipcode,
 	                                           date,
-                                               date_start,
-                                               date_stop,
+                                               time_start,
+                                               time_stop,
 	                                           customer,
 	                                           job,
 	                                           allowance_province,
@@ -50,15 +55,12 @@ namespace TRIPEXPENSEREPORT.Service
 	                                           description,
 	                                           remark,
 	                                           status,
-												EditAllowance.approver,
-												emp2.name as approver_name,
+											   approver,
 												last_date
                                                 FROM EditAllowance
-												LEFT JOIN Province p ON EditAllowance.zipcode = p.zipcode
-                                                LEFT JOIN Employees emp1 ON EditAllowance.emp_id = emp1.emp_id
-												LEFT JOIN Employees emp2 ON EditAllowance.approver = emp2.emp_id
-                                                WHERE date BETWEEN @start_date AND @stop_date");
-                SqlCommand command = new SqlCommand(strCmd, con);
+                                                WHERE emp_id = @emp_id AND date >= @start_date AND date <= @stop_date");
+                SqlCommand command = new SqlCommand(strCmd, con_report);
+                command.Parameters.AddWithValue("@emp_id", emp_id);
                 command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
                 command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
                 SqlDataReader dr = command.ExecuteReader();
@@ -66,16 +68,14 @@ namespace TRIPEXPENSEREPORT.Service
                 {
                     while (dr.Read())
                     {
-                        AllowanceViewModel allowance = new AllowanceViewModel()
+                        AllowanceModel allowance = new AllowanceModel()
                         {
                             code = dr["code"].ToString(),
                             emp_id = dr["emp_id"].ToString(),
-                            emp_name = dr["emp_name"].ToString(),
                             zipcode = dr["zipcode"].ToString(),
-                            province = dr["province"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
-                            date_start = dr["date_start"] != DBNull.Value ? Convert.ToDateTime(dr["date_start"].ToString()) : DateTime.MinValue,
-                            date_stop = dr["date_stop"] != DBNull.Value ? Convert.ToDateTime(dr["date_stop"].ToString()) : DateTime.MinValue,
+                            time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
+                            time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
                             customer = dr["customer"].ToString(),
                             job = dr["job"].ToString(),
                             allowance_province = dr["allowance_province"] != DBNull.Value ? Convert.ToDouble(dr["allowance_province"].ToString()) : 0,
@@ -90,7 +90,6 @@ namespace TRIPEXPENSEREPORT.Service
                             remark = dr["remark"].ToString(),
                             status = dr["status"].ToString(),
                             approver = dr["approver"].ToString(),
-                            approver_name = dr["approver_name"].ToString(),
                             last_date = dr["last_date"] != DBNull.Value ? Convert.ToDateTime(dr["last_date"].ToString()) : DateTime.MinValue,
                         };
                         allowances.Add(allowance);
@@ -100,31 +99,29 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (con.State == ConnectionState.Open)
+                if (con_report.State == ConnectionState.Open)
                 {
-                    con.Close();
+                    con_report.Close();
                 }
             }
             return allowances;
         }
 
-        public List<AllowanceViewModel> GetOriginalAllowancesByDate(DateTime start_date, DateTime stop_date)
+        public AllowanceModel GetAllowancesByCode(string code)
         {
-            List<AllowanceViewModel> allowances = new List<AllowanceViewModel>();
+            AllowanceModel allowance = new AllowanceModel();
             try
             {
-                if (con.State == ConnectionState.Closed)
+                if (con_report.State == ConnectionState.Closed)
                 {
-                    con.Open();
+                    con_report.Open();
                 }
                 string strCmd = string.Format($@"SELECT code,
-	                                           OriginalAllowance.emp_id,
-                                               emp1.name as emp_name,
-	                                           OriginalAllowance.zipcode,
-	                                           p.province
+	                                           emp_id,
+	                                           zipcode,
 	                                           date,
-                                               date_start,
-                                               date_stop,
+                                               time_start,
+                                               time_stop,
 	                                           customer,
 	                                           job,
 	                                           allowance_province,
@@ -138,32 +135,25 @@ namespace TRIPEXPENSEREPORT.Service
 	                                           description,
 	                                           remark,
 	                                           status,
-												OriginalAllowance.approver,
-												emp2.name as approver_name,
+											   approver,
 												last_date
-                                                FROM OriginalAllowance
-												LEFT JOIN Province p ON OriginalAllowance.zipcode = p.zipcode
-                                                LEFT JOIN Employees emp1 ON OriginalAllowance.emp_id = emp1.emp_id
-												LEFT JOIN Employees emp2 ON OriginalAllowance.approver = emp2.emp_id
-                                                WHERE date BETWEEN @start_date AND @stop_date");
-                SqlCommand command = new SqlCommand(strCmd, con);
-                command.Parameters.AddWithValue("@start_date", start_date.ToString("yyyy-MM-dd"));
-                command.Parameters.AddWithValue("@stop_date", stop_date.ToString("yyyy-MM-dd"));
+                                                FROM EditAllowance
+                                                WHERE code = @code");
+                SqlCommand command = new SqlCommand(strCmd, con_report);
+                command.Parameters.AddWithValue("@code", code);
                 SqlDataReader dr = command.ExecuteReader();
                 if (dr.HasRows)
                 {
                     while (dr.Read())
                     {
-                        AllowanceViewModel allowance = new AllowanceViewModel()
+                        allowance = new AllowanceModel()
                         {
                             code = dr["code"].ToString(),
                             emp_id = dr["emp_id"].ToString(),
-                            emp_name = dr["emp_name"].ToString(),                          
                             zipcode = dr["zipcode"].ToString(),
-                            province = dr["province"].ToString(),
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
-                            date_start = dr["date_start"] != DBNull.Value ? Convert.ToDateTime(dr["date_start"].ToString()) : DateTime.MinValue,
-                            date_stop = dr["date_stop"] != DBNull.Value ? Convert.ToDateTime(dr["date_stop"].ToString()) : DateTime.MinValue,
+                            time_start = dr["time_start"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_start"].ToString()).Ticks) : TimeSpan.Zero,
+                            time_stop = dr["time_stop"] != DBNull.Value ? new TimeSpan(Convert.ToDateTime(dr["time_stop"].ToString()).Ticks) : TimeSpan.Zero,
                             customer = dr["customer"].ToString(),
                             job = dr["job"].ToString(),
                             allowance_province = dr["allowance_province"] != DBNull.Value ? Convert.ToDouble(dr["allowance_province"].ToString()) : 0,
@@ -175,33 +165,32 @@ namespace TRIPEXPENSEREPORT.Service
                             list = dr["list"].ToString(),
                             amount = dr["amount"] != DBNull.Value ? Convert.ToDouble(dr["amount"].ToString()) : 0,
                             description = dr["description"].ToString(),
-                            remark = dr["remark"].ToString(),                          
+                            remark = dr["remark"].ToString(),
                             status = dr["status"].ToString(),
                             approver = dr["approver"].ToString(),
-                            approver_name = dr["approver_name"].ToString(),
                             last_date = dr["last_date"] != DBNull.Value ? Convert.ToDateTime(dr["last_date"].ToString()) : DateTime.MinValue,
                         };
-                        allowances.Add(allowance);
                     }
                     dr.Close();
                 }
             }
             finally
             {
-                if (con.State == ConnectionState.Open)
+                if (con_report.State == ConnectionState.Open)
                 {
-                    con.Close();
+                    con_report.Close();
                 }
             }
-            return allowances;
+            return allowance;
         }
+
         public string EditInserts(List<AllowanceModel> allowances)
         {
             try
             {
-                if (con.State == ConnectionState.Closed)
+                if (con_report.State == ConnectionState.Closed)
                 {
-                    con.Open();
+                    con_report.Open();
                 }
                 string string_command = string.Format($@"
                     INSERT INTO 
@@ -209,8 +198,8 @@ namespace TRIPEXPENSEREPORT.Service
                             emp_id,
                             zipcode,
                             date,
-                            date_start,
-                            date_stop,
+                            time_start,
+                            time_stop,
                             customer,
                             job,
                             allowance_province,
@@ -219,7 +208,8 @@ namespace TRIPEXPENSEREPORT.Service
                             allowance_8,
                             allowance_other,
                             allowance_hostel,
-                            list,amount,
+                            list,
+                            amount,
                             description,
                             remark,
                             status,
@@ -230,8 +220,8 @@ namespace TRIPEXPENSEREPORT.Service
                             @emp_id,
                             @zipcode,
                             @date,
-                            @date_start,
-                            @date_stop,
+                            @time_start,
+                            @time_stop,
                             @customer,
                             @job,
                             @allowance_province,
@@ -240,61 +230,63 @@ namespace TRIPEXPENSEREPORT.Service
                             @allowance_8,
                             @allowance_other,
                             @allowance_hostel,
-                            @list,amount,
+                            @list,
+                            @amount,
                             @description,
                             @remark,
                             @status,
                             @approver,
                             @last_date
                         )");
-                using (SqlCommand cmd = new SqlCommand(string_command, con))
+                using (SqlCommand cmd = new SqlCommand(string_command, con_report))
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.Add("@code", SqlDbType.Text);
-                    cmd.Parameters.Add("@emp_id", SqlDbType.Text);
-                    cmd.Parameters.Add("@zipcode", SqlDbType.Text);
-                    cmd.Parameters.Add("@date", SqlDbType.Date);
-                    cmd.Parameters.Add("@date_start", SqlDbType.Date);
-                    cmd.Parameters.Add("@date_stop", SqlDbType.Date);
-                    cmd.Parameters.Add("@customer", SqlDbType.Text);
-                    cmd.Parameters.Add("@job", SqlDbType.Text);
+                    cmd.Parameters.Add("@code", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@emp_id", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@zipcode", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@date", SqlDbType.DateTime);
+                    cmd.Parameters.Add("@time_start", SqlDbType.Time);
+                    cmd.Parameters.Add("@time_stop", SqlDbType.Time);
+                    cmd.Parameters.Add("@customer", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@job", SqlDbType.NVarChar);
                     cmd.Parameters.Add("@allowance_province", SqlDbType.Float);
                     cmd.Parameters.Add("@allowance_1_4", SqlDbType.Float);
                     cmd.Parameters.Add("@allowance_4_8", SqlDbType.Float);
                     cmd.Parameters.Add("@allowance_8", SqlDbType.Float);
                     cmd.Parameters.Add("@allowance_other", SqlDbType.Float);
                     cmd.Parameters.Add("@allowance_hostel", SqlDbType.Float);
-                    cmd.Parameters.Add("@list", SqlDbType.Text);
+                    cmd.Parameters.Add("@list", SqlDbType.NVarChar);
                     cmd.Parameters.Add("@amount", SqlDbType.Float);
-                    cmd.Parameters.Add("@description", SqlDbType.Text);
-                    cmd.Parameters.Add("@remark", SqlDbType.Text);
-                    cmd.Parameters.Add("@status", SqlDbType.Text);
-                    cmd.Parameters.Add("@approver", SqlDbType.Text);
-                    cmd.Parameters.Add("@last_date", SqlDbType.Text);
+                    cmd.Parameters.Add("@description", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@remark", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@status", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@approver", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@last_date", SqlDbType.DateTime);
 
-                    for (int i = 0; i < allowances.Count; i++)
+                    foreach (var item in allowances)
                     {
-                        cmd.Parameters[0].Value = allowances[i].code;
-                        cmd.Parameters[1].Value = allowances[i].emp_id;
-                        cmd.Parameters[2].Value = allowances[i].zipcode;
-                        cmd.Parameters[3].Value = allowances[i].date;
-                        cmd.Parameters[4].Value = allowances[i].date_start;
-                        cmd.Parameters[5].Value = allowances[i].date_stop;
-                        cmd.Parameters[6].Value = allowances[i].customer;
-                        cmd.Parameters[7].Value = allowances[i].job;
-                        cmd.Parameters[8].Value = allowances[i].allowance_province;
-                        cmd.Parameters[9].Value = allowances[i].allowance_1_4;
-                        cmd.Parameters[10].Value = allowances[i].allowance_4_8;
-                        cmd.Parameters[11].Value = allowances[i].allowance_8;
-                        cmd.Parameters[12].Value = allowances[i].allowance_other;
-                        cmd.Parameters[13].Value = allowances[i].allowance_hostel;
-                        cmd.Parameters[14].Value = allowances[i].list;
-                        cmd.Parameters[15].Value = allowances[i].amount;
-                        cmd.Parameters[16].Value = allowances[i].description;
-                        cmd.Parameters[17].Value = allowances[i].remark;
-                        cmd.Parameters[18].Value = allowances[i].status;
-                        cmd.Parameters[19].Value = allowances[i].approver;
-                        cmd.Parameters[20].Value = allowances[i].last_date;
+                        cmd.Parameters["@code"].Value = item.code ?? (object)DBNull.Value;
+                        cmd.Parameters["@emp_id"].Value = item.emp_id ?? (object)DBNull.Value;
+                        cmd.Parameters["@zipcode"].Value = item.zipcode ?? (object)DBNull.Value;
+                        cmd.Parameters["@date"].Value = item.date == default ? (object)DBNull.Value : item.date;
+                        cmd.Parameters["@time_start"].Value = item.time_start;
+                        cmd.Parameters["@time_stop"].Value = item.time_stop;
+                        cmd.Parameters["@customer"].Value = item.customer ?? (object)DBNull.Value;
+                        cmd.Parameters["@job"].Value = item.job ?? (object)DBNull.Value;
+                        cmd.Parameters["@allowance_province"].Value = item.allowance_province;
+                        cmd.Parameters["@allowance_1_4"].Value = item.allowance_1_4;
+                        cmd.Parameters["@allowance_4_8"].Value = item.allowance_4_8;
+                        cmd.Parameters["@allowance_8"].Value = item.allowance_8;
+                        cmd.Parameters["@allowance_other"].Value = item.allowance_other;
+                        cmd.Parameters["@allowance_hostel"].Value = item.allowance_hostel;
+                        cmd.Parameters["@list"].Value = item.list ?? (object)DBNull.Value;
+                        cmd.Parameters["@amount"].Value = item.amount;
+                        cmd.Parameters["@description"].Value = item.description ?? (object)DBNull.Value;
+                        cmd.Parameters["@remark"].Value = item.remark ?? (object)DBNull.Value;
+                        cmd.Parameters["@status"].Value = item.status ?? (object)DBNull.Value;
+                        cmd.Parameters["@approver"].Value = item.approver ?? (object)DBNull.Value;
+                        cmd.Parameters["@last_date"].Value = item.last_date;
+
                         cmd.ExecuteNonQuery();
                     }
 
@@ -306,148 +298,32 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (con.State == ConnectionState.Open)
+                if (con_report.State == ConnectionState.Open)
                 {
-                    con.Close();
+                    con_report.Close();
                 }
             }
             return "Success";
         }
-        public string OriginalInserts(List<AllowanceModel> allowances)
-        {
-            try
-            {
-                if (con.State == ConnectionState.Closed)
-                {
-                    con.Open();
-                }
-                string string_command = string.Format($@"
-                    INSERT INTO 
-                        OriginalAllowance(code,
-                            emp_id,
-                            zipcode,
-                            date,
-                            date_start,
-                            date_stop,
-                            customer,
-                            job,
-                            allowance_province,
-                            allowance_1_4,
-                            allowance_4_8,
-                            allowance_8,
-                            allowance_other,
-                            allowance_hostel,
-                            list,amount,
-                            description,
-                            remark,
-                            status,
-                            approver,
-                            last_date
-                        )
-                        VALUES(@code,
-                            @emp_id,
-                            @zipcode,
-                            @date,
-                            @date_start,
-                            @date_stop,
-                            @customer,
-                            @job,
-                            @allowance_province,
-                            @allowance_1_4,
-                            @allowance_4_8,
-                            @allowance_8,
-                            @allowance_other,
-                            @allowance_hostel,
-                            @list,amount,
-                            @description,
-                            @remark,
-                            @status,
-                            @approver,
-                            @last_date
-                        )");
-                using (SqlCommand cmd = new SqlCommand(string_command, con))
-                {
-                    cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.Add("@code", SqlDbType.Text);
-                    cmd.Parameters.Add("@emp_id", SqlDbType.Text);
-                    cmd.Parameters.Add("@zipcode", SqlDbType.Text);
-                    cmd.Parameters.Add("@date", SqlDbType.Date);
-                    cmd.Parameters.Add("@date_start", SqlDbType.Date);
-                    cmd.Parameters.Add("@date_stop", SqlDbType.Date);
-                    cmd.Parameters.Add("@customer", SqlDbType.Text);
-                    cmd.Parameters.Add("@job", SqlDbType.Text);
-                    cmd.Parameters.Add("@allowance_province", SqlDbType.Float);
-                    cmd.Parameters.Add("@allowance_1_4", SqlDbType.Float);
-                    cmd.Parameters.Add("@allowance_4_8", SqlDbType.Float);
-                    cmd.Parameters.Add("@allowance_8", SqlDbType.Float);
-                    cmd.Parameters.Add("@allowance_other", SqlDbType.Float);
-                    cmd.Parameters.Add("@allowance_hostel", SqlDbType.Float);
-                    cmd.Parameters.Add("@list", SqlDbType.Text);
-                    cmd.Parameters.Add("@amount", SqlDbType.Float);
-                    cmd.Parameters.Add("@description", SqlDbType.Text);
-                    cmd.Parameters.Add("@remark", SqlDbType.Text);
-                    cmd.Parameters.Add("@status", SqlDbType.Text);
-                    cmd.Parameters.Add("@approver", SqlDbType.Text);
-                    cmd.Parameters.Add("@last_date", SqlDbType.Text);
-
-                    for (int i = 0; i < allowances.Count; i++)
-                    {
-                        cmd.Parameters[0].Value = allowances[i].code;
-                        cmd.Parameters[1].Value = allowances[i].emp_id;
-                        cmd.Parameters[2].Value = allowances[i].zipcode;
-                        cmd.Parameters[3].Value = allowances[i].date;
-                        cmd.Parameters[4].Value = allowances[i].date_start;
-                        cmd.Parameters[5].Value = allowances[i].date_stop;
-                        cmd.Parameters[6].Value = allowances[i].customer;
-                        cmd.Parameters[7].Value = allowances[i].job;
-                        cmd.Parameters[8].Value = allowances[i].allowance_province;
-                        cmd.Parameters[9].Value = allowances[i].allowance_1_4;
-                        cmd.Parameters[10].Value = allowances[i].allowance_4_8;
-                        cmd.Parameters[11].Value = allowances[i].allowance_8;
-                        cmd.Parameters[12].Value = allowances[i].allowance_other;
-                        cmd.Parameters[13].Value = allowances[i].allowance_hostel;
-                        cmd.Parameters[14].Value = allowances[i].list;
-                        cmd.Parameters[15].Value = allowances[i].amount;
-                        cmd.Parameters[16].Value = allowances[i].description;
-                        cmd.Parameters[17].Value = allowances[i].remark;
-                        cmd.Parameters[18].Value = allowances[i].status;
-                        cmd.Parameters[19].Value = allowances[i].approver;
-                        cmd.Parameters[20].Value = allowances[i].last_date;
-                        cmd.ExecuteNonQuery();
-                    }
-
-                }
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-            finally
-            {
-                if (con.State == ConnectionState.Open)
-                {
-                    con.Close();
-                }
-            }
-            return "Success";
-        }
-
+        
         public string UpdateByCode(AllowanceModel allowance)
         {
             try
             {
-                if (con.State == ConnectionState.Closed)
+                if (con_report.State == ConnectionState.Closed)
                 {
-                    con.Open();
+                    con_report.Open();
                 }
                 string string_command = string.Format($@"
+                    IF EXISTS (SELECT 1 FROM [dbo].[EditAllowance] WHERE code = @code)
+                    BEGIN
                     UPDATE 
                         EditAllowance SET
                         emp_id = @emp_id,
                         zipcode = @zipcode,
 	                    date = @date,
-                        date_start = @date_start,
-                        date_stop = @date_stop,
+                        time_start = @time_start,
+                        time_stop = @time_stop,
 	                    customer = @customer,
 	                    job = @job,
 	                    allowance_province = @allowance_province,
@@ -463,16 +339,64 @@ namespace TRIPEXPENSEREPORT.Service
 	                    status = @status,
 						approver = @approver,
 						last_date = @last_date                                                     
-                        WHERE code = @code");
-                using (SqlCommand cmd = new SqlCommand(string_command, con))
+                        WHERE code = @code
+                   END
+                   ELSE
+                   BEGIN
+                    INSERT INTO 
+                        EditAllowance(code,
+                            emp_id,
+                            zipcode,
+                            date,
+                            time_start,
+                            time_stop,
+                            customer,
+                            job,
+                            allowance_province,
+                            allowance_1_4,
+                            allowance_4_8,
+                            allowance_8,
+                            allowance_other,
+                            allowance_hostel,
+                            list,
+                            amount,
+                            description,
+                            remark,
+                            status,
+                            approver,
+                            last_date
+                        )
+                        VALUES(@code,
+                            @emp_id,
+                            @zipcode,
+                            @date,
+                            @time_start,
+                            @time_stop,
+                            @customer,
+                            @job,
+                            @allowance_province,
+                            @allowance_1_4,
+                            @allowance_4_8,
+                            @allowance_8,
+                            @allowance_other,
+                            @allowance_hostel,
+                            @list,
+                            @amount,
+                            @description,
+                            @remark,
+                            @status,
+                            @approver,
+                            @last_date)
+                       END");
+                using (SqlCommand cmd = new SqlCommand(string_command, con_report))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@code", allowance.code);
                     cmd.Parameters.AddWithValue("@emp_id", allowance.emp_id);
                     cmd.Parameters.AddWithValue("@zipcode", allowance.zipcode);
                     cmd.Parameters.AddWithValue("@date", allowance.date);
-                    cmd.Parameters.AddWithValue("@date_start", allowance.date_start);
-                    cmd.Parameters.AddWithValue("@date_stop", allowance.date_stop);
+                    cmd.Parameters.AddWithValue("@time_start", allowance.time_start);
+                    cmd.Parameters.AddWithValue("@time_stop", allowance.time_stop);
                     cmd.Parameters.AddWithValue("@customer", allowance.customer);
                     cmd.Parameters.AddWithValue("@job", allowance.job);
                     cmd.Parameters.AddWithValue("@allowance_province", allowance.allowance_province);
@@ -486,7 +410,7 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@description", allowance.description);
                     cmd.Parameters.AddWithValue("@remark", allowance.remark);
                     cmd.Parameters.AddWithValue("@status", allowance.status);
-                    cmd.Parameters.AddWithValue("@approver", allowance.approver);
+                    cmd.Parameters.AddWithValue("@approver", allowance.approver ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@last_date", allowance.last_date);
                     cmd.ExecuteNonQuery();
                 }
@@ -497,14 +421,42 @@ namespace TRIPEXPENSEREPORT.Service
             }
             finally
             {
-                if (con.State == ConnectionState.Open)
+                if (con_report.State == ConnectionState.Open)
                 {
-                    con.Close();
+                    con_report.Close();
                 }
             }
             return "Success";
         }
-
+        public string DeleteByCode(string code)
+        {
+            try
+            {
+                if (con_report.State == ConnectionState.Closed)
+                {
+                    con_report.Open();
+                }
+                string string_command = string.Format($@"DELETE FROM EditAllowance WHERE code = @code");
+                using (SqlCommand cmd = new SqlCommand(string_command, con_report))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@code", code);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con_report.State == ConnectionState.Open)
+                {
+                    con_report.Close();
+                }
+            }
+            return "Success";
+        }
         public List<AllowanceModel> CalculateAllowanceNew(string emp_id, List<DataTripModel> trips , DateTime start, DateTime stop)
         {
             List<AllowanceModel> dataAllowances = new List<AllowanceModel>();
@@ -535,33 +487,48 @@ namespace TRIPEXPENSEREPORT.Service
                 bool zone = false;     //true in zone , false out zone
 
                 List<DataTripModel> _trips = trips.Where(w => w.date.Date == date.Date).ToList();
-                string code = Guid.NewGuid().ToString("N");
+                string code = $"{emp_id}{date.ToString("yyyyMMddHHmmss")}";
 
                 if (_trips.Count > 0) // Have Trip each date
                 {
                     #region Outside Zone
-
-                    List<DataTripModel> zones = _trips.Where(w => areas.Select(s=>s.code).Contains(w.zipcode.Substring(0, 2))).ToList();
-                    if (zones.Count != _trips.Count)
+                    //Check Zipcode Not Null.
+                    if (_trips.Any(a => a.zipcode != ""))
                     {
-                        zone = true;
-                        Allowance_Outside_Region = 100;
+                        List<DataTripModel> zones = _trips.Where(w => areas.Select(s => s.code).Contains(w.zipcode.Substring(0, 2))).ToList();
+                        if (zones.Count != _trips.Count)
+                        {
+                            zone = true;
+                            Allowance_Outside_Region = 100;
+                        }
+                        else
+                        {
+                            Allowance_Outside_Region = 0;
+                        }
                     }
                     else
                     {
-                        List<DataTripModel> AllZone = _trips.Where(w => area_location.Contains(w.zipcode.Substring(0, 2))).ToList();
-                        //Check All CheckIn Zone.
-                        zone = AllZone.Count > 0 ? true : false;
-
-                        if (zone) // out zone
+                        //Check Zipcode Not Null.
+                        if (_trips.Any(a => a.zipcode != ""))
                         {
-                            Allowance_Outside_Region = 100;
+                            List<DataTripModel> AllZone = _trips.Where(w => area_location.Contains(w.zipcode.Substring(0, 2))).ToList();
+                            //Check All CheckIn Zone.
+                            zone = AllZone.Count > 0 ? true : false;
+
+                            if (zone) // out zone
+                            {
+                                Allowance_Outside_Region = 100;
+                            }
+                        }
+                        else
+                        {
+                            Allowance_Outside_Region = 0;
                         }
                     }
                     #endregion
 
-                    TimeSpan first_start = _trips.FirstOrDefault().time_start;
-                    TimeSpan last_stop = _trips.LastOrDefault().time_stop;
+                    TimeSpan first_start = _trips.FirstOrDefault()?.time_start ?? TimeSpan.Zero;
+                    TimeSpan last_stop = _trips.LastOrDefault()?.time_stop ?? TimeSpan.Zero;
                     double time_duration = (last_stop - first_start).TotalMinutes;
 
                     if (!zone) // In Zone
@@ -677,7 +644,7 @@ namespace TRIPEXPENSEREPORT.Service
                         //}
                     }
 
-                    double Allowance_Sum = Allowance_Outside_Region + Allowance1_4 + Allowance4_8 + Allowance8;
+                    //double Allowance_Sum = Allowance_Outside_Region + Allowance1_4 + Allowance4_8 + Allowance8;
 
                     var AllDay = _trips.Select(s => s.location).ToHashSet().ToArray();
                     string joinTrip = AllDay != null ? string.Join(",", AllDay.Where(w => w != "").ToArray()) : "";
@@ -689,8 +656,10 @@ namespace TRIPEXPENSEREPORT.Service
                     AllowanceModel allowance = new AllowanceModel()
                     {
                         emp_id = emp_id,
-                        date = date.Date,
+                        date = date,
                         customer = joinTrip,
+                        time_start = new TimeSpan(_trips.FirstOrDefault().time_start.Hours, _trips.FirstOrDefault().time_start.Minutes, _trips.FirstOrDefault().time_start.Seconds),
+                        time_stop = new TimeSpan(_trips.LastOrDefault().time_stop.Hours, _trips.LastOrDefault().time_stop.Minutes, _trips.LastOrDefault().time_stop.Seconds),
                         job = _trips.FirstOrDefault().job_id,
                         allowance_province = Allowance_Outside_Region,
                         allowance_1_4 = Allowance1_4,
@@ -698,7 +667,7 @@ namespace TRIPEXPENSEREPORT.Service
                         allowance_8 = Allowance8,
                         allowance_hostel = 0,
                         allowance_other = 0,
-                        amount = Allowance_Sum,
+                        amount = 0,
                         zipcode = _trips.FirstOrDefault().zipcode,
                         approver = "",
                         status = "Pending",
@@ -716,7 +685,9 @@ namespace TRIPEXPENSEREPORT.Service
                     AllowanceModel allowance = new AllowanceModel()
                     {
                         emp_id = emp_id,
-                        date = date.Date,
+                        date = date,
+                        time_start = TimeSpan.Zero,
+                        time_stop = TimeSpan.Zero,
                         customer = "",
                         job = "",
                         allowance_province = 0,
@@ -739,6 +710,98 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return dataAllowances;
+        }
+        public Stream ExportAllowance(FileInfo path, List<AllowanceModel> allowances, string month, CTLModels.EmployeeModel emp)
+        {
+            Stream stream = new MemoryStream();
+            if (path.Exists)
+            {
+                using (ExcelPackage p = new ExcelPackage(path))
+                {
+                    List<ProvinceModel> provinces = Province.GetProvinces();
+                    ExcelWorksheet worksheet = p.Workbook.Worksheets["เบี้ยเลี้ยง"];
+                    int startRows = 11;
+                    var parts = month.Split('-');
+                    if (parts.Length != 2
+                        || !int.TryParse(parts[0], out int year)
+                        || !int.TryParse(parts[1], out int mon))
+                    {
+                        return null;
+                    }
+
+
+                    DateTime start = new DateTime(year, mon, 1);
+                    DateTime stop = start.AddMonths(1).AddDays(-1);
+                    for (DateTime date = start; date <= stop; date = date.AddDays(1))
+                    {
+                        AllowanceModel allowance = allowances.Where(w => w.date.Date == date.Date).FirstOrDefault();
+                        string _date = date.ToString("dd/MM/yyyy");
+                        worksheet.Cells["B" + startRows].Value = date;
+                        if (allowance != null)
+                        {
+                            worksheet.Cells["C" + startRows].Value = allowance.customer;
+                            string prvince = provinces.Where(w => w.zipcode == allowance.zipcode).FirstOrDefault().province;
+                            worksheet.Cells["D" + startRows].Value = prvince;
+                            worksheet.Cells["E" + startRows].Value = allowance.job;
+                            worksheet.Cells["F" + startRows].Value = allowance.allowance_province ;
+                            if ((double)worksheet.Cells["F" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["F" + (startRows)].Value = "";
+                            }
+                            worksheet.Cells["G" + (startRows)].Value = allowance.allowance_1_4;
+                            if ((double)worksheet.Cells["G" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["G" + (startRows)].Value = "";
+                            }
+                            worksheet.Cells["H" + startRows].Value = allowance.allowance_4_8;
+                            if ((double)worksheet.Cells["H" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["H" + (startRows)].Value = "";
+                            }
+                            worksheet.Cells["I" + (startRows)].Value = allowance.allowance_8;
+                            if ((double)worksheet.Cells["I" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["I" + (startRows)].Value = "";
+                            }
+                            worksheet.Cells["J" + (startRows)].Value = allowance.allowance_other;
+                            if ((double)worksheet.Cells["J" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["J" + (startRows)].Value = "";
+                            }
+                            worksheet.Cells["L" + (startRows)].Value = allowance.allowance_hostel;
+                            if ((double)worksheet.Cells["L" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["L" + (startRows)].Value = "";
+                            }
+                            worksheet.Cells["M" + (startRows)].Value = allowance.list;
+                            worksheet.Cells["N" + (startRows)].Value = allowance.amount;
+                            if ((double)worksheet.Cells["N" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["N" + (startRows)].Value = "";
+                            }
+
+                            double sum = allowance.allowance_province + allowance.allowance_1_4 + allowance.allowance_4_8 + allowance.allowance_8 + allowance.allowance_other + allowance.allowance_hostel + allowance.amount;
+
+                            worksheet.Cells["O" + (startRows)].Value = sum;
+                            if ((double)worksheet.Cells["O" + (startRows)].Value == 0)
+                            {
+                                worksheet.Cells["O" + (startRows)].Value = "";
+                            }
+                            worksheet.Cells["P" + (startRows)].Value = allowance.remark;
+
+                        }
+                        startRows++;
+                    }
+                    worksheet.Cells["C5"].Value = emp.name_en;
+                    worksheet.Cells["C44"].Value = emp.name_en;
+
+                    worksheet.Cells["C46"].Value = DateTime.Now.ToString("dd/MM/yyyy");
+
+                    p.SaveAs(stream);
+                    stream.Position = 0;
+                }
+            }
+            return stream;
         }
     }
 }

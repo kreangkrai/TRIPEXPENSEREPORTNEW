@@ -326,8 +326,8 @@ namespace TRIPEXPENSEREPORT.Controllers
         public IActionResult UpdateData(string str)
         {
             CompanyModel company = JsonConvert.DeserializeObject<CompanyModel>(str);
-            DateTime dt = DateTime.ParseExact(company.date.ToString("dd/MM/yyy"), "MM/dd/yyyy", CultureInfo.InvariantCulture);
-            company.date = dt;
+            //DateTime dt = DateTime.ParseExact(company.date.ToString("dd/MM/yyy"), "MM/dd/yyyy", CultureInfo.InvariantCulture);
+            //company.date = dt;
             company.last_date = DateTime.Now;
             company.status = "Pending";
             CompanyModel old_company = Company.GetCompanyByCode(company.code);
@@ -474,6 +474,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                 if (emp_id != "")
                 {
                     HashSet<string> set_area = new HashSet<string>();
+                    HashSet<string> set_area_all = new HashSet<string>();
                     CTLModels.EmployeeModel employee = CTLEmployees.GetEmployeeByID(emp_id);
                     string emp_location = employee.location;
                     if (emp_location.ToLower() == "hq")
@@ -484,6 +485,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                             {
                                 set_area.Add(area.code);
                             }
+                            set_area_all.Add(area.code);
                         }
                     }
                     if (emp_location.ToLower() == "rbo")
@@ -494,6 +496,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                             {
                                 set_area.Add(area.code);
                             }
+                            set_area_all.Add(area.code);
                         }
                     }
                     if (emp_location.ToLower() == "kbo")
@@ -504,6 +507,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                             {
                                 set_area.Add(area.code);
                             }
+                            set_area_all.Add(area.code);
                         }
                     }
 
@@ -513,6 +517,12 @@ namespace TRIPEXPENSEREPORT.Controllers
                     {
                         if (zip != "")
                         {
+                            bool chk_have = !set_area_all.Any(a => a == zip.Substring(0, 2));
+                            if (chk_have)
+                            {
+                                zipcode = zip;
+                                break;
+                            }
                             if (set_area.Contains(zip.Substring(0, 2)))
                             {
                                 out_zone = true;

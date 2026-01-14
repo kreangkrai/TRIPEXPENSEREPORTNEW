@@ -270,8 +270,12 @@ namespace TRIPEXPENSEREPORT.Controllers
                     has_loc.Add(item.location);
                 }
                 string loc = string.Join(",", has_loc.ToArray());
+                string code = "";
+                if (start.driver != "")
+                {
+                    code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
+                }
 
-                string code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
                 var personal = new PersonalModel
                 {
                     code = code,
@@ -410,8 +414,11 @@ namespace TRIPEXPENSEREPORT.Controllers
                     has_loc.Add(item.location);
                 }
                 string loc = string.Join(",", has_loc.ToArray());
-
-                string code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
+                string code = "";
+                if (start.driver != "")
+                {
+                    code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
+                }
                 var personal = new PersonalModel
                 {
                     code = code,

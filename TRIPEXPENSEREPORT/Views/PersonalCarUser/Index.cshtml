@@ -1017,7 +1017,7 @@
                     $('#state_diesel').prop('checked',true);
                 }
                 
-                if (!emp.position.includes('Manager') && !emp.position.includes('DirectorX')) {
+                if (emp.position.includes('Opearion')) {
                     if (sumKm <= 1000) {
                         suma1 = sumKm * 10.0;
                         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", sumKm.toString(), "AMOUNT", suma1.toString(), "BAHT"];
@@ -1084,7 +1084,7 @@
                     var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
                     a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
                 }
-                else {
+                else if (emp.position.includes('Manager') || emp.position.includes('Director')){
                     if (sumKm <= 1000) {
                         suma1 = 0;
                         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
@@ -1136,57 +1136,57 @@
                     var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
                     a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
                 }
-                // if (level == "3") {
-                //     if (sumKm <= 1000) {
-                //         suma1 = 0;
-                //         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
-                //     } else {
-                //         suma1 = 1000 * 10.0;
-                //         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
-                //     }
-                //     if (sumKm > 1000 && sumKm <= 2000) {
-                //         suma2 = 0;
-                //         a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
-                //     } else {
-                //         suma2 = 2000 * 7.5;
-                //         a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "2000", "AMOUNT", suma2.toString(), "BAHT"];
-                //     }
+                else {
+                    if (sumKm <= 1000) {
+                        suma1 = 0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
+                    } else {
+                        suma1 = 1000 * 10.0;
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                    }
+                    if (sumKm > 1000 && sumKm <= 2000) {
+                        suma2 = 0;
+                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                    } else {
+                        suma2 = 2000 * 7.5;
+                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "2000", "AMOUNT", suma2.toString(), "BAHT"];
+                    }
 
-                //     if (sumKm > 2000 && sumKm <= 4000) {
-                //         suma3 = 0;
-                //         a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
-                //     } else {
-                //         if (sumKm > 4000) {
-                //             suma3 = 0;
-                //             a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
-                //         } else {
-                //             suma3 = 0;
-                //             a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
-                //         }
-                //     }
-                //     if (sumKm > 4000) {
-                //         suma4 = 0;
-                //         a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
-                //     } else {
-                //         suma4 = 0;
-                //         a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
-                //     }
+                    if (sumKm > 2000 && sumKm <= 4000) {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                    } else {
+                        if (sumKm > 4000) {
+                            suma3 = 0;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                        } else {
+                            suma3 = 0;
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                        }
+                    }
+                    if (sumKm > 4000) {
+                        suma4 = 0;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                    } else {
+                        suma4 = 0;
+                        a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                    }
 
-                //     // Sum A/EXP, P_T
-                //     suma5 = 0;
-                //     a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+                    // Sum A/EXP, P_T
+                    suma5 = 0;
+                    a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
 
-                //     // Sum COMMENSURATE GASOLINE
-                //     suma6 = 0;
-                //     a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+                    // Sum COMMENSURATE GASOLINE
+                    suma6 = 0;
+                    a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
 
-                //     // Gasoline
-                //     a7 = ["", "", "0.0", "", "", ""];
+                    // Gasoline
+                    a7 = ["", "", "0.0", "", "", ""];
 
-                //     // Sum Total
-                //     var sumall = 3000;
-                //     a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
-                // }
+                    // Sum Total
+                    var sumall = 3000;
+                    a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+                }
                 ans = [a1, a2, a3, a4, a5, a6, a7, a8];
 
                 return ans;

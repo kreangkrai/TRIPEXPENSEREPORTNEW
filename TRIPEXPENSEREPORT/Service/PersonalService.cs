@@ -755,7 +755,7 @@ namespace TRIPEXPENSEREPORT.Service
                     worksheet.Cells["D55"].Value =  "";
                     worksheet.Cells["E55"].Value =  "";
 
-                    if (!emp.position.Contains("Manager") && !emp.position.Contains("Director")) // Sale
+                    if (emp.position.Contains("Operation")) // Sale
                     {
                         int km = personals.Sum(s => s.km);
                         if (km <= 1000)
@@ -825,14 +825,14 @@ namespace TRIPEXPENSEREPORT.Service
                         worksheet.Cells["P59"].Formula = "=SUM(P51:P56)";
 
                     }
-                    else //if (emp.position.Contains("Operation"))
+                    else if (emp.position.Contains("Manager") || emp.position.Contains("Director"))
                     {
                         worksheet.Cells["P59"].Value = sum;
                     }
-                    //else if (level == "3")
-                    //{
-                    //    worksheet.Cells["P59"].Value = 3000;
-                    //}
+                    else
+                    {
+                        worksheet.Cells["P59"].Value = 3000;
+                    }
 
                     p.SaveAs(stream);
                     stream.Position = 0;

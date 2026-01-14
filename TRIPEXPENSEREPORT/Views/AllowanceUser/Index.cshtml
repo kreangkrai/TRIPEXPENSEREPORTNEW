@@ -282,7 +282,7 @@
                         <div class="form-group col-sm-12 col-md-4">
                             <label for="edit_allowance_other">อื่นๆ</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_48" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_other" placeholder="0">
                                 <div class="input-group-append">
                                     <span class="input-group-text">บาท</span>
                                 </div>
@@ -330,9 +330,9 @@
                         </div>
                         <fieldset disabled class="col-sm-12 col-md-4">
                             <div class="form-group">
-                                <label for="edit_allowace_sum">รวม</label>
+                                <label for="edit_allowance_sum">รวม</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" style="text-align:end" id="edit_allowace_sum" placeholder="0">
+                                    <input type="number" class="form-control" style="text-align:end" id="edit_allowance_sum" placeholder="0">
                                     <div class="input-group-append">
                                         <span class="input-group-text">บาท</span>
                                     </div>
@@ -652,7 +652,6 @@
                         const description = rowData.description;
                         const remark = rowData.remark;
                         const sum = rowData.sum;
-                        console.log(rowData);
 
                         $('#edit_code').val(code);
                         $('#edit_emp_id').val(emp_id);
@@ -680,6 +679,23 @@
                 }
             });
         }
+
+        $('#edit_allowance_province,#edit_allowance_14,#edit_allowance_48,#edit_allowance_8,#edit_allowance_other,#edit_allowance_hostel,#edit_allowance_amount').on('change',function(){
+            const allowance_province = $('#edit_allowance_province').val();
+            const allowance_14 = $('#edit_allowance_14').val();
+            const allowance_48 = $('#edit_allowance_48').val();
+            const allowance_8 = $('#edit_allowance_8').val();
+            const allowance_other = $('#edit_allowance_other').val();
+            const allowance_hostel = $('#edit_allowance_hostel').val();
+            const allowance_amount = $('#edit_allowance_amount').val();
+
+            const sum = Number(allowance_province) + Number(allowance_14) + Number(allowance_48) +
+            Number(allowance_8) + Number(allowance_other) + Number(allowance_hostel) + Number(allowance_amount);
+
+            $('#edit_allowance_sum').val(sum);
+
+        });
+
 
         $('#BtnSaveChange').on('click', async function () {
             const zipcode = $('#edit_select_province').val();

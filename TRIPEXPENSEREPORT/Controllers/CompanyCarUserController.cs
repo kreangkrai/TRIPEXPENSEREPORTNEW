@@ -176,6 +176,10 @@ namespace TRIPEXPENSEREPORT.Controllers
                 datas_company.AddRange(companies);
 
                 var result = datas_company
+                    .GroupBy(k => k.date)
+                    .SelectMany(g => g.Count() > 1
+                        ? g.Where(x => !string.IsNullOrEmpty(x.code))
+                        : g)
                     .Select(k => new
                     {
                         date = k.date,
@@ -200,13 +204,11 @@ namespace TRIPEXPENSEREPORT.Controllers
                         description = k.description,
                         status = k.status,
                         zipcode = k.zipcode
-                        
                     })
                     .OrderBy(x => x.date)
-                .ThenBy(x => x.timeStart)
-                .ToList();
+                    .ThenBy(x => x.timeStart)
+                    .ToList();
 
-                //List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
                 return Json(new { data = result });
             }
             else

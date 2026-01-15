@@ -198,6 +198,18 @@ namespace TRIPEXPENSEREPORT.Controllers
                 datas_personal.AddRange(personals);
 
                 var result = datas_personal
+                    .GroupBy(k => k.date)                    
+                    .SelectMany(g =>                             
+                    {
+                        if (g.Count() > 1)
+                        {
+                            return g.Where(x => !string.IsNullOrEmpty(x.code));
+                        }
+                        else
+                        {
+                            return g;
+                        }
+                    })
                     .Select(k => new
                     {
                         date = k.date,
@@ -221,11 +233,14 @@ namespace TRIPEXPENSEREPORT.Controllers
                         status = k.status,
                         gasoline = k.gasoline,
                         zipcode = k.zipcode,
-                        province = provinces.Where(w=>w.zipcode == k.zipcode).Select(s=>s.province).FirstOrDefault()
+                        province = provinces.Where(w => w.zipcode == k.zipcode)
+                                           .Select(s => s.province)
+                                           .FirstOrDefault()
                     })
                     .OrderBy(x => x.date)
                     .ThenBy(x => x.timeStart)
                     .ToList();
+
 
                 List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
                 GasolineModel gasoline = Gasoline.GetGasolineByMonth(month);

@@ -50,19 +50,19 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a class="nav-link pl-4 dropdown-item" asp-controller="Admin_PersonalCar" asp-action="Index">
+                            <a class="nav-link pl-4 dropdown-item" asp-controller="PersonalCarAdmin" asp-action="Index">
                                 <b>- รถส่วนตัว</b>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link pl-4 dropdown-item" asp-controller="Admin_CompanyCar" asp-action="Index">
+                            <a class="nav-link pl-4 dropdown-item" asp-controller="CompanyCarAdmin" asp-action="Index">
                                 <b>- รถบริษัท</b>
                             </a>
                         </li>
                         @if (date.Year > 2024 && date.Month >= 1)
                         {
                             <li class="nav-item">
-                                <a class="nav-link pl-4 dropdown-item" asp-controller="Admin_AllowanceNew" asp-action="Index">
+                                <a class="nav-link pl-4 dropdown-item" asp-controller="AllowanceAdmin" asp-action="Index">
                                     <b>- เบี้ยเลี้ยง</b>
                                 </a>
                             </li>

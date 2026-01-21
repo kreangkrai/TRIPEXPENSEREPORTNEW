@@ -65,7 +65,49 @@ namespace TRIPEXPENSEREPORT.Service
             }
             return drivers;
         }
-      
+
+        public List<EmployeeModel> GetPesonalDriversAdmin(DateTime start_date, DateTime stop_date)
+        {
+            List<EmployeeModel> drivers = new List<EmployeeModel>();
+            try
+            {
+                if (con_report.State == ConnectionState.Closed)
+                {
+                    con_report.Open();
+                }
+                string strCmd = string.Format($@"select DISTINCT EditPersonal.driver as emp_id,
+                                                        emp.name from EditPersonal 
+                                                LEFT JOIN TRIP_EXPENSE.dbo.Employees emp ON EditPersonal.driver = emp.emp_id
+                                                where date >= @start AND date <= @stop --AND status = 'Pending'
+                                                order by name");
+                SqlCommand command = new SqlCommand(strCmd, con_report);
+                command.Parameters.AddWithValue("@start", start_date.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@stop", stop_date.ToString("yyyy-MM-dd"));
+                SqlDataReader dr = command.ExecuteReader();
+                if (dr.HasRows)
+                {
+                    while (dr.Read())
+                    {
+                        EmployeeModel driver = new EmployeeModel()
+                        {
+                            emp_id = dr["emp_id"].ToString(),
+                            name = dr["name"].ToString(),
+                        };
+                        drivers.Add(driver);
+                    }
+                    dr.Close();
+                }
+            }
+            finally
+            {
+                if (con_report.State == ConnectionState.Open)
+                {
+
+                    con_report.Close();
+                }
+            }
+            return drivers;
+        }
         public string EditInserts(List<PersonalModel> personals)
         {
             try
@@ -95,7 +137,6 @@ namespace TRIPEXPENSEREPORT.Service
                             auto_km,
                             description,
                             status,
-                            gasoline,
                             approver,
                             last_date
                         )
@@ -118,7 +159,6 @@ namespace TRIPEXPENSEREPORT.Service
                             @auto_km,
                             @description,
                             @status,
-                            @gasoline,
                             @approver,
                             @last_date
                         )");
@@ -145,7 +185,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.Add("@auto_km", SqlDbType.Int);
                     cmd.Parameters.Add("@description", SqlDbType.VarChar, -1);
                     cmd.Parameters.Add("@status", SqlDbType.VarChar, 50);
-                    cmd.Parameters.Add("@gasoline", SqlDbType.VarChar, 100);
                     cmd.Parameters.Add("@approver", SqlDbType.VarChar, 100);
                     cmd.Parameters.Add("@last_date", SqlDbType.DateTime);
 
@@ -170,7 +209,6 @@ namespace TRIPEXPENSEREPORT.Service
                         cmd.Parameters["@auto_km"].Value = p.auto_km;
                         cmd.Parameters["@description"].Value = (object)p.description ?? DBNull.Value;
                         cmd.Parameters["@status"].Value = (object)p.status ?? DBNull.Value;
-                        cmd.Parameters["@gasoline"].Value = (object)p.gasoline ?? DBNull.Value;
                         cmd.Parameters["@approver"].Value = (object)p.approver ?? DBNull.Value;
                         cmd.Parameters["@last_date"].Value = (object)p.last_date ?? DBNull.Value;
 
@@ -223,7 +261,6 @@ namespace TRIPEXPENSEREPORT.Service
                                         auto_km       = @auto_km,
                                         description   = @description,
                                         status        = @status,
-                                        gasoline      = @gasoline,
                                         approver      = @approver,
                                         last_date     = @last_date
                                     WHERE code = @code;
@@ -233,12 +270,12 @@ namespace TRIPEXPENSEREPORT.Service
                                     INSERT INTO [dbo].[EditPersonal] (
                                         code, driver, [date], zipcode, time_start, time_stop, location, job,
                                         cash, ctbo, exp, pt, mileage_start, mileage_stop, km,
-                                        program_km, auto_km, description, status, gasoline, approver, last_date
+                                        program_km, auto_km, description, status, approver, last_date
                                     )
                                     VALUES (
                                         @code, @driver, @date,@zipcode, @time_start, @time_stop, @location, @job,
                                         @cash, @ctbo, @exp, @pt, @mileage_start, @mileage_stop, @km,
-                                        @program_km, @auto_km, @description, @status, @gasoline, @approver, @last_date
+                                        @program_km, @auto_km, @description, @status, @approver, @last_date
                                     );
                                 END");
                 using (SqlCommand cmd = new SqlCommand(string_command, con_report))
@@ -263,7 +300,6 @@ namespace TRIPEXPENSEREPORT.Service
                     cmd.Parameters.AddWithValue("@auto_km", personal.auto_km);
                     cmd.Parameters.AddWithValue("@description", personal.description ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@status", personal.status ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@gasoline", personal.gasoline ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@approver", personal.approver ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@last_date", personal.last_date);
 
@@ -283,7 +319,54 @@ namespace TRIPEXPENSEREPORT.Service
             }
             return "Success";
         }
-     
+
+        public string UpdateApproved(List<string> codes , string approver)
+        {
+            try
+            {
+                if (con_report.State == ConnectionState.Closed)
+                {
+                    con_report.Open();
+                }
+                string string_command = string.Format($@"
+                                    UPDATE [dbo].[EditPersonal]
+                                    SET
+                                        last_date = @last_date,
+                                        approver = @approver,
+                                        status = @status
+                                    WHERE code = @code AND status <> 'Approved'");
+                using (SqlCommand cmd = new SqlCommand(string_command, con_report))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add("@code",SqlDbType.NVarChar);
+                    cmd.Parameters.AddWithValue("@last_date", SqlDbType.DateTime);
+                    cmd.Parameters.AddWithValue("@approver", SqlDbType.NVarChar);
+                    cmd.Parameters.AddWithValue("@status", SqlDbType.NVarChar);
+
+                    foreach (var code in codes)
+                    {
+                        cmd.Parameters[0].Value = code;
+                        cmd.Parameters[1].Value = DateTime.Now;
+                        cmd.Parameters[2].Value = approver;
+                        cmd.Parameters[3].Value = "Approved";
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con_report.State == ConnectionState.Open)
+                {
+                    con_report.Close();
+                }
+            }
+            return "Success";
+        }
         public List<PersonalViewModel> GetEditPersonalsByDate(string emp_id,DateTime start_date, DateTime stop_date)
         {
             List<PersonalViewModel> personals = new List<PersonalViewModel>();
@@ -400,7 +483,6 @@ namespace TRIPEXPENSEREPORT.Service
 												auto_km,
 												description,
 												status,
-												gasoline,
 												approver,
 												last_date
                                                 FROM EditPersonal
@@ -435,7 +517,6 @@ namespace TRIPEXPENSEREPORT.Service
                             auto_km = dr["auto_km"] != DBNull.Value ? Convert.ToInt32(dr["auto_km"].ToString()) : 0,
                             description = dr["description"].ToString(),
                             status = dr["status"].ToString(),
-                            gasoline = dr["gasoline"].ToString(),
                             approver = dr["approver"].ToString(),
                             last_date = dr["last_date"] != DBNull.Value ? Convert.ToDateTime(dr["last_date"].ToString()) : DateTime.MinValue
                         };
@@ -483,7 +564,6 @@ namespace TRIPEXPENSEREPORT.Service
 												auto_km,
 												description,
 												status,
-												gasoline,
 												approver,
 												last_date
                                                 FROM EditPersonal
@@ -516,7 +596,6 @@ namespace TRIPEXPENSEREPORT.Service
                             auto_km = dr["auto_km"] != DBNull.Value ? Convert.ToInt32(dr["auto_km"].ToString()) : 0,
                             description = dr["description"].ToString(),
                             status = dr["status"].ToString(),
-                            gasoline = dr["gasoline"].ToString(),
                             approver = dr["approver"].ToString(),
                             last_date = dr["last_date"] != DBNull.Value ? Convert.ToDateTime(dr["last_date"].ToString()) : DateTime.MinValue,
                         };

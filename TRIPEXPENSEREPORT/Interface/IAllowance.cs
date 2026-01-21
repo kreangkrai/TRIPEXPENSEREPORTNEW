@@ -12,5 +12,8 @@ namespace TRIPEXPENSEREPORT.Interface
         string DeleteByCode(string code);
         List<AllowanceModel> CalculateAllowanceNew(string emp_id, List<DataTripModel> trips, DateTime start, DateTime stop);
         Stream ExportAllowance(FileInfo path, List<AllowanceModel> allowances, string month, CTLModels.EmployeeModel emp);
+
+        List<EmployeeModel> GetEmployeeAdmin(DateTime start_date, DateTime stop_date);
+        string UpdateApproved(List<string> codes, string approver);
     }
 }

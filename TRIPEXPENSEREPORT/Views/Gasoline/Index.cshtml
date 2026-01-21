@@ -1,0 +1,346 @@
+﻿@{
+    ViewData["Title"] = "Gasoline";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #table {
+        cursor: pointer;
+        white-space: nowrap;
+    }
+</style>
+<div class="container-fluid p-3" style="background-color:#ECF0F5;">
+    <div class="row">
+        <div class="col-xl-2" style="background-color:#ECF0F5">
+            <div class="card card-dark">
+                <div class="card-header" style="background-color: #034694">
+                    <span class="card-title">Gasoline</span>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="col-12 col-xl-12">
+                            <div class="form-group row">
+                                <div class="col-md-12 col-xl-12">
+                                    <input type="button" id="btn_add" value="เพิ่ม" class="form-control btn btn-success" style="height:60px;color:white;font-size:20px" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-10" style="background-color:#ECF0F5;height:auto;overflow-x:auto">
+            <div class="card card-dark">
+                <div class="card-header" style="background-color: #034694">
+                    <span class="card-title">ราคาน้ำมันต่อลิตร</span>
+                </div>
+                <div class="card-body">
+                    <div id="div_loading" style="text-align:center" hidden>
+                        <img src="~/images/loading.gif" style="width:300px;height:300px;align-items:center" />
+                    </div>
+                    <div id="div_table" class="row">
+                        <div class="col-12 col-xl-12" style="overflow-x:auto;height:700px">
+                            <table id="table" class="table compact table-bordered table-sm table-hover text-center" style="width:100%">
+                                <thead style="background-color:#034694;color:white">
+                                    <tr>
+                                        <th>เดือนปี</th>
+                                        <th>แก๊ชโซฮอล์</th>
+                                        <th>ดีเซล</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>                   
+                </div>
+            </div>
+        </div>       
+    </div>
+</div>
+<div class="modal fade" id="editGasolineModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><b>Edit Gasoline</b></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="edit_month">เดือนปี</label>
+                            <input id="edit_month" type="month" class="form-control" style="width:100%;" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="edit_sohol">แก๊สโซฮอล์</label>
+                            <input id="edit_sohol" type="number" class="form-control" style="width:100%;">
+                        </div>
+                    </div>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="edit_diesel">ดีเซล</label>
+                            <input id="edit_diesel" type="number" class="form-control" style="width:100%;">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <div class="col-12 col-xl-12">
+                    <div class="row">
+                        <div class="col-2 col-xl-2">
+                            <button type="button" id="btn_delete" class="btn btn-danger">Delete</button>
+                        </div>
+                        <div class="col-10 col-xl-10 d-flex justify-content-end">
+                            <div class="row">
+                                <div class="col-4 col-xl-4">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                </div>
+                                <div class="col-8 col-xl-8">
+                                    <button type="button" id="btn_edit_save" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="modal fade" id="deleteGasolineModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><b>Delete Gasoline</b></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="delete_month">เดือนปี</label>
+                            <input id="delete_month" type="month" class="form-control" style="width:100%;" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="delete_sohol">แก๊สโซฮอล์</label>
+                            <input id="delete_sohol" type="number" class="form-control" style="width:100%;">
+                        </div>
+                    </div>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="delete_diesel">ดีเซล</label>
+                            <input id="delete_diesel" type="number" class="form-control" style="width:100%;">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="btn_delete_save" class="btn btn-danger">Delete</button>
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="modal fade" id="addGasolineModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><b>Add Gasoline</b></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="add_month">วันเดือนปี</label>
+                            <input id="add_month" type="month" class="form-control" style="width:100%;">
+                        </div>
+                    </div>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="add_sohol">แก๊สโซฮอล์</label>
+                            <input id="add_sohol" type="number" class="form-control" style="width:100%;">
+                        </div>
+                    </div>
+                    <div class="form-group row m-0">
+                        <div class="col-12">
+                            <label for="add_diesel">ดีเซล</label>
+                            <input id="add_diesel" type="number" class="form-control" style="width:100%;">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="btn_add_save" class="btn btn-success">Add</button>
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<partial name="ModalSpin" />
+@section Scripts{
+    <script type="text/javascript">
+        var table;
+        $(document).ready(async function () {
+            await Loading();
+        });
+        $('#btn_add').on('click', async function () {
+            $('#addGasolineModal').modal();
+        });
+
+        $('#btn_add_save').on('click', async function () {
+            let month = $('#add_month').val();
+            let sohol = $('#add_sohol').val();
+            let diesel = $('#add_diesel').val();
+            let json_string = JSON.stringify({
+                "month": month,
+                "sohol": sohol,
+                "diesel": diesel
+            });
+
+            await $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddGasoline", "Gasoline")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { json_string },
+                success: async function (response) {
+                    if (response === "Insert Success") {
+                        await Loading();
+                        $('#addGasolineModal').modal('hide');
+                    }
+                }
+            });
+        });
+        $('#table').on('click', 'tbody td', function () {
+            var row = table.row(this).data();
+            let month = row[0];
+            let sohol = row[1];
+            let diesel = row[2];
+
+            $('#edit_month').val(month);
+            $('#edit_sohol').val(sohol);
+            $('#edit_diesel').val(diesel);
+            $('#editGasolineModal').modal();
+
+        });
+
+        $('#btn_edit_save').on('click', async function () {
+            let month = $('#edit_month').val();
+            let sohol = $('#edit_sohol').val();
+            let diesel = $('#edit_diesel').val();
+            let json_string = JSON.stringify({
+                "month": month,
+                "sohol": sohol,
+                "diesel": diesel
+            });
+
+            await $.ajax({
+                type: "PUT",
+                url: '@Url.Action("UpdateGasoline", "Gasoline")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { json_string },
+                success: async function (response) {
+                    if (response === "Update Success") {
+                        await Loading();
+                        $('#editGasolineModal').modal('hide');
+                    }
+                }
+            });
+        });
+
+        $('#btn_delete').on('click', function () {
+
+            let month = $('#edit_month').val();
+            let sohol = $('#edit_sohol').val();
+            let diesel = $('#edit_diesel').val();
+
+            $('#delete_month').val(month);
+            $('#delete_sohol').val(sohol);
+            $('#delete_diesel').val(diesel);
+            $('#deleteGasolineModal').modal();
+        });
+
+        $('#btn_delete_save').on('click', async function () {
+            let month = $('#delete_month').val();
+            let sohol = $('#delete_sohol').val();
+            let diesel = $('#delete_diesel').val();
+            let json_string = JSON.stringify({
+                "month": month,
+                "sohol": sohol,
+                "diesel": diesel
+            });
+
+            await $.ajax({
+                type: "DELETE",
+                url: '@Url.Action("DeleteGasoline", "Gasoline")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { json_string },
+                success: async function (response) {
+                    if (response === "Delete Success") {
+                        await Loading();
+                        $('#deleteGasolineModal').modal('hide');
+                        $('#editGasolineModal').modal('hide');
+                    }
+                }
+            });
+        });
+        async function Loading() {
+            $('#div_loading').prop('hidden', false);
+            $('#div_table').prop('hidden', true);
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetGasoline", "Gasoline")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: {  },
+                success: function (response) {
+                    $('#div_loading').prop('hidden', true);
+                    $('#div_table').prop('hidden', false);
+                    let gasolines = response;
+                    GenerateTable(gasolines);
+
+                }
+            });
+        };
+
+        function GenerateTable(gasolines) {
+            var datas = [];
+            for (var i = 0; i < gasolines.length; i++) {
+                datas.push([
+                    gasolines[i].month,
+                    gasolines[i].sohol,
+                    gasolines[i].diesel
+                ]);
+            }
+
+            if (table !== undefined) {
+                table.destroy();
+            }
+
+            table = $('#table').DataTable({
+                data: datas,
+                columnDefs: [
+                    {
+                        //targets: [2],
+                        //className: "dt-left",
+                    },
+                ],
+                ordering: false,
+                searching: false,
+                paging: false,
+                info: false,
+                rowCallback: function (row, data, dataIndex) {
+
+                }
+            });
+        }
+    </script>
+}

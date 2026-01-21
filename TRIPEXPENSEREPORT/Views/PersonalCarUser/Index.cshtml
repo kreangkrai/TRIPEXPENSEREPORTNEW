@@ -974,6 +974,7 @@
         });
 
         function CalSummary(data_personal, Gastype,commensurate) {
+           
                 var a1 = [];
                 var a2 = [];
                 var a3 = [];
@@ -995,7 +996,6 @@
                  const sumKm = data.reduce((acc, curr) => {
                       return acc + (Number(curr.km) || 0);
                     }, 0);
-        
                 const sumEXP_PT = data.reduce((acc, curr) => {
                   const exp = Number(curr.exp) || 0;
                   const pt  = Number(curr.pt)  || 0;
@@ -1018,7 +1018,7 @@
                 }
                 
                 if (emp.position.includes('Opearion')) {
-                    if (sumKm <= 1000) {
+                    if (sumKm <= 1000) {                       
                         suma1 = sumKm * 10.0;
                         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", sumKm.toString(), "AMOUNT", suma1.toString(), "BAHT"];
                     } else {
@@ -1194,6 +1194,7 @@
 
             let table_summary;
             function GenerateSummaryTable(_datas) {
+                console.log(_datas);
                 let datas = [];
                 for (let i = 0; i < _datas.length; i++) {
                     datas.push([_datas[i][0], _datas[i][1], _datas[i][2], _datas[i][3], _datas[i][4], _datas[i][5]]);

@@ -22,7 +22,6 @@
         public int auto_km { get; set; }
         public string description { get; set; }
         public string status { get; set; }
-        public string gasoline { get; set; }
         public string approver { get; set; }
         public DateTime last_date { get; set; }
     }

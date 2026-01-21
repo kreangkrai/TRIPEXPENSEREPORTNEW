@@ -83,29 +83,12 @@
     <div class=" text-center">
         <h1 style="font-family:Rajdhani; font-weight:bold; font-size:33px; letter-spacing:2px;align-content:center; padding:0px; color:#1C4698">FOR ADMIN </h1>
     </div>
-    @* <div class="row">
-    <div class="col-md-4">
-    <!-- คอลัมน์กว้างครึ่งหนึ่งบนหน้าจอขนาดกลางขึ้นไป -->
-    <h2>คอลัมน์ซ้าย</h2>
-    <p>เนื้อหาซ้าย</p>
-    </div>
-    <div class="col-md-4" style="background-color:antiquewhite">
-    <!-- คอลัมน์ขวา -->
-    <h2>Center Column</h2>
-    <p>เนื้อหาขวา</p>
-    </div>
-    <div class="col-md-4">
-    <!-- คอลัมน์ขวา -->
-    <h2>คอลัมน์ขวา</h2>
-    <p>เนื้อหาขวา</p>
-    </div>
-    </div> *@
 
     <div class="container mt-3">
         <div class="row justify-content-center">
             <!-- การ์ดปุ่มที่ 1: รถส่วนตัว -->
             <div class="col-md-4 mb-4">
-                <a href="@Url.Action("PersonalCar", "Home")" class="text-decoration-none" style="color:#1BA2E4; letter-spacing:1px">
+                <a href="@Url.Action("Index", "PersonalCarAdmin")" class="text-decoration-none" style="color:#1BA2E4; letter-spacing:1px">
                     <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                         <div class="card-body d-flex flex-column align-items-center">
                             <i class="fa-solid fa-car-side fa-3x mb-3"></i>  <!-- ไอคอนรถยนต์ สีน้ำเงิน -->
@@ -118,7 +101,7 @@
 
             <!-- การ์ดปุ่มที่ 2: รถบริษัท -->
             <div class="col-md-4 mb-4">
-                <a href="@Url.Action("CompanyCar", "Home")" class="text-decoration-none" style="color:#2178BE; letter-spacing:1px">
+                <a href="@Url.Action("Index", "CompanyCarAdmin")" class="text-decoration-none" style="color:#2178BE; letter-spacing:1px">
                     <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                         <div class="card-body d-flex flex-column align-items-center">
                             <i class="fa-solid fa-truck-pickup fa-3x mb-3"></i>  <!-- ไอคอนรถบรรทุก สีเทา -->
@@ -131,7 +114,7 @@
 
             <!-- การ์ดปุ่มที่ 3: เบี้ยเลี้ยง -->
             <div class="col-md-4 mb-4">
-                <a href="@Url.Action("Index", "AllowanceUser")" class="text-decoration-none" style="color:#27D86C; letter-spacing:1px">
+                <a href="@Url.Action("Index", "AllowanceAdmin")" class="text-decoration-none" style="color:#27D86C; letter-spacing:1px">
                     <div class="card border-0 shadow-sm h-0 text-center p-2 rounded-3">
                         <div class="card-body d-flex flex-column align-items-center">
                             <i class="fas fa-envelope-open-text fa-3x  mb-3"></i>  <!-- ไอคอนซองจดหมาย สีเขียว -->

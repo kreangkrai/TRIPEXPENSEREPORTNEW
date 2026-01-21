@@ -627,7 +627,7 @@
                     { data: 'job', className: 'text-center' },
                     { data: 'province', className: 'text-center' },
                     { data: 'car_id', className: 'text-center' },
-                    { data: 'driver', className: 'text-center' },
+                    { data: 'driverName', className: 'text-center' },
                     {
                         data: 'timeStart', className: 'text-center',
                         render: function (data) {
@@ -746,7 +746,6 @@
                         const pt = rowData.pt;
                         const description = rowData.description;
 
-                        //console.log(car_id);
                         const license_plate = cars.filter(f => f.car_id === car_id).map(m => m.license_plate)[0];
                         if (car_id === "" || car_id === null) {
                             $('#edit_select_car').prop('disabled', false);

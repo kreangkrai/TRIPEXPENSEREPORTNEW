@@ -17,5 +17,7 @@ namespace TRIPEXPENSEREPORT.Interface
         List<EmployeeModel> GetCompanyDrivers(DateTime start_date, DateTime stop_date);
         List<CarModel> GetCompanyCars(DateTime start_date, DateTime stop_date);
         Stream ExportCompanyNormal(FileInfo path, List<CompanyModel> companies, string month, CTLModels.EmployeeModel emp, List<CarModel> cars);
+
+        string UpdateApproved(List<string> codes, string approver);
     }
 }

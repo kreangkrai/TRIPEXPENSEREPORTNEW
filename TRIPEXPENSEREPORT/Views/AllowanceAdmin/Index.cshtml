@@ -1,0 +1,601 @@
+﻿@model TRIPEXPENSEREPORT.Models.EmployeeModel
+@{
+    ViewData["Title"] = "TE : เบิกเงิน(แอดมิน)";
+}
+
+<style>
+    #table_allowance tbody tr:hover {
+        background-color: #f0f8ff !important;
+    }
+
+    #table_allowance tbody tr.table-selected {
+        background-color: #d0e8ff !important;
+        font-weight: bold;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    tr.holiday-row {
+        background-color: #e9ecef !important; /* เทาอ่อน */
+        /* หรือ #dee2e6, #ced4da ตามชอบ */
+    }
+
+    td.highlight-diff {
+        position: relative;
+    }
+
+        td.highlight-diff:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e88e5; /* น้ำเงินเข้ม */
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        td.highlight-diff:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #1e88e5 transparent;
+            z-index: 100;
+        }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar (ซ้าย) : Filter -->
+        <div class="col-md-2 bg-light p-3 kanit-medium">
+            <div class="card border-0 shadow-sm h-0 p-2 rounded-10">
+                <h5 class="mb-3" style="letter-spacing:2px; padding:8px; color:white; border-radius:3px; background: #2178BE;
+                    background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);">
+                    ตัวกรอง
+                </h5>
+
+                <div class="mb-2">
+                    <label for="month_start" style="color:#555555">เดือน:</label>
+                    <input type="month" class="form-control" id="month_start" placeholder="วันที่ (dd/mm/yyyy)" />
+                </div>
+                <label for="select_employee" style="color:#555555">ชื่อพนักงาน:</label>
+                <select name="employees" id="select_employee" class="mb-3 form-control" style="border-radius:5px">
+                </select>
+                <div id="div_search">
+                    <div class="form-group">
+                        <button id="btn_search" class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            ค้นหา
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <button id="btn_approve" class="btn btn-success w-100"
+                                style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            ยืนยันการตวจสอบ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content (ขวา) : Table  -->
+        <div class="col-md-10 p-3 kanit-regular">
+            <h4 style="letter-spacing:2px; padding:10px; padding-left:15px; color:white; border-top-right-radius:20px; border-top-left-radius:20px; background: #2178BE;
+                    background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);">
+                เบี้ยเลี้ยง
+            </h4>
+            <div class="table-responsive-lg" style="height: 700px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table id="table_allowance" class="table table-bordered ">
+                    <thead class="bg-primary text-white align-content-center text-center">
+                        <tr>
+                            <th>วันที่</th>
+                            <th>เวลาเริ่มต้น</th>
+                            <th>เวลาสิ้นสุด</th>
+                            <th>ชื่อลูกค้า</th>
+                            <th>จังหวัด</th>
+                            <th>Job No.</th>
+                            <th>ต่างจังหวัด</th>
+                            <th>1-4 ชม.</th>
+                            <th>4-8 ชม.</th>
+                            <th>8 ชม.+</th>
+                            <th>อื่นๆ</th>
+                            <th>ค่าที่พัก</th>
+                            <th>รายการ</th>
+                            <th>จำนวนเงิน</th>
+                            <th>รายละเอียด</th>
+                            <th>รวม</th>
+                            <th>หมายเหตุ</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot class="table-warning text-black fw-bold">
+                        <tr>
+                            <th colspan="6" class="text-center">ยอดรวมทั้งหมด</th>
+                            <th id="totalProvince" class="text-end">0.00</th>
+                            <th id="totalA14" class="text-end">0.00</th>
+                            <th id="totalA48" class="text-end">0.00</th>
+                            <th id="totalA8" class="text-end">0.00</th>
+                            <th id="totalAOther" class="text-end">0.00</th>
+                            <th id="totalAHostel" class="text-end">0.00</th>
+                            <th colspan="1"></th>
+                            <th id="totalAAmount" class="text-end">0</th>
+                            <th colspan="1"></th>
+                            <th id="totalASum" class="text-end">0.00</th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modal_confirm" class="modal">
+    <div class="modal modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title" id="modal_alert_title">Approve</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <span>Are you sure you want to confirm this ?</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer d-flex">
+                <button id="btn_confirm_approve" type="button" class="btn btn-success elevation-1 mr-auto">
+                    <i class="fas fa-marker"></i> Confirm Approve
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<partial name="ModalSpin" />
+@section Scripts {
+    <script>
+        let employees = [];
+        let holidays = [];
+        var table_allowance;
+        let originalData = [];
+        $(document).ready(async function () {
+            const today = new Date();
+            const month = today.toISOString().slice(0, 7);
+            $('#month_start').val(month);
+            employees = await GetEmployees(month);
+            GenerateEmployeeOption(employees);
+        });
+
+        $('#month_start').on('change', async function () {
+            const month = $('#month_start').val();
+            employees = await GetEmployees(month);
+            GenerateEmployeeOption(employees);
+        });
+
+        function findOriginalRow(currentRow) {
+            return originalData.find(orig =>
+                orig.code === currentRow.code
+            );
+        }
+        async function GetEmployees(month) {
+            let data = [];
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetEmployees", "AllowanceAdmin")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { month },
+                success: function (response) {
+                    data = response;
+                }
+            });
+            return data;
+
+        }
+
+        $('#btn_search').on('click', async function () {
+
+            const month = $('#month_start').val();
+            const emp_id = $('#select_employee').val();
+
+            LoadAllowanceTable(emp_id, month);
+        });
+
+        $('#btn_approve').on('click', function () {
+            $('#modal_confirm').modal();
+        });
+
+        $('#btn_confirm_approve').on('click', async function () {
+
+            try {
+                const month = $('#month_start').val();
+                const emp_id = $('#select_employee').val();
+                const response = await $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Approved", "AllowanceAdmin")',
+                    dataType: "json",
+                    data: { emp_id ,month },
+                });
+
+                if (response === "Success") {
+                    location.reload();
+                } else {
+                    alert(response);
+                }
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
+            }
+            $('#modal_confirm').modal('hide');
+        });
+
+        async function GetAllowance(emp_id, month) {
+            const $modal = $('#SpinModal');
+            $modal.modal('show');
+
+            try {
+                const response = await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetDataAllowance", "AllowanceAdmin")',
+                    dataType: "json",
+                    data: { emp_id, month },
+                });
+
+                return response;
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
+            }
+        }
+
+        function ddMMyyyyToISO(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string' || !dateStr.includes('/')) {
+                return dateStr || '';
+            }
+
+            const parts = dateStr.trim().split('/');
+            if (parts.length !== 3) return dateStr;
+
+            const [dd, mm, yyyy] = parts.map(p => p.trim());
+
+            // เผื่อเลขเดือน/วันไม่มี 0 นำหน้า
+            const paddedDD = dd.padStart(2, '0');
+            const paddedMM = mm.padStart(2, '0');
+
+            return `${yyyy}-${paddedMM}-${paddedDD}`;
+        }
+
+        async function LoadAllowanceTable(emp_id, month) {
+
+            const data = await GetAllowance(emp_id, month);
+
+            holidays = data.holidays;
+            originalData = data.old_allowance;
+            const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
+            table_allowance = $('#table_allowance').DataTable({
+                destroy: true,
+                data: data.data,
+                order: [[0, 'asc']],
+                paging: false,
+                info: false,
+                searching: false,
+                ordering: false,
+                createdRow: function (row, data, dataIndex) {
+                    const $row = $(row);
+                    const dateDisplay = data.dateDisplay || data.date;
+
+                    let year, month, day;
+                    if (dateDisplay.includes('-')) {
+                        [year, month, day] = dateDisplay.split('-').map(Number);
+                    } else if (dateDisplay.includes('/')) {
+                        [day, month, year] = dateDisplay.split('/').map(Number);
+                    } else {
+                        console.error('Invalid date format:', dateDisplay);
+                        return;
+                    }
+                    const date = new Date(Date.UTC(year, month - 1, day));
+                    const dayOfWeek = date.getUTCDay();
+                    const dateKey = date.toISOString().split('T')[0];
+
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                    const isHoliday = holidayDates.has(dateKey);
+
+                    if (isWeekend || isHoliday) {
+                        $(row).addClass('table-secondary bg-opacity-50');
+                    }
+
+                    if (originalData && originalData.length > 0) {
+                        const originalRow = findOriginalRow(data);
+                        if (originalRow) {
+
+                            // ตั้งแต่เวลา
+                            const currenttimeStart = data.timeStart || '';
+                            const originaltimeStart = originalRow.timeStart || '';
+
+                            if (currenttimeStart !== originaltimeStart) {
+                                $row.find('td').eq(1)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originaltimeStart || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ตั้งแต่เวลา
+                            const currenttimeStop = data.timeStop || '';
+                            const originaltimeStop = originalRow.timeStop || '';
+
+                            if (currenttimeStop !== originaltimeStop) {
+                                $row.find('td').eq(2)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originaltimeStop || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ชื่อลูกค้า
+                            const currentCustomer = data.customer || '';
+                            const originalCustomer = originalRow.customer || '';
+
+                            if (currentCustomer !== originalCustomer) {
+                                $row.find('td').eq(3)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalCustomer || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // จังหวัด
+                            const currentProvince = data.province || '';
+                            const originalProvince = originalRow.province || '';
+
+                            if (currentProvince !== originalProvince) {
+                                $row.find('td').eq(4)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalProvince || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ค่าต่างจังหวัด
+                            const currentallowanceProvince = data.allowance_province || '';
+                            const originalallowanceProvince = originalRow.allowance_province || '';
+
+                            if (currentallowanceProvince !== originalallowanceProvince) {
+                                $row.find('td').eq(6)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalallowanceProvince || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ค่า 1-4 ซม.
+                            const currentallowance14 = data.allowance_1_4 || '';
+                            const originalallowance14 = originalRow.allowance_1_4 || '';
+
+                            if (currentallowance14 !== originalallowance14) {
+                                $row.find('td').eq(7)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalallowance14 || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ค่า 4-8 ซม.
+                            const currentallowance48 = data.allowance_4_8 || '';
+                            const originalallowance48 = originalRow.allowance_4_8 || '';
+
+                            if (currentallowance48 !== originalallowance48) {
+                                $row.find('td').eq(8)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalallowance48 || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ค่า 8 ซม.
+                            const currentallowance8 = data.allowance_8 || '';
+                            const originalallowance8 = originalRow.allowance_8 || '';
+
+                            if (currentallowance8 !== originalallowance8) {
+                                $row.find('td').eq(9)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalallowance8 || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+                        }
+                    }
+                },
+                drawCallback: function () {
+                    //mergeDateRows();
+                },
+                footerCallback: function (row, data, start, end, display) {
+                    const api = this.api();
+
+                    const sum = (columnIndex) => {
+                        return api.column(columnIndex, { page: 'all' }).data().reduce((a, b) => {
+                            return a + (parseFloat(b) || 0);
+                        }, 0);
+                    };
+
+                    const totalProvince = sum(6);
+                    const totalA14 = sum(7);
+                    const totalA48 = sum(8);
+                    const totalA8 = sum(9);
+                    const totalAOther = sum(10);
+                    const totalAHostel = sum(11);
+                    const totalAAmount = sum(13);
+                    const totalASum = sum(15);
+
+                    $('#totalProvince').html(totalProvince.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalA14').html(totalA14.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalA48').html(totalA48.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalA8').html(totalA8.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalAOther').html(totalAOther.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                    $('#totalAHostel').html(totalAHostel.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                    $('#totalAAmount').html(totalAAmount.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                    $('#totalASum').html(totalASum.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                },
+                columns: [
+                    { data: 'dateDisplay', className: 'text-center fw-bold' },
+                    {
+                        data: 'timeStart', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    {
+                        data: 'timeStop', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    { data: 'customer' },
+                    { data: 'province', className: 'text-center' },
+                    { data: 'job', className: 'text-center' },
+                    {
+                        data: 'allowance_province',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'allowance_1_4',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'allowance_4_8',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'allowance_8',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'allowance_other',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'allowance_hostel',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'list',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'amount',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    { data: 'description' },
+                    {
+                        data: 'sum',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    { data: 'remark', className: 'text-center' },
+                    {
+                        data: 'status',
+                        className: 'text-center',
+                        render: function (data) {
+                            const badges = {
+                                'Approved': 'bg-success',
+                                'Pending': 'bg-info'
+                            };
+                            const cls = badges[data] || 'bg-secondary';
+                            return `<span class="badge ${cls}">${data || ''}</span>`;
+                        }
+                    }
+                ]
+
+            });
+        }
+
+        function GenerateEmployeeOption(employees) {
+            $('#select_employee').empty();
+            $('#select_employee').append(`<option value="" selected disabled>Please Select Employee</option>`);
+            for (let i = 0; i < employees.length; i++) {
+                $('#select_employee').append(`<option value="${employees[i].emp_id}">${employees[i].name}</option>`);
+            }
+        }
+    </script>
+}

@@ -244,7 +244,8 @@
                         <div class="form-group col-sm-12 col-md-4">
                             <label for="edit_allowance_province">ต่างจังหวัด</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_province" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_province" placeholder="0" min="0" max="100"step="100"
+                                       oninput="this.value = (this.value == '100' || this.value == '0' || this.value == '') ? this.value : (this.value < 100 ? '0' : '100');">
                                 <div class="input-group-append">
                                     <span class="input-group-text">บาท</span>
                                 </div>
@@ -253,7 +254,8 @@
                         <div class="form-group col-sm-12 col-md-4">
                             <label for="edit_allowance_14">1-4 ซม.</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_14" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_14" placeholder="0" min="0" max="50" step="50"
+                                       oninput="this.value = (this.value == '50' || this.value == '0' || this.value == '') ? this.value : (this.value < 50 ? '0' : '50');">
                                 <div class="input-group-append">
                                     <span class="input-group-text">บาท</span>
                                 </div>
@@ -262,7 +264,8 @@
                         <div class="form-group col-sm-12 col-md-4">
                             <label for="edit_allowance_48">4-8 ซม.</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_48" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_48" placeholder="0" min="0" max="70" step="70"
+                                       oninput="this.value = (this.value == '70' || this.value == '0' || this.value == '') ? this.value : (this.value < 70 ? '0' : '70');">
                                 <div class="input-group-append">
                                     <span class="input-group-text">บาท</span>
                                 </div>
@@ -273,7 +276,8 @@
                         <div class="form-group col-sm-12 col-md-4">
                             <label for="edit_allowance_8">8 ซม.+</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_8" placeholder="0">
+                                <input type="number" class="form-control" style="text-align:end" id="edit_allowance_8" placeholder="0" min="0" max="80" step="80"
+                                       oninput="this.value = (this.value == '80' || this.value == '0' || this.value == '') ? this.value : (this.value < 80 ? '0' : '80');">
                                 <div class="input-group-append">
                                     <span class="input-group-text">บาท</span>
                                 </div>

@@ -9,6 +9,11 @@ namespace TRIPEXPENSEREPORT.Controllers
             return View();
         }
 
+        public IActionResult PersonalCarAdmin()
+        {
+            // หน้าเป้าหมายสำหรับการสั่งจองรถ
+            return View();
+        }
         public IActionResult PersonalCarUser()
         {
             // หน้าเป้าหมายสำหรับการสั่งจองรถ

@@ -428,6 +428,53 @@ namespace TRIPEXPENSEREPORT.Service
             }
             return "Success";
         }
+        public string UpdateApproved(List<string> codes, string approver)
+        {
+            try
+            {
+                if (con_report.State == ConnectionState.Closed)
+                {
+                    con_report.Open();
+                }
+                string string_command = string.Format($@"
+                                    UPDATE [dbo].[EditAllowance]
+                                    SET
+                                        last_date = @last_date,
+                                        approver = @approver,
+                                        status = @status
+                                    WHERE code = @code AND status <> 'Approved'");
+                using (SqlCommand cmd = new SqlCommand(string_command, con_report))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add("@code", SqlDbType.NVarChar);
+                    cmd.Parameters.AddWithValue("@last_date", SqlDbType.DateTime);
+                    cmd.Parameters.AddWithValue("@approver", SqlDbType.NVarChar);
+                    cmd.Parameters.AddWithValue("@status", SqlDbType.NVarChar);
+
+                    foreach (var code in codes)
+                    {
+                        cmd.Parameters[0].Value = code;
+                        cmd.Parameters[1].Value = DateTime.Now;
+                        cmd.Parameters[2].Value = approver;
+                        cmd.Parameters[3].Value = "Approved";
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con_report.State == ConnectionState.Open)
+                {
+                    con_report.Close();
+                }
+            }
+            return "Success";
+        }
         public string DeleteByCode(string code)
         {
             try
@@ -802,6 +849,49 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return stream;
+        }
+
+        public List<EmployeeModel> GetEmployeeAdmin(DateTime start_date, DateTime stop_date)
+        {
+            List<EmployeeModel> drivers = new List<EmployeeModel>();
+            try
+            {
+                if (con_report.State == ConnectionState.Closed)
+                {
+                    con_report.Open();
+                }
+                string strCmd = string.Format($@"select DISTINCT EditAllowance.emp_id,
+                                                        emp.name from EditAllowance 
+                                                LEFT JOIN TRIP_EXPENSE.dbo.Employees emp ON EditAllowance.emp_id = emp.emp_id
+                                                where date >= @start AND date <= @stop
+                                                order by name");
+                SqlCommand command = new SqlCommand(strCmd, con_report);
+                command.Parameters.AddWithValue("@start", start_date.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@stop", stop_date.ToString("yyyy-MM-dd"));
+                SqlDataReader dr = command.ExecuteReader();
+                if (dr.HasRows)
+                {
+                    while (dr.Read())
+                    {
+                        EmployeeModel driver = new EmployeeModel()
+                        {
+                            emp_id = dr["emp_id"].ToString(),
+                            name = dr["name"].ToString(),
+                        };
+                        drivers.Add(driver);
+                    }
+                    dr.Close();
+                }
+            }
+            finally
+            {
+                if (con_report.State == ConnectionState.Open)
+                {
+
+                    con_report.Close();
+                }
+            }
+            return drivers;
         }
     }
 }

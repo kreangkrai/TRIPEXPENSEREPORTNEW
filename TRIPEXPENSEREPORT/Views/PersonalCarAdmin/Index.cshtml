@@ -1,0 +1,1080 @@
+﻿@model TRIPEXPENSEREPORT.Models.EmployeeModel
+@{
+    ViewData["Title"] = "TE : รถส่วนตัว (แอดมิน)";
+    TRIPEXPENSEREPORT.CTLModels.EmployeeModel emp = ViewBag.Employee;
+}
+
+<style>
+
+    #table_personal tbody tr:hover {      
+        background-color: #f0f8ff !important;
+    }
+
+    #table_personal tbody tr.table-selected {
+        background-color: #d0e8ff !important;
+        font-weight: bold;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    tr.holiday-row {
+        background-color: #e9ecef !important; /* เทาอ่อน */
+        /* หรือ #dee2e6, #ced4da ตามชอบ */
+    }
+
+    td.highlight-diff {
+        position: relative;
+    }
+
+        td.highlight-diff:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e88e5; /* น้ำเงินเข้ม */
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        td.highlight-diff:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #1e88e5 transparent;
+            z-index: 100;
+        }
+</style>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar (ซ้าย) : Filter -->
+        <div class="col-md-2 bg-light p-3 kanit-medium">
+            <div class="card border-0 shadow-sm h-0 p-2 rounded-10">
+                <h5 class="mb-3" style="letter-spacing:2px; padding:8px; color:white; border-radius:3px; background: #2178BE;
+                    background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);">
+                    ตัวกรอง
+                </h5>
+
+                <div class="mb-2">
+                    <label for="month_start" style="color:#555555">เดือน:</label>
+                    <input type="month" class="form-control" id="month_start" />
+                </div>
+
+                <div class="form-group">
+                    <label for="employee" style="color:#555555" id="employee-label">ชื่อผู้ขับ:</label>
+                    <select id="select_driver" class="mb-3 form-control" style="border-radius:5px">
+                    </select>
+                    <button id="btn_search" class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        ค้นหา
+                    </button>
+                </div>
+                <div class="form-group" id="div_approve" hidden>
+                    <button class="btn btn-success w-100" id="btn_approve"
+                            style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            ยืนยันการตวจสอบ
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Main Content (ขวา) : Table  -->
+        <div class="col-md-10 p-3 kanit-regular">
+            <h4 style="letter-spacing:2px; padding:10px; padding-left:15px; color:white; border-top-right-radius:20px; border-top-left-radius:20px; background: #2178BE;
+        background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);
+        display: flex; justify-content: space-between; align-items: center;">
+                รถส่วนตัว
+            </h4>
+            <!-- Table -->
+            <div class="table-responsive-lg" style="height: 700px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table id="table_personal" class="table table-bordered table-hover table-sm compact">
+                    <thead class="bg-primary text-white text-center sticky-top" style="position: sticky; top: 0; z-index: 10;">
+                        <tr>
+                            <th>วันที่</th>
+                            <th>Job</th>
+                            <th>จังหวัด</th>
+                            <th>ตั้งแต่เวลา</th>
+                            <th>ถึงเวลา</th>
+                            <th>การเดินทาง</th>
+                            <th>CTBO</th>
+                            <th>EXP</th>
+                            <th>P/T</th>
+                            <th>เลขไมล์เริ่มต้น</th>
+                            <th>เลขไมล์สิ้นสุด</th>
+                            <th>ระยะทาง</th>
+                            <th>รวมระยะทาง</th>
+                            <th>ระยะทาง(โปรแกรม)</th>
+                            <th>รวมระยะทาง</th>
+                            <th>ระยะทาง(อัตโนมัติ)</th>
+                            <th>รวมระยะทาง</th>
+                            <th>รายละเอียด</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot class="table-warning text-black fw-bold">
+                        <tr>
+                            <th colspan="6" class="text-center">ยอดรวมทั้งหมด</th>
+                            <th id="totalCTBO" class="text-end">0.00</th>
+                            <th id="totalEXP" class="text-end">0.00</th>
+                            <th id="totalPT" class="text-end">0.00</th>
+                            <th colspan="3"></th>
+                            <th id="totalKM" class="text-end">0</th>
+                            <th colspan="1"></th>
+                            <th id="totalProgramKM" class="text-end">0</th>
+                            <th colspan="1"></th>
+                            <th id="totalAutoKM" class="text-end">0</th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div id="div_summary" hidden>
+                    <div id="div_summary" class="row">
+                        <div class="col-md-5 col-xl-5">
+                            <table class="table table-sm table-condensed no-border" style="background-color:grey;height:250px">
+                                <tbody>
+                                    <tr>
+                                        <td colspan="2" style="vertical-align:middle">
+                                            <span>1)  C = COMPANY'S CAR, T = TAXI, B = BUS, O = OTHER (Pls. specific)</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" style="vertical-align:middle">
+                                            <span>2)  A/EXP = ACTUAL EXPENSES BY COMPANY'S CAR, TAXI, BUS (WITH RECEIPTS IF AVAILABLE)</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" style="vertical-align:middle">
+                                            <span>3)  P/T = PARKING FEE , TOLL FEE (WITH RECEIPT)</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" style="vertical-align:middle">
+                                            <span>4)  OWN CAR  - MILAGE :  START-ENGING =  MILAGE FROM BEGINNING  TO ENDING  PER TRIP  KMS = KILOMETERS MADE PER TRIP</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">
+                                            <label class="btn btn-primary">
+                                                <input id="state_bensin" class="form-control" type="checkbox" disabled> Bensin
+                                            </label>
+                                        </td>
+                                        <td class="text-left">
+                                            <label class="btn btn-primary">
+                                                <input id="state_diesel" class="form-control" type="checkbox" disabled> Diesel
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-7 col-xl-7">
+                            <div style="background-color:#ECF0F5;height:auto;overflow-x:auto">
+                                <table class="table compact table-sm table-condensed" id="table_summary" style="border:1px;border-style:solid;border-color:black;border-collapse:collapse;height:250px">
+                                    <thead style="background-color:white;color:white">
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Button below Table -->
+            <div class="row kanit-medium d-flex justify-content-center g-0">
+            </div>          
+        </div>
+    </div>
+</div>
+<div id="modal_confirm" class="modal">
+    <div class="modal modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title" id="modal_alert_title">Approve</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <span>Are you sure you want to confirm this ?</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer d-flex">
+                <button id="btn_confirm_approve" type="button" class="btn btn-success elevation-1 mr-auto">
+                    <i class="fas fa-marker"></i> Confirm Approve
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="ModalSpin" />
+
+@section Scripts {
+
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script>
+        let personals = [];
+        let holidays = [];
+        var table_personal;
+        let provinces = [];
+        let originalData = [];
+        $(document).ready(async function () {
+            const today = new Date();
+            const month = today.toISOString().slice(0, 7);
+
+            $('#month_start').val(month);
+
+            let drivers = await Getdrivers();
+            const emp = @Html.Raw(Json.Serialize(Model));;
+            if (emp.role !== "Admin") {
+                drivers = drivers.filter(f => f.emp_id == emp.emp_id).map(m => m);
+            }
+
+            if (drivers.length > 0) {
+                GenerateDriverOption(drivers);
+                $('#btn_search').prop('disabled', false);
+            } else {
+                alert('ไม่มีข้อมูลในการใช้งาน');
+                $('#btn_search').prop('disabled', true);
+            }
+
+        });
+
+        function findOriginalRow(currentRow) {
+            return originalData.find(orig =>
+                orig.code === currentRow.code
+            );
+        }
+
+        async function LoadPersonalCarTable(emp_id, month) {
+
+            const data = await GetPersonalCar(emp_id, month);
+            const gasoline = data.gasoline;
+            const gasoline_type = data.gasoline_type;
+            originalData = data.old_personal;
+
+            let datas = CalSummary(data, gasoline_type, gasoline);
+            GenerateSummaryTable(datas);
+
+            holidays = data.holidays;
+            provinces = data.provinces;
+            //GenerateProvinceOption(provinces);
+
+            const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
+            table_personal = $('#table_personal').DataTable({
+                destroy: true,
+                data: data.data,
+                order: [[0, 'asc']],
+                paging: false,
+                info: false,
+                searching: false,
+                ordering: false,
+                createdRow: function (row, data, dataIndex) {
+                    const $row = $(row);
+                    const dateDisplay = data.dateDisplay || data.date;
+
+                    let year, month, day;
+                    if (dateDisplay.includes('-')) {
+                        [year, month, day] = dateDisplay.split('-').map(Number);
+                    } else if (dateDisplay.includes('/')) {
+                        [day, month, year] = dateDisplay.split('/').map(Number);
+                    } else {
+                        console.error('Invalid date format:', dateDisplay);
+                        return;
+                    }
+                    const date = new Date(Date.UTC(year, month - 1, day));
+
+                    const dayOfWeek = date.getUTCDay();
+                    const dateKey = date.toISOString().split('T')[0];
+
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                    const isHoliday = holidayDates.has(dateKey);
+
+                    if (isWeekend || isHoliday) {
+                        $(row).addClass('table-secondary bg-opacity-50');
+                    }
+                    if (originalData && originalData.length > 0) {
+                        const originalRow = findOriginalRow(data);
+                        if (originalRow) {
+                            
+                            // จังหวัด
+                            const currentProvince = data.province || '';
+                            const originalProvince = originalRow.province || '';
+
+                            if (currentProvince !== originalProvince) {
+                                $row.find('td').eq(2)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalProvince || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ตั้งแต่เวลา
+                            const currenttimeStart = data.timeStart || '';
+                            const originaltimeStart = originalRow.timeStart || '';
+
+                            if (currenttimeStart !== originaltimeStart) {
+                                $row.find('td').eq(3)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originaltimeStart || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ตั้งแต่เวลา
+                            const currenttimeStop = data.timeStop || '';
+                            const originaltimeStop = originalRow.timeStop || '';
+
+                            if (currenttimeStop !== originaltimeStop) {
+                                $row.find('td').eq(4)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originaltimeStop || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // การเดินทาง
+                            const currentLocation = data.location || '';
+                            const originalLocation = originalRow.location || '';
+
+                            if (currentLocation !== originalLocation) {
+                                $row.find('td').eq(5)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalLocation || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+                            // เลขไมล์เริ่มต้น
+                            const currentmileageStart = data.mileage_start || '';
+                            const originalmileageStart = originalRow.mileage_start || '';
+
+                            if (currentmileageStart !== originalmileageStart) {
+                                $row.find('td').eq(9)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalmileageStart || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+                            // เลขไมล์เริ่มต้น
+                            const currentmileageStop = data.mileage_stop || '';
+                            const originalmileageStop = originalRow.mileage_stop || '';
+
+                            if (currentmileageStop !== originalmileageStop) {
+                                $row.find('td').eq(10)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalmileageStop || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+                        }
+                    }
+                },
+                drawCallback: function () {
+                    mergeDateRows();
+                },
+                footerCallback: function (row, data, start, end, display) {
+                    const api = this.api();
+
+                    const sum = (columnIndex) => {
+                        return api.column(columnIndex, { page: 'all' }).data().reduce((a, b) => {
+                            return a + (parseFloat(b) || 0);
+                        }, 0);
+                    };
+
+                    const totalCTBO = sum(6);
+                    const totalEXP = sum(7);
+                    const totalPT = sum(8);
+                    const totalKM = sum(11);
+                    const totalProgramKM = sum(13);
+                    const totalAutoKM = sum(15);
+
+                    $('#totalCTBO').html(totalCTBO.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalEXP').html(totalEXP.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalPT').html(totalPT.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalKM').html(totalKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                    $('#totalProgramKM').html(totalProgramKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                    $('#totalAutoKM').html(totalAutoKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                },
+                columns: [
+                    { data: 'dateDisplay', className: 'text-center fw-bold' },
+                    { data: 'job', className: 'text-center' },
+                    { data: 'province', className: 'text-center' },
+                    {
+                        data: 'timeStart', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    {
+                        data: 'timeStop', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    { data: 'location' },
+                    {
+                        data: 'ctbo',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'exp',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'pt',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'mileage_start',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'mileage_stop',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'km',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: '',
+                    },
+                    {
+                        data: 'program_km',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: '',
+                    },
+                    {
+                        data: 'auto_km',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: '',
+                    },
+                    { data: 'description' },
+                    {
+                        data: 'status',
+                        className: 'text-center',
+                        render: function (data) {
+                            const badges = {
+                                'Approved': 'bg-success',
+                                'Pending': 'bg-info'
+                            };
+                            const cls = badges[data] || 'bg-secondary';
+                            return `<span class="badge ${cls}">${data || ''}</span>`;
+                        }
+                    }
+                ]
+
+            });
+            mergeDateRows();
+        }
+
+        async function GetPersonalCar(emp_id, month) {
+            const $modal = $('#SpinModal');
+            $modal.modal('show');
+
+            try {
+                const response = await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetDataPersonalCar", "PersonalCarAdmin")',
+                    dataType: "json",
+                    data: { emp_id, month },
+                });
+
+                return response;
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
+            }
+        }
+
+        $('#month_start').on('change', async function () {
+            const driver = await Getdrivers();
+            GenerateDriverOption(driver);
+        });
+
+        $('#btn_search').on('click', function () {
+            const emp_id = $('#select_driver').val();
+            const month = $('#month_start').val();
+
+            if (emp_id !== "" && emp_id !== null) {
+                LoadPersonalCarTable(emp_id, month);
+            } else {
+                alert('Please Select Driver');
+            }
+
+            $('#div_summary').prop('hidden', false);
+            $('#div_approve').prop('hidden', false);
+        });
+
+        $('#btn_approve').on('click', function () {
+            $('#modal_confirm').modal();
+        });
+
+        $('#btn_confirm_approve').on('click', async function () {
+
+            try {
+                const emp_id = $('#select_driver').val();
+                const month = $('#month_start').val();
+                const response = await $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Approved", "PersonalCarAdmin")',
+                    dataType: "json",
+                    data: { emp_id, month },
+                });
+
+                if (response === "Success"){
+                    location.reload();
+                }else{
+                    alert(response);
+                }
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
+            }
+            $('#modal_confirm').modal('hide');
+        });
+
+        async function Getdrivers() {
+            let drivers = [];
+            const month = $('#month_start').val();
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("Getdrivers", "PersonalCarAdmin")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { month },
+                success: function (response) {
+                    drivers = response;
+                }
+            });
+            return drivers;
+        }
+        function ddMMyyyyToISO(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string' || !dateStr.includes('/')) {
+                return dateStr || '';
+            }
+
+            const parts = dateStr.trim().split('/');
+            if (parts.length !== 3) return dateStr;
+
+            const [dd, mm, yyyy] = parts.map(p => p.trim());
+
+            // เผื่อเลขเดือน/วันไม่มี 0 นำหน้า
+            const paddedDD = dd.padStart(2, '0');
+            const paddedMM = mm.padStart(2, '0');
+
+            return `${yyyy}-${paddedMM}-${paddedDD}`;
+        }
+
+        function mergeDateRows() {
+            const api = table_personal;
+            if (!api || api.rows().count() === 0) return;
+
+            const dateColIdx = 0;   // วันที่
+            const sumKmColIdx = 12;  // รวมระยะทาง (km)
+            const programKmColIdx = 13;  // ระยะทาง(โปรแกรม) - ข้อมูลจริง
+            const sumProgramKmColIdx = 14;  // รวมระยะทาง(โปรแกรม)
+            const autoKmColIdx = 15;  // ระยะทาง(อัตโนมัติ) - ข้อมูลจริง
+            const sumAutoKmColIdx = 16;  // รวมระยะทาง(อัตโนมัติ)
+
+            let currentGroupDate = null;
+            let groupRows = [];
+            let groupTotalKm = 0;
+            let groupTotalProgramKm = 0;
+            let groupTotalAutoKm = 0;
+
+            api.rows({ page: 'current' }).nodes().to$().each(function () {
+                const $row = $(this);
+                const rowData = api.row(this).data();
+                if (!rowData) return;
+
+                const thisDate = rowData.dateDisplay;
+
+                if (currentGroupDate !== thisDate) {
+                    if (groupRows.length > 0) {
+                        applyGroupMerge(
+                            groupRows,
+                            groupTotalKm,
+                            groupTotalProgramKm,
+                            groupTotalAutoKm,
+                            dateColIdx, sumKmColIdx, sumProgramKmColIdx, sumAutoKmColIdx,
+                            programKmColIdx, autoKmColIdx
+                        );
+                    }
+                    currentGroupDate = thisDate;
+                    groupRows = [$row];
+                    groupTotalKm = parseFloat(rowData.km) || 0;
+                    groupTotalProgramKm = parseFloat(rowData.program_km) || 0;
+                    groupTotalAutoKm = parseFloat(rowData.auto_km) || 0;
+                } else {
+                    groupRows.push($row);
+                    groupTotalKm += parseFloat(rowData.km) || 0;
+                    groupTotalProgramKm += parseFloat(rowData.program_km) || 0;
+                    groupTotalAutoKm += parseFloat(rowData.auto_km) || 0;
+                }
+            });
+
+            if (groupRows.length > 0) {
+                applyGroupMerge(
+                    groupRows,
+                    groupTotalKm,
+                    groupTotalProgramKm,
+                    groupTotalAutoKm,
+                    dateColIdx, sumKmColIdx, sumProgramKmColIdx, sumAutoKmColIdx,
+                    programKmColIdx, autoKmColIdx
+                );
+            }
+        }
+
+        function applyGroupMerge(groupRows, totalKm, totalProgramKm, totalAutoKm,
+            dateColIdx, sumKmColIdx, sumProgramKmColIdx, sumAutoKmColIdx,
+            programKmColIdx, autoKmColIdx) {
+            const rowCount = groupRows.length;
+            const $firstRow = groupRows[0];
+
+            // Merge วันที่ (เหมือนเดิม)
+            $firstRow.find('td').eq(dateColIdx)
+                .attr('rowspan', rowCount)
+                .css({ 'vertical-align': 'middle', 'background-color': '#e3f2fd', 'font-weight': '500' });
+
+            // ฟังก์ชันช่วย format
+            const formatKm = (value) => value > 0 ? value.toLocaleString('th-TH') : '';
+
+            // คำนวณเปอร์เซ็นต์ความต่าง (ใช้ Math.abs เพื่อดูความต่างโดยไม่สนใจเครื่องหมาย)
+            let programDiffPercent = 0;
+            let autoDiffPercent = 0;
+            let programBgColor = '#ffffff';
+            let autoBgColor = '#ffffff';
+            let programTextColor = '#d84315';  // สีแดงเริ่มต้น (ถ้าไม่มี highlight)
+            let autoTextColor = '#d84315';
+
+            if (totalKm > 0) {
+                programDiffPercent = Math.abs(((totalKm - totalProgramKm) / totalKm) * 100);
+                autoDiffPercent = Math.abs(((totalKm - totalAutoKm) / totalKm) * 100);
+
+                // โปรแกรม
+                if (programDiffPercent >= 10) {
+                    programBgColor = '#FFAC1C';
+                    programTextColor = '#000000';    
+                } else {
+                    programBgColor = '#90EE90';
+                    programTextColor = '#000000';
+                }
+
+                // อัตโนมัติ
+                if (autoDiffPercent >= 10) {
+                    autoBgColor = '#FFAC1C';
+                    autoTextColor = '#000000';
+                } else {
+                    autoBgColor = '#90EE90';
+                    autoTextColor = '#000000';
+                }
+            }
+
+            // รวมระยะทาง (km) - ไม่ highlight (เหมือนเดิม)
+            $firstRow.find('td').eq(sumKmColIdx)
+                .attr('rowspan', rowCount)
+                .html(`<strong style="color:#d84315; font-size:1.1em;">${formatKm(totalKm)}</strong>`)
+                .css({
+                    'vertical-align': 'middle',
+                    'text-align': 'center',
+                    'font-weight': '500',
+                    'background-color': '#ffffff'
+                });
+
+            // รวมระยะทาง(โปรแกรม) - Highlight ตามเงื่อนไข
+            $firstRow.find('td').eq(sumProgramKmColIdx)
+                .attr('rowspan', rowCount)
+                .html(`<strong style="color:${programTextColor}; font-size:1.1em;">${formatKm(totalProgramKm)}</strong>`)
+                .css({
+                    'vertical-align': 'middle',
+                    'text-align': 'center',
+                    'font-weight': '500',
+                    'background-color': programBgColor
+                });
+
+            // รวมระยะทาง(อัตโนมัติ) - Highlight ตามเงื่อนไข
+            $firstRow.find('td').eq(sumAutoKmColIdx)
+                .attr('rowspan', rowCount)
+                .html(`<strong style="color:${autoTextColor}; font-size:1.1em;">${formatKm(totalAutoKm)}</strong>`)
+                .css({
+                    'vertical-align': 'middle',
+                    'text-align': 'center',
+                    'font-weight': '500',
+                    'background-color': autoBgColor
+                });
+
+            // ซ่อน td ที่ merge ในแถวถัดไป (เหมือนเดิม)
+            if (rowCount > 1) {
+                for (let i = 1; i < groupRows.length; i++) {
+                    const $row = groupRows[i];
+                    $row.find('td').eq(dateColIdx).hide();
+                    $row.find('td').eq(sumKmColIdx).hide();
+                    $row.find('td').eq(sumProgramKmColIdx).hide();
+                    $row.find('td').eq(sumAutoKmColIdx).hide();
+                }
+            }
+        }
+
+        async function GenerateDriverOption(drivers) {
+            $('#select_driver').empty();
+            $('#select_driver').append(`<option value="" selected disabled>Please Select Driver</option>`);
+            for (let i = 0; i < drivers.length; i++) {
+                $('#select_driver').append(`<option value="${drivers[i].emp_id}">${drivers[i].name}</option>`);
+            }
+        }
+
+        function formatDateTimeYYYYMMDDHHMMSS(date = new Date()) {
+            const pad = (n) => String(n).padStart(2, '0');
+
+            return (
+                date.getFullYear() +
+                pad(date.getMonth() + 1) +
+                pad(date.getDate()) +
+                pad(date.getHours()) +
+                pad(date.getMinutes()) +
+                pad(date.getSeconds())
+            );
+        }
+
+        function CalSummary(data_personal, Gastype, commensurate) {
+            var a1 = [];
+            var a2 = [];
+            var a3 = [];
+            var a4 = [];
+            var a5 = [];
+            var a6 = [];
+            var a7 = [];
+            var a8 = [];
+            var ans = [];
+            var suma1 = 0;
+            var suma2 = 0;
+            var suma3 = 0;
+            var suma4 = 0;
+            var suma5 = 0;
+            var suma6 = 0;
+
+            const data = data_personal.data;
+
+            const sumKm = data.reduce((acc, curr) => {
+                return acc + (Number(curr.km) || 0);
+            }, 0);
+
+            const sumEXP_PT = data.reduce((acc, curr) => {
+                const exp = Number(curr.exp) || 0;
+                const pt = Number(curr.pt) || 0;
+
+                return {
+                    sumEXP: acc.sumEXP + exp,
+                    sumPT: acc.sumPT + pt
+                };
+            }, { sumEXP: 0, sumPT: 0 });
+
+            const emp = @Html.Raw(Json.Serialize(emp));
+
+            if (Gastype.gasoline_type == "Bensin") {
+                $('#state_bensin').prop('checked', true);
+                $('#state_diesel').prop('checked', false);
+            }
+            else if (Gastype.gasoline_type == "Diesel") {
+                $('#state_bensin').prop('checked', false);
+                $('#state_diesel').prop('checked', true);
+            }
+
+            if (emp.position.includes('Opearion')) {
+                if (sumKm <= 1000) {
+                    suma1 = sumKm * 10.0;
+                    a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", sumKm.toString(), "AMOUNT", suma1.toString(), "BAHT"];
+                } else {
+                    suma1 = 1000 * 10.0;
+                    a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                }
+                if (sumKm > 1000 && sumKm <= 2000) {
+                    suma2 = (sumKm - 1000) * 7.5;
+                    a2 = ["(1,001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", (sumKm - 1000).toString(), "AMOUNT", suma2.toString(), "BAHT"];
+                } else {
+                    if (sumKm > 2000) {
+                        suma2 = 1000 * 7.5;
+                        a2 = ["(1,001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "1000", "AMOUNT", suma2.toString(), "BAHT"];
+                    } else {
+                        suma2 = 0;
+                        a2 = ["(1,001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                    }
+                }
+
+                if (sumKm > 2000 && sumKm <= 4000) {
+                    suma3 = (sumKm - 2000) * 5;
+                    a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", (sumKm - 2000).toString(), "AMOUNT", suma3.toString(), "BAHT"];
+                } else {
+                    if (sumKm > 4000) {
+                        suma3 = 2000 * 5;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                    } else {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                    }
+                }
+                if (sumKm > 4000) {
+                    suma4 = (sumKm - 4000) * 4;
+                    a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", (sumKm - 4000).toString(), "AMOUNT", suma4.toString(), "BAHT"];
+                } else {
+                    suma4 = 0;
+                    a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                }
+
+                // Sum A/EXP, P_T
+                suma5 = sumEXP_PT.sumEXP + sumEXP_PT.sumPT;
+                a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+
+                // Sum COMMENSURATE GASOLINE
+
+                if (Gastype.gasoline_type == "Bensin") {
+                    suma6 = ((sumKm / 10.0) * (commensurate.sohol - 35)).toFixed(2);
+                } else if (Gastype.gasoline_type == "Diesel") {
+                    suma6 = ((sumKm / 10.0) * (commensurate.diesel - 35)).toFixed(2);
+                }
+                a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+
+                // Gasoline
+                if (Gastype.gasoline_type == "Bensin") {
+                    a7 = ["", "Bensin", commensurate.sohol.toString(), "", "", ""];
+                } else if (Gastype.gasoline_type == "Diesel") {
+                    a7 = ["", "Diesel", commensurate.diesel.toString(), "", "", ""];
+                } else {
+                    a7 = ["", "", "0.0", "", "", ""];
+                }
+
+                // Sum Total
+                var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
+                a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+            }
+            else if (emp.position.includes('Manager') || emp.position.includes('Director')) {
+                if (sumKm <= 1000) {
+                    suma1 = 0;
+                    a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
+                } else {
+                    suma1 = 0;
+                    a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                }
+
+                if (sumKm > 1000 && sumKm <= 2000) {
+                    suma2 = 0;
+                    a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                } else {
+                    suma2 = 0;
+                    a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                }
+
+                if (sumKm > 2000 && sumKm <= 4000) {
+                    suma3 = 0;
+                    a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                } else {
+                    if (sumKm > 4000) {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                    } else {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                    }
+                }
+                if (sumKm > 4000) {
+                    suma4 = 0;
+                    a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                } else {
+                    suma4 = 0;
+                    a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                }
+
+                // Sum A/EXP, P_T
+                suma5 = 0;
+                a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+
+                // Sum COMMENSURATE GASOLINE
+                suma6 = 0;
+                a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+
+                // Gasoline
+                a7 = ["", "", "0.0", "", "", ""];
+
+                // Sum Total
+                var sumall = suma1 + suma2 + suma3 + suma4 + suma5 + parseFloat(suma6);
+                a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+            }
+            else {
+                if (sumKm <= 1000) {
+                    suma1 = 0;
+                    a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
+                } else {
+                    suma1 = 1000 * 10.0;
+                    a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                }
+                if (sumKm > 1000 && sumKm <= 2000) {
+                    suma2 = 0;
+                    a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
+                } else {
+                    suma2 = 2000 * 7.5;
+                    a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "2000", "AMOUNT", suma2.toString(), "BAHT"];
+                }
+
+                if (sumKm > 2000 && sumKm <= 4000) {
+                    suma3 = 0;
+                    a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                } else {
+                    if (sumKm > 4000) {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                    } else {
+                        suma3 = 0;
+                        a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
+                    }
+                }
+                if (sumKm > 4000) {
+                    suma4 = 0;
+                    a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                } else {
+                    suma4 = 0;
+                    a4 = ["(4,001 ~ ……...KMS)  4.0 B/KMS", "KMS__", "0", "AMOUNT", suma4.toString(), "BAHT"];
+                }
+
+                // Sum A/EXP, P_T
+                suma5 = 0;
+                a5 = ["", "A/EXP + P/T", "", "AMOUNT", suma5.toString(), "BAHT"];
+
+                // Sum COMMENSURATE GASOLINE
+                suma6 = 0;
+                a6 = ["", "COMMENSURATE GASOLINE", "", "AMOUNT", suma6.toString(), "BAHT"];
+
+                // Gasoline
+                a7 = ["", "", "0.0", "", "", ""];
+
+                // Sum Total
+                var sumall = 3000;
+                a8 = ["", "", "", "TOTAL", sumall.toString(), "BAHT"];
+            }
+            ans = [a1, a2, a3, a4, a5, a6, a7, a8];
+
+            return ans;
+        }
+
+        let table_summary;
+        function GenerateSummaryTable(_datas) {
+            let datas = [];
+            for (let i = 0; i < _datas.length; i++) {
+                datas.push([_datas[i][0], _datas[i][1], _datas[i][2], _datas[i][3], _datas[i][4], _datas[i][5]]);
+            }
+            if (table_summary !== undefined) {
+                table_summary.destroy();
+            }
+            table_summary = $('#table_summary').DataTable({
+                data: datas,
+                columnDefs: [
+                    {
+                        //targets: [2],
+                        //className: "dt-left",
+                    },
+                ],
+                ordering: false,
+                searching: false,
+                paging: false,
+                info: false,
+                rowCallback: function (row, data) {
+                    let amount = data[3];
+                    if (amount === "TOTAL") {
+                        $('td', row).css("font-weight", "bold");
+                        $('td', row).css("text-align", "center");
+                    }
+                }
+            });
+        };        
+    </script>
+}

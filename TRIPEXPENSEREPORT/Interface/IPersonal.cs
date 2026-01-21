@@ -19,5 +19,11 @@ namespace TRIPEXPENSEREPORT.Interface
         string UpdatePersonalGasoline(PersonalGasolineModel personal);
 
         Stream ExportPersonalNormal(FileInfo path, List<PersonalModel> personals, string month,CTLModels.EmployeeModel emp, GasolineModel gasoline, PersonalGasolineModel gasoline_type);
+
+
+        // Admin
+
+        List<EmployeeModel> GetPesonalDriversAdmin(DateTime start_date, DateTime stop_date);
+        string UpdateApproved(List<string> codes, string approver);
     }
 }

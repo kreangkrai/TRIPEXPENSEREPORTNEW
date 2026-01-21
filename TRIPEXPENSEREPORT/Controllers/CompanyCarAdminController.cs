@@ -1,19 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting.Internal;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NPOI.SS.Formula.Functions;
-using NPOI.SS.Formula.PTG;
+using Newtonsoft.Json;
 using System.Globalization;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
+using System.Collections.Generic;
 
 namespace TRIPEXPENSEREPORT.Controllers
 {
-    public class CompanyCarUserController : Controller
+    public class CompanyCarAdminController : Controller
     {
-        private readonly string _googleMapsApiKey;
         private IEmployee Employees;
         private ICompany Company;
         private ICar Car;
@@ -22,8 +19,7 @@ namespace TRIPEXPENSEREPORT.Controllers
         private CTLInterfaces.IHoliday Holiday;
         private IArea Area;
         private IProvince Province;
-        private readonly IWebHostEnvironment hostingEnvironment;
-        public CompanyCarUserController(IEmployee employees, CTLInterfaces.IEmployee ctlEmployees, ICompany company, ITrip trip, CTLInterfaces.IHoliday holiday, ICar car, IArea area, IProvince province,IOptions<AppSettings> options, IWebHostEnvironment _hostingEnvironment)
+        public CompanyCarAdminController(IEmployee employees, CTLInterfaces.IEmployee ctlEmployees, ICompany company, ITrip trip, CTLInterfaces.IHoliday holiday, ICar car, IArea area, IProvince province)
         {
             Employees = employees;
             CTLEmployees = ctlEmployees;
@@ -33,8 +29,6 @@ namespace TRIPEXPENSEREPORT.Controllers
             Car = car;
             Area = area;
             Province = province;
-            hostingEnvironment = _hostingEnvironment;
-            _googleMapsApiKey = options.Value.GoogleMapsApiKey;
         }
         public IActionResult Index()
         {
@@ -61,7 +55,6 @@ namespace TRIPEXPENSEREPORT.Controllers
                 return RedirectToAction("Index", "Account");
             }
         }
-
         [HttpGet]
         public IActionResult GetDrivers(string month)
         {
@@ -112,7 +105,7 @@ namespace TRIPEXPENSEREPORT.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetDataCompanyCar(string month)
+        public IActionResult GetDataCompanyCar(string month)
         {
             var parts = month.Split('-');
             if (parts.Length != 2
@@ -126,96 +119,65 @@ namespace TRIPEXPENSEREPORT.Controllers
             DateTime stop = start.AddMonths(1).AddDays(-1);
 
             List<CompanyModel> companies = Company.GetCompaniesByDate(start, stop);
-            List<DataModel> list = Trip.GetDatasCompnayByDate(start, stop);
 
             List<DataModel> datas = new List<DataModel>();
             List<DateTime> dates = new List<DateTime>();
             DateTime now = DateTime.Now;
             int last = DateTime.DaysInMonth(now.Year, now.Month);
+            List<CompanyModel> datas_companies = new List<CompanyModel>();
             for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
             {
-                if (list.Any(a => a.date.Date == d.Date))
+                if (companies.Any(a => a.date.Date == d.Date))
                 {
-                    List<DataModel> data = list.Where(a => a.date.Date == d.Date).ToList();
-                    datas.AddRange(data);
+                    var comp = companies.Where(a => a.date.Date == d.Date).ToList();
+                    datas_companies.AddRange(comp);
                 }
                 else
                 {
-                    List<DataModel> data = new List<DataModel>()
+                    CompanyModel com = new CompanyModel()
                     {
-                       new DataModel()
-                       {
-                            date = d,
-                            driver = "",
-                            car_id = "",
-                            trip = "",
-                            passenger = "",
-                            job_id = "",
-                            location = "",
-                            status = "",
-                            mileage = 0,
-                            fleetcard = 0,
-                            cash = 0,                          
-                       }
+                        date = d,
                     };
-                    datas.AddRange(data);
+                    datas_companies.Add(com);
                 }
             }
+            var result = datas_companies
+                .GroupBy(k => k.date)
+                .SelectMany(g => g.Count() > 1
+                    ? g.Where(x => !string.IsNullOrEmpty(x.code))
+                    : g)
+                .Select(k => new
+                {
+                    date = k.date,
+                    dateDisplay = k.date.ToString("dd/MM/yyyy"),
+                    code = k.code,
+                    driver = k.driver,
+                    car_id = k.car_id,
+                    fleet = k.fleet,
+                    timeStart = k.time_start.ToString(@"hh\:mm"),
+                    timeStop = k.time_stop.ToString(@"hh\:mm"),
+                    location = k.location,
+                    job = k.job,
+                    cash = k.cash,
+                    ctbo = k.ctbo,
+                    exp = k.exp + k.cash,
+                    pt = k.pt,
+                    mileage_start = k.mileage_start,
+                    mileage_stop = k.mileage_stop,
+                    km = k.km,
+                    program_km = k.program_km,
+                    auto_km = k.auto_km,
+                    description = k.description,
+                    status = k.status,
+                    zipcode = k.zipcode
+                })
+                .OrderBy(x => x.date)
+                .ThenBy(x => x.timeStart)
+                .ToList();
 
-            List<CompanyModel> lookup = await ConvertToCompanyModels(datas);
-
-            var code_company = companies.Select(d => d.code).ToHashSet();
-            List<CompanyModel> new_datas = lookup.Where(w => !code_company.Contains(w.code)).ToList();
-
-            List<CompanyModel> insert_datas = new_datas.Where(w => w.driver != "").ToList();
-            string message = Company.EditInserts(insert_datas);
-            if (message == "Success")
-            {
-                List<CompanyModel> datas_company = new List<CompanyModel>();
-                datas_company.AddRange(new_datas);
-                datas_company.AddRange(companies);
-
-                var result = datas_company
-                    .GroupBy(k => k.date)
-                    .SelectMany(g => g.Count() > 1
-                        ? g.Where(x => !string.IsNullOrEmpty(x.code))
-                        : g)
-                    .Select(k => new
-                    {
-                        date = k.date,
-                        dateDisplay = k.date.ToString("dd/MM/yyyy"),
-                        code = k.code,
-                        driver = k.driver,
-                        car_id = k.car_id,
-                        fleet = k.fleet,
-                        timeStart = k.time_start.ToString(@"hh\:mm"),
-                        timeStop = k.time_stop.ToString(@"hh\:mm"),
-                        location = k.location,
-                        job = k.job,
-                        cash = k.cash,
-                        ctbo = k.ctbo,
-                        exp = k.exp + k.cash,
-                        pt = k.pt,
-                        mileage_start = k.mileage_start,
-                        mileage_stop = k.mileage_stop,
-                        km = k.km,
-                        program_km = k.program_km,
-                        auto_km = k.auto_km,
-                        description = k.description,
-                        status = k.status,
-                        zipcode = k.zipcode
-                    })
-                    .OrderBy(x => x.date)
-                    .ThenBy(x => x.timeStart)
-                    .ToList();
-
-                return Json(new { data = result });
-            }
-            else
-            {
-                return Json(new { data = new List<CompanyModel>() });
-            }
+            return Json(new { data = result });
         }
+    
 
         [HttpGet]
         public IActionResult GetData(string month, string mode, string driver, string car)
@@ -240,8 +202,9 @@ namespace TRIPEXPENSEREPORT.Controllers
             {
                 companies = Company.GetCompaniesByDriverDate(driver, start, stop);
             }
-            List<ProvinceModel> provinces = Province.GetProvinces();
             List<CTLModels.EmployeeModel> employees = CTLEmployees.GetEmployees();
+            List<ProvinceModel> provinces = Province.GetProvinces();
+
             List<CompanyModel> datas = new List<CompanyModel>();
 
             List<DateTime> dates = new List<DateTime>();
@@ -319,41 +282,77 @@ namespace TRIPEXPENSEREPORT.Controllers
                     .OrderBy(x => x.date)
                     .ThenBy(x => x.timeStart)
                     .ToList();
+
+            // Compare Old Data
+            List<DataModel> list = Trip.GetDatasCompnayByDate(start, stop);
+            List<DataModel> old_datas = new List<DataModel>();
+            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            {
+                if (list.Any(a => a.date.Date == d.Date))
+                {
+                    List<DataModel> data = list.Where(a => a.date.Date == d.Date).ToList();
+                    old_datas.AddRange(data);
+                }
+                else
+                {
+                    List<DataModel> data = new List<DataModel>()
+                    {
+                       new DataModel()
+                       {
+                            date = d,
+                            driver = "",
+                            trip = "",
+                            passenger = "",
+                            job_id = "",
+                            location = "",
+                            status = "",
+                            mileage = 0,
+                       }
+                    };
+                    old_datas.AddRange(data);
+                }
+            }
+
+            List<CompanyModel> old_companies = ConvertToCompanyModels(old_datas);
+            var old_result = old_companies
+                    .Select(k => new
+                    {
+                        date = k.date,
+                        car_id = k.car_id,
+                        dateDisplay = k.date.ToString("dd/MM/yyyy"),
+                        code = k.code,
+                        driver = k.driver,
+                        driverName = employees.Where(w => w.emp_id == k.driver).Select(s => s.name_en).FirstOrDefault(),
+                        timeStart = k.time_start.ToString(@"hh\:mm"),
+                        timeStop = k.time_stop.ToString(@"hh\:mm"),
+                        location = k.location,
+                        job = k.job,
+                        fleet = k.fleet,
+                        cash = k.cash,
+                        ctbo = k.ctbo,
+                        exp = k.exp,
+                        pt = k.pt,
+                        mileage_start = k.mileage_start,
+                        mileage_stop = k.mileage_stop,
+                        km = k.km,
+                        program_km = k.program_km,
+                        auto_km = k.auto_km,
+                        description = k.description,
+                        status = k.status,
+                        zipcode = k.zipcode,
+                        province = provinces.Where(w => w.zipcode == k.zipcode).Select(s => s.province).FirstOrDefault()
+                    })
+                    .OrderBy(x => x.date)
+                    .ThenBy(x => x.timeStart)
+                    .ToList();
+
             List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
-            return Json(new { data = result, holidays = holidays, provinces = provinces });
+            return Json(new { data = result, old_companies = old_result, holidays = holidays });
 
         }
-
 
         [HttpPost]
-        public IActionResult UpdateData(string str)
-        {
-            CompanyModel company = JsonConvert.DeserializeObject<CompanyModel>(str);
-            //DateTime dt = DateTime.ParseExact(company.date.ToString("dd/MM/yyy"), "MM/dd/yyyy", CultureInfo.InvariantCulture);
-            //company.date = dt;
-            company.last_date = DateTime.Now;
-            company.status = "Pending";
-            CompanyModel old_company = Company.GetCompanyByCode(company.code);
-            if (old_company.car_id != null)
-            {
-                company.approver = old_company.approver;
-                company.auto_km = old_company.auto_km;
-                company.program_km = old_company.program_km;
-                company.status = old_company.status;
-                company.date = old_company.date;
-            }
-            string message = Company.UpdateByCode(company);
-            return Json(message);
-        }
-
-        [HttpDelete]
-        public IActionResult DeleteData(string code)
-        {
-            string message = Company.DeleteByCode(code);
-            return Json(message);
-        }
-
-        public IActionResult Export(string month,string mode,string driver,string car)
+        public IActionResult Approved(string month, string mode, string driver, string car)
         {
             var parts = month.Split('-');
             if (parts.Length != 2
@@ -375,23 +374,14 @@ namespace TRIPEXPENSEREPORT.Controllers
             {
                 companies = Company.GetCompaniesByDriverDate(driver, start, stop);
             }
+            List<string> codes = companies.Select(s => s.code).ToList();
 
-            companies = companies.Where(w => w.status != "Approved").ToList();
-
-            string emp_id = HttpContext.Session.GetString("userId");
-
-            List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
-            CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();
-
-            List<CarModel> cars = Car.GetCars();
-
-            string timestamp = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToUpper().Replace(':', '_').Replace('.', '_').Replace(' ', '_').Trim();
-            var templateFileInfo = new FileInfo(Path.Combine(hostingEnvironment.ContentRootPath, "./wwwroot/Template", "แบบฟอร์มรายงานการใช้รถบริษัท.xlsx"));
-            var stream = Company.ExportCompanyNormal(templateFileInfo, companies, month, emp , cars);
-            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "แบบฟอร์มรายงานการใช้รถบริษัท_" + emp_id + "_" + timestamp + ".xlsx");
+            string approver = HttpContext.Session.GetString("userId");
+            string message = Company.UpdateApproved(codes, approver);
+            return Json(message);
         }
-
-        public async Task<Dictionary<DateTime, List<CompanyModel>>> ConvertToDictCompanyModels(List<DataModel> dataList)
+      
+        public Dictionary<DateTime, List<CompanyModel>> ConvertToDictCompanyModels(List<DataModel> dataList)
         {
             var result = new Dictionary<DateTime, List<CompanyModel>>();
 
@@ -460,7 +450,7 @@ namespace TRIPEXPENSEREPORT.Controllers
             return result;
         }
 
-        public async Task<List<CompanyModel>> ConvertToCompanyModels(List<DataModel> dataList)
+        public List<CompanyModel> ConvertToCompanyModels(List<DataModel> dataList)
         {
             var result = new List<CompanyModel>();
 
@@ -595,56 +585,6 @@ namespace TRIPEXPENSEREPORT.Controllers
             }
 
             return result;
-        }
-        public async Task<double> GetDistanceKmAsync(string origin, string destination)
-        {
-            string apiKey = _googleMapsApiKey;
-
-
-            string url = $"https://maps.googleapis.com/maps/api/directions/json" +
-                         $"?origin={Uri.EscapeDataString(origin)}" +
-                         $"&destination={Uri.EscapeDataString(destination)}" +
-                         $"&key={apiKey}" +
-                         $"&language=th&region=th";
-
-            try
-            {
-                using var client = new HttpClient();
-                client.Timeout = TimeSpan.FromSeconds(10);
-
-                HttpResponseMessage response = await client.GetAsync(url);
-
-                if (!response.IsSuccessStatusCode)
-                    return 0;
-
-                string json = await response.Content.ReadAsStringAsync();
-                var jobj = JObject.Parse(json);
-
-                string status = jobj["status"]?.ToString();
-
-                if (status == "OK")
-                {
-                    var distanceMeters = jobj["routes"]?[0]?["legs"]?[0]?["distance"]?["value"]?.ToObject<long>();
-                    if (distanceMeters != null)
-                        return Math.Round(distanceMeters.Value / 1000.0, 2);
-                }
-                else if (status == "ZERO_RESULTS")
-                {
-                    return 0;
-                }
-                else
-                {
-                    Console.WriteLine($"Google API Error: {status}");
-                    return 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error calling Google Directions API: " + ex.Message);
-                return 0;
-            }
-
-            return 0;
-        }
+        }       
     }
 }

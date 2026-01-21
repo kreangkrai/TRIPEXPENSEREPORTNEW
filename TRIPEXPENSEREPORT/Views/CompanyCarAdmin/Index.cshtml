@@ -1,0 +1,911 @@
+﻿@model TRIPEXPENSEREPORT.Models.EmployeeModel
+@{
+    ViewData["Title"] = "TE : รถบริษัท(แอดมิน)";
+}
+
+<style>
+    #table_company tbody tr:hover {
+        background-color: #f0f8ff !important;
+    }
+
+    #table_company tbody tr.table-selected {
+        background-color: #d0e8ff !important;
+        font-weight: bold;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    tr.holiday-row {
+        background-color: #e9ecef !important;
+    }
+
+    td.highlight-diff {
+        position: relative;
+    }
+
+        td.highlight-diff:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e88e5; /* น้ำเงินเข้ม */
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        td.highlight-diff:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #1e88e5 transparent;
+            z-index: 100;
+        }
+
+</style>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar (ซ้าย) : Filter -->
+        <div class="col-md-2 bg-light p-3 kanit-medium">
+            <div class="card border-0 shadow-sm h-0 p-2 rounded-10">
+                <h5 class="mb-3" style="letter-spacing:2px; padding:8px; color:white; border-radius:3px; background: #2178BE;
+                    background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);">
+                    ตัวกรอง
+                </h5>
+
+                <div class="mb-2">
+                    <label for="month_start" style="color:#555555">เดือน:</label>
+                    <input type="month" class="form-control" id="month_start" />
+                </div>
+
+                <div class="form-group">
+                    <label for="select_mode" style="color:#555555">เลือกดู:</label>
+                    <select name="modes" id="select_mode" class="mb-3 form-control" style="border-radius:5px">
+                        <option value="NULL">Please Select...</option>
+                        <option value="Car">รถ</option>
+                        <option value="Driver">คนขับ</option>
+                    </select>
+                    <div id="div_car" hidden>
+                        <label for="select_cars" style="color:#555555" id="car-label">รถ:</label>
+                        <select name="cars" id="select_cars" class="mb-3 form-control" style="border-radius:5px">
+                        </select>
+                    </div>
+                    <div id="div_driver" hidden>
+                        <label for="select_drivers" style="color:#555555" id="employee-label">ชื่อผู้ขับ:</label>
+                        <select name="employees" id="select_drivers" class="mb-3 form-control" style="border-radius:5px">
+                        </select>
+                    </div>
+                    <div id="div_search" hidden>
+                        <div class="form-group">
+                            <button id="btn_search" class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                ค้นหา
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <button id="btn_confirm" class="btn btn-success w-100"
+                                    style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                ยืนยันการตวจสอบ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content (ขวา) : Table  -->
+        <div class="col-md-10 p-3 kanit-regular">
+            <h4 style="letter-spacing:2px; padding:10px; padding-left:15px; color:white; border-top-right-radius:20px; border-top-left-radius:20px; background: #2178BE;
+        background: linear-gradient(90deg, rgba(33, 120, 190, 1) 0%, rgba(40, 71, 95, 1) 100%);
+        display: flex; justify-content: space-between; align-items: center;">
+                รถบริษัท
+            </h4>
+
+            <!-- Table -->
+            <div class="table-responsive-lg" style="height: 700px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table id="table_company" class="table table-bordered ">
+                    <thead class="bg-primary text-white align-content-center text-center">
+                        <tr>
+                            <th>วันที่</th>
+                            <th>Job</th>
+                            <th>จังหวัด</th>
+                            <th>รถ</th>
+                            <th>ผู้ขับ</th>
+                            <th>ตั้งแต่เวลา</th>
+                            <th>ถึงเวลา</th>
+                            <th>การเดินทาง</th>
+                            <th>ค่าน้ำมัน (Fleet Card)</th>
+                            <th>ค่าน้ำมัน (เงินสด)</th>
+                            <th>ค่าทางด่วน</th>
+                            <th>ค่าใช้จ่ายอื่นๆ</th>
+                            <th>เลขไมล์เริ่มต้น</th>
+                            <th>เลขไมล์สิ้นสุด</th>
+                            <th>ระยะทาง</th>
+                            <th>รวมระยะทาง</th>
+                            <th>ระยะทาง(โปรแกรม)</th>
+                            <th>รวมระยะทาง</th>
+                            <th>ระยะทาง(อัตโนมัติ)</th>
+                            <th>รวมระยะทาง</th>
+                            <th>รายละเอียด</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot class="table-warning text-black fw-bold">
+                        <tr>
+                            <th colspan="8" class="text-center">ยอดรวมทั้งหมด</th>
+                            <th id="totalFleet" class="text-center">0.00</th>
+                            <th id="totalCash" class="text-center">0.00</th>
+                            <th id="totalPT" class="text-center">0.00</th>
+                            <th id="totalOther" class="text-center">0.00</th>
+                            <th colspan="3"></th>
+                            <th id="totalKM" class="text-center">0</th>
+                            <th colspan="1"></th>
+                            <th id="totalProgramKM" class="text-end">0</th>
+                            <th colspan="1"></th>
+                            <th id="totalAutoKM" class="text-end">0</th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </tfoot>
+                </table>               
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modal_confirm" class="modal">
+    <div class="modal modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title" id="modal_alert_title">Approve</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <span>Are you sure you want to confirm this ?</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer d-flex">
+                <button id="btn_confirm_approve" type="button" class="btn btn-success elevation-1 mr-auto">
+                    <i class="fas fa-marker"></i> Confirm Approve
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<partial name="ModalSpin" />
+@section Scripts {
+    <script type="text/javascript">
+        let holidays = [];
+        var table_company;
+        let cars = [];
+        let employees = [];
+        let provinces = [];
+        let originalData = [];
+        $(document).ready(async function () {
+
+            const today = new Date();
+            const month = today.toISOString().slice(0, 7);
+            $('#month_start').val(month);
+            await GetCompanyCar(month);
+        });
+
+        $('#select_mode').on('change', async function () {
+            const mode = $('#select_mode').val();
+            if (mode === "Car") {
+                $('#div_car').prop('hidden', false);
+                $('#div_driver').prop('hidden', true);
+
+                const month = $('#month_start').val();
+                await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetCars", "CompanyCarAdmin")',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: { month },
+                    success: function (response) {
+                        const cars = response;
+                        GenerateCarOption(cars);
+                    }
+                });
+            } else {
+                $('#div_car').prop('hidden', true);
+                $('#div_driver').prop('hidden', false);
+                const month = $('#month_start').val();
+                const emp = @Html.Raw(Json.Serialize(Model));;
+
+                await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetDrivers", "CompanyCarAdmin")',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: { month },
+                    success: function (response) {
+                        let drivers = response;
+                        if (emp.role !== "Admin") {
+                            drivers = drivers.filter(f => f.emp_id == emp.emp_id).map(m => m);
+                        }
+                        if (drivers.length > 0) {
+                            GenerateDriverOption(drivers);
+                        } else {
+                            alert('ไม่มีข้อมูลในการใช้งาน');
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#select_drivers,#select_cars').on('change', function () {
+            $('#div_search').prop('hidden', false);
+        });
+
+        $('#month_start').on('change', async function () {
+            const month = $('#month_start').val();
+            await GetCompanyCar(month);
+
+            $('#select_drivers').empty();
+            $('#select_cars').empty();
+        });
+
+        $('#btn_search').on('click', async function () {
+
+            const month = $('#month_start').val();
+            const mode = $('#select_mode').val();
+            const driver = $('#select_drivers').val();
+            const car = $('#select_cars').val();
+
+            LoadCompanyCarTable(month, mode, driver, car);
+        });
+
+        $('#btn_confirm').on('click', function () {
+            $('#modal_confirm').modal();
+        });
+
+        $('#btn_confirm_approve').on('click', async function () {
+
+            try {
+                const month = $('#month_start').val();
+                const mode = $('#select_mode').val();
+                const driver = $('#select_drivers').val();
+                const car = $('#select_cars').val();
+                const response = await $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Approved", "CompanyCarAdmin")',
+                    dataType: "json",
+                    data: { month, mode, driver, car },
+                });
+
+                if (response === "Success") {
+                    location.reload();
+                } else {
+                    alert(response);
+                }
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
+            }
+            $('#modal_confirm').modal('hide');
+        });
+
+        function findOriginalRow(currentRow) {
+            return originalData.find(orig =>
+                orig.code === currentRow.code
+            );
+        }
+
+        async function GetData(month, mode, driver, car) {
+            const $modal = $('#SpinModal');
+            $modal.modal('show');
+            let datas = [];
+            try {
+                await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetData", "CompanyCarAdmin")',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: { month, mode, driver, car },
+                    success: function (response) {
+                        datas = response;
+                    }
+                });
+                return datas;
+            }
+            finally {
+                $modal.modal('hide');
+            }
+        }
+        async function GenerateDriverOption(drivers) {
+            $('#select_drivers').empty();
+            $('#select_drivers').append(`<option value="" selected disabled>Please Select Driver</option>`);
+            for (let i = 0; i < drivers.length; i++) {
+                $('#select_drivers').append(`<option value="${drivers[i].emp_id}">${drivers[i].name}</option>`);
+            }
+        }
+
+        async function GenerateCarOption(cars) {
+            $('#select_cars').empty();
+            $('#select_cars').append(`<option value="" selected disabled>Please Select Car</option>`);
+            for (let i = 0; i < cars.length; i++) {
+                $('#select_cars').append(`<option value="${cars[i].car_id}">${cars[i].car_id}</option>`);
+            }
+        }
+
+        async function GenerateAllCarOption(cars) {
+            $('#edit_select_car').empty();
+            $('#edit_select_car').append(`<option value="" selected disabled>Please Select Car</option>`);
+            for (let i = 0; i < cars.length; i++) {
+                $('#edit_select_car').append(`<option value="${cars[i].car_id}">${cars[i].car_id}</option>`);
+            }
+        }
+
+        async function GetCompanyCar(month) {
+            const $modal = $('#SpinModal');
+            $modal.modal('show');
+
+            try {
+                const response = await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetDataCompanyCar", "CompanyCarAdmin")',
+                    dataType: "json",
+                    data: { month },
+                });
+
+                return response;
+
+            } catch (err) {
+                return null;
+
+            } finally {
+                $modal.modal('hide');
+            }
+        }
+
+        async function GetCars() {
+            try {
+                const response = await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetAllCars", "CompanyCarAdmin")',
+                    dataType: "json",
+                    data: {},
+                });
+
+                return response;
+
+            } catch (err) {
+                return null;
+
+            }
+        }
+        async function GetEmployees() {
+            try {
+                const response = await $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetEmployees", "CompanyCarAdmin")',
+                    dataType: "json",
+                    data: {},
+                });
+
+                return response;
+
+            } catch (err) {
+                return null;
+
+            }
+        }
+
+        async function LoadCompanyCarTable(month, mode, driver, car) {
+
+            const data = await GetData(month, mode, driver, car);
+            originalData = data.old_companies;
+            holidays = data.holidays;
+
+            const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
+            table_company = $('#table_company').DataTable({
+                destroy: true,
+                data: data.data,
+                order: [[0, 'asc']],
+                paging: false,
+                info: false,
+                searching: false,
+                ordering: false,
+                createdRow: function (row, data, dataIndex) {
+                    const $row = $(row);
+                    const dateDisplay = data.dateDisplay || data.date;
+
+                    let year, month, day;
+                    if (dateDisplay.includes('-')) {
+                        [year, month, day] = dateDisplay.split('-').map(Number);
+                    } else if (dateDisplay.includes('/')) {
+                        [day, month, year] = dateDisplay.split('/').map(Number);
+                    } else {
+                        console.error('Invalid date format:', dateDisplay);
+                        return;
+                    }
+                    const date = new Date(Date.UTC(year, month - 1, day));
+                    const dayOfWeek = date.getUTCDay();
+                    const dateKey = date.toISOString().split('T')[0];
+
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                    const isHoliday = holidayDates.has(dateKey);
+
+                    if (isWeekend || isHoliday) {
+                        $(row).addClass('table-secondary bg-opacity-50');
+                    }
+                    if (originalData && originalData.length > 0) {
+                        const originalRow = findOriginalRow(data);
+                        if (originalRow) {
+
+                            // จังหวัด
+                            const currentProvince = data.province || '';
+                            const originalProvince = originalRow.province || '';
+
+                            if (currentProvince !== originalProvince) {
+                                $row.find('td').eq(2)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalProvince || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // รถ
+                            const currentCar = data.car_id || '';
+                            const originalCar = originalRow.car_id || '';
+
+                            if (currentCar !== originalCar) {
+                                $row.find('td').eq(3)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalCar || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // คนขับ
+                            const currentDriver = data.driverName || '';
+                            const originalDriver = originalRow.driverName || '';
+
+                            if (currentDriver !== originalDriver) {
+                                $row.find('td').eq(4)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalDriver || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ตั้งแต่เวลา
+                            const currenttimeStart = data.timeStart || '';
+                            const originaltimeStart = originalRow.timeStart || '';
+
+                            if (currenttimeStart !== originaltimeStart) {
+                                $row.find('td').eq(5)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originaltimeStart || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // ตั้งแต่เวลา
+                            const currenttimeStop = data.timeStop || '';
+                            const originaltimeStop = originalRow.timeStop || '';
+
+                            if (currenttimeStop !== originaltimeStop) {
+                                $row.find('td').eq(6)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originaltimeStop || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+
+                            // การเดินทาง
+                            const currentLocation = data.location || '';
+                            const originalLocation = originalRow.location || '';
+
+                            if (currentLocation !== originalLocation) {
+                                $row.find('td').eq(7)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalLocation || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+                            // เลขไมล์เริ่มต้น
+                            const currentmileageStart = data.mileage_start || '';
+                            const originalmileageStart = originalRow.mileage_start || '';
+
+                            if (currentmileageStart !== originalmileageStart) {
+                                $row.find('td').eq(12)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalmileageStart || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+                            // เลขไมล์เริ่มต้น
+                            const currentmileageStop = data.mileage_stop || '';
+                            const originalmileageStop = originalRow.mileage_stop || '';
+
+                            if (currentmileageStop !== originalmileageStop) {
+                                $row.find('td').eq(13)
+                                    .addClass('highlight-diff')
+                                    .attr('title', `เดิม: ${originalmileageStop || '(ไม่มีข้อมูลเดิม)'}`)
+                                    .css({
+                                        'background-color': '#60A6BF',
+                                        'cursor': 'pointer'
+                                    });
+                            }
+                        }
+                    }
+                },
+                drawCallback: function () {
+                    mergeDateRows();
+                },
+                footerCallback: function (row, data, start, end, display) {
+                    const api = this.api();
+
+                    const sum = (columnIndex) => {
+                        return api.column(columnIndex, { page: 'all' }).data().reduce((a, b) => {
+                            return a + (parseFloat(b) || 0);
+                        }, 0);
+                    };
+
+                    const totalFleet = sum(8);
+                    const totalCash = sum(9);
+                    const totalPT = sum(10);
+                    const totalOther = sum(11);
+                    const totalKM = sum(14);
+                    const totalProgramKM = sum(16);
+                    const totalAutoKM = sum(18);
+
+                    $('#totalFleet').html(totalFleet.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalCash').html(totalCash.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalPT').html(totalPT.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalOther').html(totalOther.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
+                    $('#totalKM').html(totalKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                    $('#totalProgramKM').html(totalProgramKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                    $('#totalAutoKM').html(totalAutoKM.toLocaleString('th-TH')).css({
+                        'vertical-align': 'middle',
+                        'font-size': '20px',
+                        'text-align': 'center'
+                    });
+                },
+                columns: [
+                    { data: 'dateDisplay', className: 'text-center fw-bold' },
+                    { data: 'job', className: 'text-center' },
+                    { data: 'province', className: 'text-center' },
+                    { data: 'car_id', className: 'text-center' },
+                    { data: 'driverName', className: 'text-center' },
+                    {
+                        data: 'timeStart', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    {
+                        data: 'timeStop', className: 'text-center',
+                        render: function (data) {
+                            return data === "00:00" ? '' : data;
+                        }
+                    },
+                    { data: 'location' },
+                    {
+                        data: 'fleet',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'cash',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'pt',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'exp',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'mileage_start',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'mileage_stop',
+                        className: 'text-center',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: 'km',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: '',
+                    },
+                    {
+                        data: 'program_km',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: '',
+                    },
+                    {
+                        data: 'auto_km',
+                        className: 'text-center fw-bold',
+                        render: function (data) {
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: 'text-center fw-bold',
+                        defaultContent: '',
+                    },
+                    { data: 'description', className: 'text-center' },
+                    {
+                        data: 'status',
+                        className: 'text-center',
+                        render: function (data) {
+                            const badges = {
+                                'Approved': 'bg-success',
+                                'Pending': 'bg-info'
+                            };
+                            const cls = badges[data] || 'bg-secondary';
+                            return `<span class="badge ${cls}">${data || ''}</span>`;
+                        }
+                    }
+                ]
+
+            });
+            mergeDateRows();
+        }
+
+        $('#edit_select_car').on('change', function () {
+            const car_id = $('#edit_select_car').val();
+            const license_plate = cars.filter(f => f.car_id === car_id).map(m => m.license_plate)[0];
+            $('#edit_license_plate').val(license_plate);
+        });
+
+        function ddMMyyyyToISO(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string' || !dateStr.includes('/')) {
+                return dateStr || '';
+            }
+
+            const parts = dateStr.trim().split('/');
+            if (parts.length !== 3) return dateStr;
+
+            const [dd, mm, yyyy] = parts.map(p => p.trim());
+
+            // เผื่อเลขเดือน/วันไม่มี 0 นำหน้า
+            const paddedDD = dd.padStart(2, '0');
+            const paddedMM = mm.padStart(2, '0');
+
+            return `${yyyy}-${paddedMM}-${paddedDD}`;
+        }
+
+        function mergeDateRows() {
+            const api = table_company;
+            if (!api || api.rows().count() === 0) return;
+
+            const dateColIdx = 0;
+            const sumKmColIdx = 15;
+            const programKmColIdx = 16;  // ระยะทาง(โปรแกรม) - ข้อมูลจริง
+            const sumProgramKmColIdx = 17;  // รวมระยะทาง(โปรแกรม)
+            const autoKmColIdx = 18;  // ระยะทาง(อัตโนมัติ) - ข้อมูลจริง
+            const sumAutoKmColIdx = 19;  // รวมระยะทาง(อัตโนมัติ)
+
+            let currentGroupDate = null;
+            let groupRows = [];
+            let groupTotalKm = 0;
+            let groupTotalProgramKm = 0;
+            let groupTotalAutoKm = 0;
+
+            api.rows({ page: 'current' }).nodes().to$().each(function () {
+                const $row = $(this);
+                const rowData = api.row(this).data();
+                if (!rowData) return;
+
+                const thisDate = rowData.dateDisplay;
+
+                if (currentGroupDate !== thisDate) {
+                    if (groupRows.length > 0) {
+                        applyGroupMerge(
+                            groupRows,
+                            groupTotalKm,
+                            groupTotalProgramKm,
+                            groupTotalAutoKm,
+                            dateColIdx, sumKmColIdx, sumProgramKmColIdx, sumAutoKmColIdx,
+                            programKmColIdx, autoKmColIdx
+                        );
+                    }
+                    currentGroupDate = thisDate;
+                    groupRows = [$row];
+                    groupTotalKm = parseFloat(rowData.km) || 0;
+                    groupTotalProgramKm = parseFloat(rowData.program_km) || 0;
+                    groupTotalAutoKm = parseFloat(rowData.auto_km) || 0;
+                } else {
+                    groupRows.push($row);
+                    groupTotalKm += parseFloat(rowData.km) || 0;
+                    groupTotalProgramKm += parseFloat(rowData.program_km) || 0;
+                    groupTotalAutoKm += parseFloat(rowData.auto_km) || 0;
+                }
+            });
+
+            if (groupRows.length > 0) {
+                applyGroupMerge(
+                    groupRows,
+                    groupTotalKm,
+                    groupTotalProgramKm,
+                    groupTotalAutoKm,
+                    dateColIdx, sumKmColIdx, sumProgramKmColIdx, sumAutoKmColIdx,
+                    programKmColIdx, autoKmColIdx
+                );
+            }
+        }
+        function applyGroupMerge(groupRows, totalKm, totalProgramKm, totalAutoKm,
+            dateColIdx, sumKmColIdx, sumProgramKmColIdx, sumAutoKmColIdx,
+            programKmColIdx, autoKmColIdx) {
+            const rowCount = groupRows.length;
+            const $firstRow = groupRows[0];
+
+            // Merge วันที่ (เหมือนเดิม)
+            $firstRow.find('td').eq(dateColIdx)
+                .attr('rowspan', rowCount)
+                .css({ 'vertical-align': 'middle', 'background-color': '#e3f2fd', 'font-weight': '500' });
+
+            // ฟังก์ชันช่วย format
+            const formatKm = (value) => value > 0 ? value.toLocaleString('th-TH') : '';
+
+            // คำนวณเปอร์เซ็นต์ความต่าง (ใช้ Math.abs เพื่อดูความต่างโดยไม่สนใจเครื่องหมาย)
+            let programDiffPercent = 0;
+            let autoDiffPercent = 0;
+            let programBgColor = '#ffffff';
+            let autoBgColor = '#ffffff';
+            let programTextColor = '#d84315';  // สีแดงเริ่มต้น (ถ้าไม่มี highlight)
+            let autoTextColor = '#d84315';
+
+            if (totalKm > 0) {
+                programDiffPercent = Math.abs(((totalKm - totalProgramKm) / totalKm) * 100);
+                autoDiffPercent = Math.abs(((totalKm - totalAutoKm) / totalKm) * 100);
+
+                // โปรแกรม
+                if (programDiffPercent >= 10) {
+                    programBgColor = '#FFAC1C';
+                    programTextColor = '#000000';
+                } else {
+                    programBgColor = '#90EE90';
+                    programTextColor = '#000000';
+                }
+
+                // อัตโนมัติ
+                if (autoDiffPercent >= 10) {
+                    autoBgColor = '#FFAC1C';
+                    autoTextColor = '#000000';
+                } else {
+                    autoBgColor = '#90EE90';
+                    autoTextColor = '#000000';
+                }
+            }
+
+            // รวมระยะทาง (km) - ไม่ highlight (เหมือนเดิม)
+            $firstRow.find('td').eq(sumKmColIdx)
+                .attr('rowspan', rowCount)
+                .html(`<strong style="color:#d84315; font-size:1.1em;">${formatKm(totalKm)}</strong>`)
+                .css({
+                    'vertical-align': 'middle',
+                    'text-align': 'center',
+                    'font-weight': '500',
+                    'background-color': '#ffffff'
+                });
+
+            // รวมระยะทาง(โปรแกรม) - Highlight ตามเงื่อนไข
+            $firstRow.find('td').eq(sumProgramKmColIdx)
+                .attr('rowspan', rowCount)
+                .html(`<strong style="color:${programTextColor}; font-size:1.1em;">${formatKm(totalProgramKm)}</strong>`)
+                .css({
+                    'vertical-align': 'middle',
+                    'text-align': 'center',
+                    'font-weight': '500',
+                    'background-color': programBgColor
+                });
+
+            // รวมระยะทาง(อัตโนมัติ) - Highlight ตามเงื่อนไข
+            $firstRow.find('td').eq(sumAutoKmColIdx)
+                .attr('rowspan', rowCount)
+                .html(`<strong style="color:${autoTextColor}; font-size:1.1em;">${formatKm(totalAutoKm)}</strong>`)
+                .css({
+                    'vertical-align': 'middle',
+                    'text-align': 'center',
+                    'font-weight': '500',
+                    'background-color': autoBgColor
+                });
+
+            // ซ่อน td ที่ merge ในแถวถัดไป (เหมือนเดิม)
+            if (rowCount > 1) {
+                for (let i = 1; i < groupRows.length; i++) {
+                    const $row = groupRows[i];
+                    $row.find('td').eq(dateColIdx).hide();
+                    $row.find('td').eq(sumKmColIdx).hide();
+                    $row.find('td').eq(sumProgramKmColIdx).hide();
+                    $row.find('td').eq(sumAutoKmColIdx).hide();
+                }
+            }
+        }
+
+        function formatDateTimeYYYYMMDDHHMMSS(date = new Date()) {
+            const pad = (n) => String(n).padStart(2, '0');
+
+            return (
+                date.getFullYear() +
+                pad(date.getMonth() + 1) +
+                pad(date.getDate()) +
+                pad(date.getHours()) +
+                pad(date.getMinutes()) +
+                pad(date.getSeconds())
+            );
+        }       
+    </script>
+}

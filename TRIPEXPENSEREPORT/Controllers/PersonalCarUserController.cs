@@ -96,8 +96,7 @@ namespace TRIPEXPENSEREPORT.Controllers
             if (old_personal.driver != null)
             {
                 personal.approver = old_personal.approver;
-                personal.auto_km = old_personal.auto_km;
-                personal.gasoline = old_personal.gasoline;               
+                personal.auto_km = old_personal.auto_km;          
                 personal.program_km = old_personal.program_km;
                 personal.cash = old_personal.cash;
                 personal.status = old_personal.status;
@@ -231,7 +230,6 @@ namespace TRIPEXPENSEREPORT.Controllers
                         auto_km = k.auto_km,
                         description = k.description,
                         status = k.status,
-                        gasoline = k.gasoline,
                         zipcode = k.zipcode,
                         province = provinces.Where(w => w.zipcode == k.zipcode)
                                            .Select(s => s.province)
@@ -312,7 +310,6 @@ namespace TRIPEXPENSEREPORT.Controllers
                     mileage_start = start.mileage,
                     mileage_stop = stop.mileage,
                     program_km = (int)Math.Round(stop.distance, 0),
-                    gasoline = "",
                     approver = "",
                     zipcode = ""
                 };
@@ -455,7 +452,6 @@ namespace TRIPEXPENSEREPORT.Controllers
                     mileage_start = start.mileage,
                     mileage_stop = stop.mileage,
                     program_km = (int)Math.Round(stop.distance, 0),
-                    gasoline = "",
                     approver = "",
                     zipcode = zipcode
                 };
@@ -528,6 +524,7 @@ namespace TRIPEXPENSEREPORT.Controllers
             DateTime start = new DateTime(year, mon, 1);
             DateTime stop = start.AddMonths(1).AddDays(-1);
             List<PersonalModel> personals = Personal.GetPersonalsByDate(emp_id, start, stop);
+            personals = personals.Where(w => w.status != "Approved").ToList();
 
             List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
             CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();

@@ -275,11 +275,12 @@ namespace TRIPEXPENSEREPORT.Controllers
                 .ThenBy(x => x.timeStart)
                 .ToList();
 
+            List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
             List<CTLModels.HolidayModel> holidays = Holiday.GetHolidays(start.Year.ToString());
             GasolineModel gasoline = Gasoline.GetGasolineByMonth(month);
             PersonalGasolineModel gasoline_type = Personal.GetPersonalGasoline(emp_id, month);
 
-            return Json(new { data = result, old_personal = result_original, holidays = holidays, gasoline = gasoline, gasoline_type = gasoline_type, provinces = provinces });
+            return Json(new { data = result, old_personal = result_original, holidays = holidays, gasoline = gasoline, gasoline_type = gasoline_type, provinces = provinces , employees = emps });
         }
 
         [HttpPost]

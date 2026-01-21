@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="employee" style="color:#555555" id="employee-label">ชื่อผู้ขับ:</label>
+                    <label for="select_driver" style="color:#555555">ชื่อผู้ขับ:</label>
                     <select id="select_driver" class="mb-3 form-control" style="border-radius:5px">
                     </select>
                     <button id="btn_search" class="btn btn-primary w-100 " style="border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
@@ -429,6 +429,7 @@
         let holidays = [];
         var table_personal;
         let provinces = [];
+        let employees = [];
         $(document).ready(async function () {
             const today = new Date();
             const month = today.toISOString().slice(0, 7);
@@ -456,12 +457,13 @@
             const data = await GetPersonalCar(emp_id,month);
             const gasoline = data.gasoline;
             const gasoline_type = data.gasoline_type;
+            employees = data.employees;
 
             let datas = CalSummary(data, gasoline_type, gasoline);
             GenerateSummaryTable(datas);
 
             holidays = data.holidays;
-            provinces = data.provinces;
+            provinces = data.provinces;          
             GenerateProvinceOption(provinces);
 
             const holidayDates = new Set(holidays.map(h => h.date.split('T')[0]));
@@ -1006,7 +1008,8 @@
                   };
                 }, { sumEXP: 0, sumPT: 0 });
 
-                const emp =  @Html.Raw(Json.Serialize(emp));
+                const emp_id =  $('#select_driver').val();
+                const emp = employees.filter(f=>f.emp_id === emp_id).map(m=>m)[0];
 
                 if (Gastype.gasoline_type == "Bensin") {
                     $('#state_bensin').prop('checked',true);
@@ -1016,8 +1019,8 @@
                      $('#state_bensin').prop('checked',false);
                     $('#state_diesel').prop('checked',true);
                 }
-                
-                if (emp.position.includes('Opearion')) {
+
+                if (emp.position.includes('Operation')) {
                     if (sumKm <= 1000) {                       
                         suma1 = sumKm * 10.0;
                         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", sumKm.toString(), "AMOUNT", suma1.toString(), "BAHT"];
@@ -1090,7 +1093,7 @@
                         a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
                     } else {
                         suma1 = 0;
-                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "1000", "AMOUNT", suma1.toString(), "BAHT"];
+                        a1 = ["(0 ~ 1,000 KMS)  10.0 B/KMS", "KMS__", "0", "AMOUNT", suma1.toString(), "BAHT"];
                     }
 
                     if (sumKm > 1000 && sumKm <= 2000) {
@@ -1107,7 +1110,7 @@
                     } else {
                         if (sumKm > 4000) {
                             suma3 = 0;
-                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "2000", "AMOUNT", suma3.toString(), "BAHT"];
+                            a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
                         } else {
                             suma3 = 0;
                             a3 = ["(2,001 ~ 4,000 KMS)  5.0 B/KMS", "KMS__", "0", "AMOUNT", suma3.toString(), "BAHT"];
@@ -1149,7 +1152,7 @@
                         a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "0", "AMOUNT", suma2.toString(), "BAHT"];
                     } else {
                         suma2 = 2000 * 7.5;
-                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "2000", "AMOUNT", suma2.toString(), "BAHT"];
+                        a2 = ["(1001 ~ 2,000 KMS)  7.5 B/KMS", "KMS__", "1000", "AMOUNT", suma2.toString(), "BAHT"];
                     }
 
                     if (sumKm > 2000 && sumKm <= 4000) {
@@ -1194,7 +1197,6 @@
 
             let table_summary;
             function GenerateSummaryTable(_datas) {
-                console.log(_datas);
                 let datas = [];
                 for (let i = 0; i < _datas.length; i++) {
                     datas.push([_datas[i][0], _datas[i][1], _datas[i][2], _datas[i][3], _datas[i][4], _datas[i][5]]);

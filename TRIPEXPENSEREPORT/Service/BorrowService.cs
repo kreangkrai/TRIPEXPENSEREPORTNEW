@@ -1,15 +1,17 @@
 ﻿using Microsoft.Data.SqlClient;
+using OfficeOpenXml;
 using System.Data;
+using System.Drawing;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 
 namespace TRIPEXPENSEREPORT.Service
 {
-    public class BorroweService : IBorrow
+    public class BorrowService : IBorrow
     {
         ConnectSQL connect = null;
         SqlConnection con = null;
-        public BorroweService()
+        public BorrowService()
         {
             connect = new ConnectSQL();
             con = connect.OpenConnect();
@@ -319,6 +321,43 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return "Success";
+        }
+        public Stream ExportBorrow(FileInfo path, List<BorrowerModel> borrowers)
+        {
+            Stream stream = new MemoryStream();
+
+            if (path.Exists)
+            {
+                using (var package = new ExcelPackage(path))
+                {
+                    int startRows = 2;
+                    //*** Sheet 1
+                    var workbook = package.Workbook;
+                    var worksheet = workbook.Worksheets["Sheet1"];
+                    var cellfont = worksheet.Cells.Style.Font;
+                    cellfont.SetFromFont(new Font("Angsana New", 14));
+
+                    for (int i = 0; i < borrowers.Count; i++)
+                    {
+                        worksheet.Cells["A" + (startRows)].Value = (i + 1);
+                        worksheet.Cells["B" + (startRows)].Value = borrowers[i].car_id;
+                        worksheet.Cells["C" + (startRows)].Value = borrowers[i].license_plate;
+                        worksheet.Cells["D" + (startRows)].Value = borrowers[i].borrower_name;
+                        worksheet.Cells["E" + (startRows)].Value = borrowers[i].customer;
+                        worksheet.Cells["F" + (startRows)].Value = borrowers[i].job_id;
+                        worksheet.Cells["G" + (startRows)].Value = borrowers[i].borrow_date;
+                        worksheet.Cells["H" + (startRows)].Value = borrowers[i].plan_return_date;
+                        worksheet.Cells["I" + (startRows)].Value = borrowers[i].actual_return_date == DateTime.MinValue ? "-" : borrowers[i].actual_return_date.ToString("dd/MM/yyyy");
+                        worksheet.Cells["J" + (startRows)].Value = borrowers[i].status;
+                        worksheet.Cells["K" + (startRows)].Value = borrowers[i].admin_name;
+                        worksheet.Cells["L" + (startRows)].Value = borrowers[i].remark;
+                        startRows++;
+                    }
+                    package.SaveAs(stream);
+                    stream.Position = 0;
+                }
+            }
+            return stream;
         }
     }
 }

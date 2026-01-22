@@ -9,16 +9,16 @@
         white-space: nowrap;
     }
 </style>
-<div class="container-fluid p-3" style="background-color:#ECF0F5;">
+<div class="container-fluid d-flex justify-content-center" style="background-color:#ECF0F5;">
     <div class="row">
-        <div class="col-xl-2" style="background-color:#ECF0F5">
+        <div class="col-xl-12" style="background-color:#ECF0F5;height:auto;overflow-x:auto">
             <div class="card card-dark">
                 <div class="card-header" style="background-color: #034694">
-                    <span class="card-title">Gasoline</span>
+                    <span class="card-title">ราคาน้ำมันต่อลิตร</span>
                 </div>
                 <div class="card-body">
                     <form>
-                        <div class="col-12 col-xl-12">
+                        <div class="col-6 col-xl-6">
                             <div class="form-group row">
                                 <div class="col-md-12 col-xl-12">
                                     <input type="button" id="btn_add" value="เพิ่ม" class="form-control btn btn-success" style="height:60px;color:white;font-size:20px" />
@@ -26,20 +26,8 @@
                             </div>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-10" style="background-color:#ECF0F5;height:auto;overflow-x:auto">
-            <div class="card card-dark">
-                <div class="card-header" style="background-color: #034694">
-                    <span class="card-title">ราคาน้ำมันต่อลิตร</span>
-                </div>
-                <div class="card-body">
-                    <div id="div_loading" style="text-align:center" hidden>
-                        <img src="~/images/loading.gif" style="width:300px;height:300px;align-items:center" />
-                    </div>
                     <div id="div_table" class="row">
-                        <div class="col-12 col-xl-12" style="overflow-x:auto;height:700px">
+                        <div class="col-12 col-xl-12" style="overflow-x:auto;height:600px">
                             <table id="table" class="table compact table-bordered table-sm table-hover text-center" style="width:100%">
                                 <thead style="background-color:#034694;color:white">
                                     <tr>
@@ -57,7 +45,7 @@
     </div>
 </div>
 <div class="modal fade" id="editGasolineModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title"><b>Edit Gasoline</b></h4>
@@ -98,7 +86,7 @@
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                                 </div>
                                 <div class="col-8 col-xl-8">
-                                    <button type="button" id="btn_edit_save" class="btn btn-primary">Save changes</button>
+                                    <button type="button" id="btn_edit_save" class="btn btn-primary">Save</button>
                                 </div>
                             </div>
                         </div>
@@ -109,7 +97,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <div class="modal fade" id="deleteGasolineModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title"><b>Delete Gasoline</b></h4>
@@ -148,7 +136,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <div class="modal fade" id="addGasolineModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title"><b>Add Gasoline</b></h4>
@@ -294,7 +282,6 @@
             });
         });
         async function Loading() {
-            $('#div_loading').prop('hidden', false);
             $('#div_table').prop('hidden', true);
             await $.ajax({
                 type: "GET",
@@ -302,7 +289,6 @@
                 contentType: 'application/x-www-form-urlencoded',
                 data: {  },
                 success: function (response) {
-                    $('#div_loading').prop('hidden', true);
                     $('#div_table').prop('hidden', false);
                     let gasolines = response;
                     GenerateTable(gasolines);

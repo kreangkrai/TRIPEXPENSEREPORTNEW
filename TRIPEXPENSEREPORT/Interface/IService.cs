@@ -1,4 +1,5 @@
-﻿using TRIPEXPENSEREPORT.Service;
+﻿using TRIPEXPENSEREPORT.Models;
+using TRIPEXPENSEREPORT.Service;
 
 namespace TRIPEXPENSEREPORT.Interface
 {
@@ -14,5 +15,6 @@ namespace TRIPEXPENSEREPORT.Interface
         string InsertServiceHistory(ServiceModel service);
         string UpdateService(ServiceModel service);
         string UpdateMileage(string car, int mileage);
+        Stream ExportServiceHistory(FileInfo path, List<ServiceModel> services);
     }
 }

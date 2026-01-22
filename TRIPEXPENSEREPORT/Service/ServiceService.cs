@@ -1,6 +1,9 @@
 ﻿using Microsoft.Data.SqlClient;
+using OfficeOpenXml;
 using System.Data;
+using System.Drawing;
 using TRIPEXPENSEREPORT.Interface;
+using TRIPEXPENSEREPORT.Models;
 
 namespace TRIPEXPENSEREPORT.Service
 {
@@ -518,6 +521,58 @@ namespace TRIPEXPENSEREPORT.Service
                 }
             }
             return "Success";
+        }
+        public Stream ExportServiceHistory(FileInfo path, List<ServiceModel> services)
+        {
+            Stream stream = new MemoryStream();
+
+            if (path.Exists)
+            {
+                using (var package = new ExcelPackage(path))
+                {
+                    int startRows = 2;
+                    //*** Sheet 1
+                    var workbook = package.Workbook;
+                    var worksheet = workbook.Worksheets["Sheet1"];
+                    var cellfont = worksheet.Cells.Style.Font;
+                    cellfont.SetFromFont(new Font("Angsana New", 14));
+
+                    for (int i = 0; i < services.Count; i++)
+                    {
+                        worksheet.Cells["A" + (startRows)].Value = (i + 1);
+                        worksheet.Cells["B" + (startRows)].Value = ServiceType(services[i].service_id);
+                        worksheet.Cells["C" + (startRows)].Value = services[i].car_id;
+                        worksheet.Cells["D" + (startRows)].Value = services[i].license_plate;
+                        worksheet.Cells["E" + (startRows)].Value = services[i].mileage_at_service;
+                        worksheet.Cells["F" + (startRows)].Value = services[i].date_at_service;
+                        worksheet.Cells["G" + (startRows)].Value = services[i].appointment_mileage;
+                        worksheet.Cells["H" + (startRows)].Value = services[i].appointment_date;
+                        worksheet.Cells["I" + (startRows)].Value = services[i].name;
+                        worksheet.Cells["J" + (startRows)].Value = services[i].location_service;
+                        worksheet.Cells["K" + (startRows)].Value = services[i].detail;
+                        worksheet.Cells["L" + (startRows)].Value = services[i].note;
+                        startRows++;
+                    }
+                    package.SaveAs(stream);
+                    stream.Position = 0;
+                }
+            }
+            return stream;
+        }
+        public string ServiceType(string service)
+        {
+            if (service == "SER01")
+            {
+                return "General Service";
+            }
+            else if (service == "SER02")
+            {
+                return "Tires Service";
+            }
+            else
+            {
+                return "Battery Service";
+            }
         }
     }
 }

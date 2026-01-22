@@ -17,6 +17,7 @@ builder.Services.AddTransient<IEmployee, EmployeeService>();
 builder.Services.AddTransient<IPersonal, PersonalService>();
 builder.Services.AddTransient<ICompany, CompanyService>();
 builder.Services.AddTransient<IGasoline, GasolineService>();
+builder.Services.AddTransient<IBorrow, BorrowService>();
 builder.Services.AddTransient<TRIPEXPENSEREPORT.CTLInterfaces.IHoliday, TRIPEXPENSEREPORT.CTLServices.HolidayService>();
 builder.Services.AddTransient<TRIPEXPENSEREPORT.CTLInterfaces.IEmployee, TRIPEXPENSEREPORT.CTLServices.EmployeeService>();
 builder.Services.Configure<CookiePolicyOptions>(options =>

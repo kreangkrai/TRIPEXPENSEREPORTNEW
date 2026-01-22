@@ -11,31 +11,46 @@ namespace TRIPEXPENSEREPORT.Controllers
         private IEmployee Employee;
         private IService Service;
         private ICar Car;
-        //private IExport Export;
-        static UserManagementModel role = new UserManagementModel();
+        private CTLInterfaces.IEmployee CTLEmployees;
         private readonly IWebHostEnvironment _hostingEnvironment;
-        public ServiceHistoryController(IWebHostEnvironment hostingEnvironment)
+        public ServiceHistoryController(IUser users, IEmployee employee, IService service, ICar car, CTLInterfaces.IEmployee ctlEmployees, IWebHostEnvironment hostingEnvironment)
         {
-            Users = new UserService();
-            Employee = new EmployeeService();
-            Service = new ServiceService();
-            Car = new CarService();
-            //Export = new ExportService();
+            Users = users;
+            Employee = employee;
+            Service = service;
+            Car = car;
+            CTLEmployees = ctlEmployees;
             _hostingEnvironment = hostingEnvironment;
         }
         public IActionResult Index()
         {
             if (ModelState.IsValid)
             {
-                //Get Name Login
-                var userId = HttpContext.Session.GetString("userId");
-                string name = userId.Split(' ')[0].Substring(0, 1).ToUpper() + userId.Split(' ')[0].Substring(1, userId.Split(' ')[0].Length - 1) + "." + userId.Split(' ')[1].Substring(0, 1).ToUpper();
-                List<UserModel> names = new List<UserModel>();
+                if (HttpContext.Session.GetString("userId") != null)
+                {
+                    string emp_id = HttpContext.Session.GetString("userId");
+                    List<EmployeeModel> employees = Employee.GetEmployees();
+                    EmployeeModel employee = employees.Where(w => w.emp_id == emp_id).FirstOrDefault();
+                    HttpContext.Session.SetString("Role", employee.role);
+                    HttpContext.Session.SetString("Name", employee.name);
+                    HttpContext.Session.SetString("Department", employee.department);
+                    HttpContext.Session.SetString("Location", employee.location);
 
-                role = Users.GetUsers().Where(w => w.name == name).FirstOrDefault();
-                List<ServiceTypeModel> services = Service.GetServiceTypes();
-                ViewBag.serviceType = services;
-                return View(role);
+
+                    List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
+                    CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();
+
+                    ViewBag.Employee = emp;
+
+                    List<ServiceTypeModel> services = Service.GetServiceTypes();
+                    ViewBag.serviceType = services;
+
+                    return View(employee);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Account");
+                }
             }
             else
             {
@@ -49,14 +64,14 @@ namespace TRIPEXPENSEREPORT.Controllers
             List<ServiceModel> services = Service.GetSevicesHistoryByService(service);
             return Json(services);
         }
-        //public IActionResult DownloadXlsxReport()
-        //{
-        //    List<ServiceModel> service = Service.GetSevicesHistory();
+        public IActionResult DownloadXlsxReport()
+        {
+            List<ServiceModel> service = Service.GetSevicesHistory();
 
-        //    //Download Excel
-        //    var templateFileInfo = new FileInfo(Path.Combine(_hostingEnvironment.ContentRootPath, "./wwwroot/Template", "service_history.xlsx"));
-        //    var stream = Export.ExportServiceHistory(templateFileInfo, service);
-        //    return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "service_history_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx");
-        //}
+            //Download Excel
+            var templateFileInfo = new FileInfo(Path.Combine(_hostingEnvironment.ContentRootPath, "./wwwroot/Template", "service_history.xlsx"));
+            var stream = Service.ExportServiceHistory(templateFileInfo, service);
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "service_history_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx");
+        }
     }
 }

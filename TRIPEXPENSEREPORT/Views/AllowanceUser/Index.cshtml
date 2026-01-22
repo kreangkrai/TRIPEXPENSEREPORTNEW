@@ -374,7 +374,19 @@
             const month = today.toISOString().slice(0, 7);
             $('#month_start').val(month);
             employees = await GetEmployees();
+
+            const emp = @Html.Raw(Json.Serialize(Model));
+            if (emp.role !== "Admin") {
+                employees = employees.filter(f => f.emp_id == emp.emp_id).map(m => m);
+            }
             GenerateEmployeeOption(employees);
+            if (employees.length > 0) {                
+                $('#btn_search').prop('disabled', false);
+            } else {
+                alert('ไม่มีข้อมูลในการใช้งาน');
+                $('#btn_search').prop('disabled', true);
+            }
+           
         });
 
         async function GetEmployees() {
@@ -392,12 +404,30 @@
 
         }
 
+        $('#month_start').on('change',async function(){
+            employees = await GetEmployees();
+            const emp = @Html.Raw(Json.Serialize(Model));
+            if (emp.role !== "Admin") {
+                employees = employees.filter(f => f.emp_id == emp.emp_id).map(m => m);
+            }
+            GenerateEmployeeOption(employees);
+            if (employees.length > 0) {               
+                $('#btn_search').prop('disabled', false);
+            } else {
+                alert('ไม่มีข้อมูลในการใช้งาน');
+                $('#btn_search').prop('disabled', true);
+            }
+        });
+
         $('#btn_search').on('click', async function () {
 
             const month = $('#month_start').val();
             const emp_id = $('#select_employee').val();
-
-            LoadAllowanceTable(emp_id,month);
+            if (emp_id !== null) {
+                LoadAllowanceTable(emp_id, month);
+            }else{
+                alert('ยังไม่ได้เลือกชื่อพนักงาน');
+            }
         });
 
         async function GetAllowance(emp_id, month) {
@@ -804,7 +834,11 @@
         $('#btn_export').on('click', function () {
             const emp_id = $('#select_employee').val();
             const month = $('#month_start').val();
-            location.href = '@Url.Action("Export", "AllowanceUser")?emp_id=' + emp_id + '&month=' + month;
+            if (emp_id !== null) {
+                location.href = '@Url.Action("Export", "AllowanceUser")?emp_id=' + emp_id + '&month=' + month;
+            } else {
+                alert('ยังไม่ได้เลือกชื่อพนักงาน');
+            }           
         });
     </script>
 }

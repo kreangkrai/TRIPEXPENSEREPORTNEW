@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using TRIPEXPENSEREPORT.CTLInterfaces;
 using TRIPEXPENSEREPORT.Interface;
 using TRIPEXPENSEREPORT.Models;
 using TRIPEXPENSEREPORT.Service;
+using IEmployee = TRIPEXPENSEREPORT.Interface.IEmployee;
 
 namespace TRIPEXPENSEREPORT.Controllers
 {
@@ -12,28 +14,47 @@ namespace TRIPEXPENSEREPORT.Controllers
         private IEmployee Employee;
         private IService Service;
         private ICar Car;
-        static UserManagementModel role = new UserManagementModel();
+        private CTLInterfaces.IEmployee CTLEmployees;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public ServiceController()
+        public ServiceController(IUser users, IEmployee employee, IService service, ICar car, CTLInterfaces.IEmployee ctlEmployees, IWebHostEnvironment hostingEnvironment)
         {
-            Users = new UserService();
-            Employee = new EmployeeService();
-            Service = new ServiceService();
-            Car = new CarService();
+            Users = users;
+            Employee = employee;
+            Service = service;
+            Car = car;
+            CTLEmployees = ctlEmployees;
+            _hostingEnvironment = hostingEnvironment;
         }
         public IActionResult Index()
         {
             if (ModelState.IsValid)
             {
-                //Get Name Login
-                var userId = HttpContext.Session.GetString("userId");
-                string name = userId.Split(' ')[0].Substring(0, 1).ToUpper() + userId.Split(' ')[0].Substring(1, userId.Split(' ')[0].Length - 1) + "." + userId.Split(' ')[1].Substring(0, 1).ToUpper();
-                List<UserModel> names = new List<UserModel>();
+                if (HttpContext.Session.GetString("userId") != null)
+                {
+                    string emp_id = HttpContext.Session.GetString("userId");
+                    List<EmployeeModel> employees = Employee.GetEmployees();
+                    EmployeeModel employee = employees.Where(w => w.emp_id == emp_id).FirstOrDefault();
+                    HttpContext.Session.SetString("Role", employee.role);
+                    HttpContext.Session.SetString("Name", employee.name);
+                    HttpContext.Session.SetString("Department", employee.department);
+                    HttpContext.Session.SetString("Location", employee.location);
 
-                role = Users.GetUsers().Where(w => w.name == name).FirstOrDefault();
-                List<ServiceTypeModel> services = Service.GetServiceTypes();
-                ViewBag.serviceType = services;
-                return View(role);
+
+                    List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
+                    CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();
+
+                    ViewBag.Employee = emp;
+
+                    List<ServiceTypeModel> services = Service.GetServiceTypes();
+                    ViewBag.serviceType = services;
+
+                    return View(employee);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Account");
+                }
             }
             else
             {
@@ -45,7 +66,8 @@ namespace TRIPEXPENSEREPORT.Controllers
         public IActionResult GetServices()
         {
             List<ServiceModel> services = Service.GetSevices();
-            List<EmployeeModel> employees = Employee.GetEmployees();
+            List<CTLModels.EmployeeModel> employees = CTLEmployees.GetEmployees();
+            employees = employees.OrderBy(o=>o.name_en).ToList();
             var data = new { services = services, users = employees };
             return Json(data);
         }
@@ -54,7 +76,8 @@ namespace TRIPEXPENSEREPORT.Controllers
         public IActionResult GetServicesByService(string service)
         {
             List<ServiceModel> services = Service.GetSevicesByService(service);
-            List<EmployeeModel> employees = Employee.GetEmployees();
+            List<CTLModels.EmployeeModel> employees = CTLEmployees.GetEmployees();
+            employees = employees.OrderBy(o => o.name_en).ToList();
             var data = new { services = services, users = employees };
             return Json(data);
         }
@@ -63,7 +86,8 @@ namespace TRIPEXPENSEREPORT.Controllers
         public IActionResult GetServiceByCar(string car_id, string service_id)
         {
             ServiceModel service = Service.GetSeviceByCar(car_id, service_id);
-            List<EmployeeModel> employees = Employee.GetEmployees();
+            List<CTLModels.EmployeeModel> employees = CTLEmployees.GetEmployees();
+            employees = employees.OrderBy(o=>o.name_en).ToList();
             var data = new { service = service, users = employees };
             return Json(data);
         }

@@ -28,9 +28,9 @@
                             For User
                         </a>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                            <a class="dropdown-item" asp-controller="User" asp-action="Index"><i class="fa-solid fa-car-side"></i> รถส่วนตัว</a>
-                            <a class="dropdown-item" asp-controller="Monitor" asp-action="Index"><i class="fa-solid fa-truck-pickup"></i> รถบริษัท</a>
-                            <a class="dropdown-item" asp-controller="Device" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar"></i>  เบี้ยเลี้ยง</a>
+                            <a class="dropdown-item" asp-controller="PersonalCarUser" asp-action="Index"><i class="fa-solid fa-car-side"></i> รถส่วนตัว</a>
+                            <a class="dropdown-item" asp-controller="CompanyCarUser" asp-action="Index"><i class="fa-solid fa-truck-pickup"></i> รถบริษัท</a>
+                            <a class="dropdown-item" asp-controller="AllowanceUser" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar"></i>  เบี้ยเลี้ยง</a>
                         </div>
                     </div>
                 </li>
@@ -45,9 +45,9 @@
                                 For Admin
                             </a>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                <a class="dropdown-item" asp-controller="User" asp-action="Index"><i class="fa-solid fa-car-side"></i> รถส่วนตัว</a>
-                                <a class="dropdown-item" asp-controller="Monitor" asp-action="Index"><i class="fa-solid fa-truck-pickup"></i> รถบริษัท</a>
-                                <a class="dropdown-item" asp-controller="Device" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar"></i>  เบี้ยเลี้ยง</a>
+                                <a class="dropdown-item" asp-controller="PersonalCarAdmin" asp-action="Index"><i class="fa-solid fa-car-side"></i> รถส่วนตัว</a>
+                                <a class="dropdown-item" asp-controller="CompanyCarAdmin" asp-action="Index"><i class="fa-solid fa-truck-pickup"></i> รถบริษัท</a>
+                                <a class="dropdown-item" asp-controller="AllowanceAdmin" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar"></i>  เบี้ยเลี้ยง</a>
                             </div>
                         </div>
                     </li>
@@ -58,9 +58,6 @@
                                 Summary Company Car
                             </a>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="font-family:Kanit">
-                                <a class="dropdown-item" asp-controller="User" asp-action="Index"><i class="fa-solid fa-car-side"></i> รถส่วนตัว</a>
-                                <a class="dropdown-item" asp-controller="Monitor" asp-action="Index"><i class="fa-solid fa-truck-pickup"></i> รถบริษัท</a>
-                                <a class="dropdown-item" asp-controller="Device" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar"></i>  เบี้ยเลี้ยง</a>
                                 <a class="dropdown-item" asp-controller="Service" asp-action="Index"><i class="fa-solid fa-wrench"></i>  Service Maintenance</a>
                                 <a class="dropdown-item" asp-controller="ServiceHistory" asp-action="Index"><i class="fa-solid fa-screwdriver-wrench"></i> Service History</a>
                                 <a class="dropdown-item" asp-controller="Borrow" asp-action="Index"><i class="fa-solid fa-calendar-week"></i> Borrow</a>
@@ -87,9 +84,7 @@
                                 Management
                             </a>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="font-family:Kanit">
-                                <a class="dropdown-item" asp-controller="User" asp-action="Index"><i class="fa-solid fa-car-side"></i> รถส่วนตัว</a>
-                                <a class="dropdown-item" asp-controller="Monitor" asp-action="Index"><i class="fa-solid fa-truck-pickup"></i> รถบริษัท</a>
-                                <a class="dropdown-item" asp-controller="Device" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar"></i>  เบี้ยเลี้ยง</a>
+                                <a class="dropdown-item" asp-controller="Authen" asp-action="Index"><i class="fa-solid fa-cogs"></i> จัดการแอดมิน</a>
                             </div>
                         </div>
                     </li>

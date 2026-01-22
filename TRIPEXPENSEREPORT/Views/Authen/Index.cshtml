@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "User Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    List<TRIPEXPENSEREPORT.CTLModels.EmployeeModel> emps = ViewBag.Employee;
+}
+<style>
+    #table tr td:nth-of-type(1) {
+        cursor: pointer;
+    }
+</style>
+<div class="container p-3" style="background-color:#ECF0F5;">
+    <div class="row">
+        <div class="col-md-4 col-xl-4">
+            <div class="row">
+                <div class="col-md-8 col-xl-8">
+                    <select id="users" class="form-control" style="width:100%">
+                        <option disabled>Please Select</option>
+                        @for(int i = 0; i < emps.Count; i++)
+                        {
+                            <option value="@emps[i].emp_id">@emps[i].name_en</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 col-xl-4">
+                    <button type="button" id="AddUser" class="btn btn-primary" style="width: 100%">
+                        <i class="fas fa-plus" style="font-size:16px;"> User</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row pt-3">
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><b>Users</b></span>
+                </div>
+                <div class="card-body">
+                    <table id="table" class="table table-xl cell-border display responsive nowrap" width="100%">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<partial name="ModalEdit" />
+@section Scripts
+{
+    <script type="text/javascript">
+        var Users = [];
+        $(document).ready(function () {
+            init();
+        });
+
+        function init() {
+            $.ajax({
+                url: '@Url.Action("GetData", "Authen")',
+                type: "post",
+                contentType: 'application/x-www-form-urlencoded',
+                data: {
+                },
+                success: function (response) {
+                    Users = response.users;
+                    table(Users);
+                }
+            });
+        };
+        var tables;
+        function table(users) {
+            let datas = [];
+            for (let i = 0; i < users.length;i++){
+                datas.push(["", users[i].name, users[i].role]);
+            }
+            if (tables !== undefined)
+                tables.destroy();
+            tables = $('#table').DataTable({
+                data: datas  ,
+                columns: [
+                    { title: "Edit ", width: 10 },
+                    { title: "Name" },
+                    { title: "Role" },
+                ],
+                "columnDefs": [
+                    {
+                        "targets": 0,
+                        "data": null,
+                        "defaultContent": "<i class=\"fas fa-pen\"></i>",
+                        "className": 'dt-body-center',
+                    },
+                ],
+                "scrollX": true,
+            });
+            $(tables.table().body()).addClass('text-dark');
+        };
+
+        $('#table').on('click', 'tbody td', function () {
+            var cell = tables.cell(this);
+            var column = cell[0][0].column;
+            name = cell.data()[1];
+            role = cell.data()[2];
+
+            if (column == "0") {
+                document.getElementById('edit_name').value = name;
+                document.getElementById('edit_role').value = role;
+
+                $('#EditModal').modal();
+            }
+        });
+        $('#edit_RoleConfirm').on('click', function () {
+            var name = document.getElementById('edit_name').value;
+            var role = document.getElementById('edit_role').value;
+            $.ajax({
+                url: '@Url.Action("Update", "Authen")',
+                type: "post",
+                contentType: 'application/x-www-form-urlencoded',
+                data: {
+                    name, role
+                },
+                success: function (response) {
+                    if (response == "Success") {
+                        init();
+                    } else {
+                        alert(response);
+                    }
+                    $('#EditModal').modal('hide');
+                }
+            });
+        });
+        $('#AddUser').on('click', function () {
+            var emp_id = document.getElementById('users').value;
+            $.ajax({
+                url: '@Url.Action("Insert", "Authen")',
+                type: "post",
+                contentType: 'application/x-www-form-urlencoded',
+                data: {
+                    emp_id
+                },
+                success: function (response) {
+                    if (response == "Success") {
+                        init();
+                    } else {
+                        alert(response);
+                    }
+                }
+            });
+        });
+    </script>
+}

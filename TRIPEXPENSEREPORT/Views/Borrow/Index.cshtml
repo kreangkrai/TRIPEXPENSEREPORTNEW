@@ -429,6 +429,7 @@
             let borrow_id = $('#return_borrow_id').val();
             let car = $('#return_borrow_car').val();
             let borrower = $('#return_borrow_borrower').val();
+            let borr = users.filter(f => f.name_en === borrower).map(m => m.emp_id)[0];
             let mileage_start = $('#return_borrow_mileage').val();
             let customer = $('#return_borrow_customer').val();
             let job = $('#return_borrow_job').val();
@@ -441,7 +442,7 @@
                 "job": job,
                 "mileage_start": mileage_start,
                 "customer": customer,
-                "borrower": borrower,
+                "borrower": borr,
                 "borrow_date": borrow_date,
                 "plan_return_date": plan_return_date,
                 "remark": remark
@@ -609,7 +610,7 @@
         async function GenerateUserOptions(users) {
             var str = '<option value="" selected disabled>Select Borrower</option>';
             for (var i = 0; i < users.length; i++) {
-                str += '<option value="' + users[i].emp_id + '">' + users[i].name + '</option>';
+                str += '<option value="' + users[i].emp_id + '">' + users[i].name_en + '</option>';
             }
             $('#borrow_borrower').empty();
             $('#borrow_borrower').append(str);

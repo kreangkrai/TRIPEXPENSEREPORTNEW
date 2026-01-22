@@ -1,4 +1,4 @@
-﻿namespace TRIPEXPENSEREPORT.Service
+﻿namespace TRIPEXPENSEREPORT.Models
 {
     public class ServiceModel
     {

@@ -13,30 +13,43 @@ namespace TRIPEXPENSEREPORT.Controllers
         private IEmployee Employee;
         private IBorrow Borrow;
         private ICar Car;
-        //private IExport Export;
-        static UserManagementModel role = new UserManagementModel();
         private readonly IWebHostEnvironment _hostingEnvironment;
-        public BorrowController(IWebHostEnvironment hostingEnvironment)
+        private CTLInterfaces.IEmployee CTLEmployees;
+        public BorrowController(IUser users, IEmployee employee, IBorrow borrow, ICar car, CTLInterfaces.IEmployee ctlEmployees, IWebHostEnvironment hostingEnvironment)
         {
-            Users = new UserService();
-            Employee = new EmployeeService();
-            Borrow = new BorroweService();
-            Car = new CarService();
-            //Export = new ExportService();
+            Users = users;
+            Employee = employee;
+            Borrow = borrow;
+            Car = car;
+            CTLEmployees = ctlEmployees;
             _hostingEnvironment = hostingEnvironment;
         }
         public IActionResult Index()
         {
             if (ModelState.IsValid)
             {
-                //Get Name Login
-                var userId = HttpContext.Session.GetString("userId");
-                string name = userId.Split(' ')[0].Substring(0, 1).ToUpper() + userId.Split(' ')[0].Substring(1, userId.Split(' ')[0].Length - 1) + "." + userId.Split(' ')[1].Substring(0, 1).ToUpper();
-                List<UserModel> names = new List<UserModel>();
+                if (HttpContext.Session.GetString("userId") != null)
+                {
+                    string emp_id = HttpContext.Session.GetString("userId");
+                    List<EmployeeModel> employees = Employee.GetEmployees();
+                    EmployeeModel employee = employees.Where(w => w.emp_id == emp_id).FirstOrDefault();
+                    HttpContext.Session.SetString("Role", employee.role);
+                    HttpContext.Session.SetString("Name", employee.name);
+                    HttpContext.Session.SetString("Department", employee.department);
+                    HttpContext.Session.SetString("Location", employee.location);
 
-                role = Users.GetUsers().Where(w => w.name == name).FirstOrDefault();
 
-                return View(role);
+                    List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
+                    CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();
+
+                    ViewBag.Employee = emp;
+
+                    return View(employee);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Account");
+                }
             }
             else
             {
@@ -55,7 +68,8 @@ namespace TRIPEXPENSEREPORT.Controllers
         public IActionResult GetBorrowers()
         {
             List<BorrowerModel> borrowers = Borrow.GetBorrowers();
-            List<EmployeeModel> users = Employee.GetEmployees();
+            List<CTLModels.EmployeeModel> users = CTLEmployees.GetEmployees();
+            users = users.OrderBy(o=>o.name_en).ToList();
             var data = new { borrowers = borrowers, users = users };
             return Json(data);
         }
@@ -67,7 +81,8 @@ namespace TRIPEXPENSEREPORT.Controllers
             var last_cars = borrowers.GroupBy(g => g.car_id).Select(s => new { car = s.Key, date = s.LastOrDefault().borrow_id, status = borrowers.Where(w1 => w1.car_id == s.Key && w1.borrow_id == s.LastOrDefault().borrow_id).Select(s1 => s1.status).FirstOrDefault() }).ToList();
             last_cars = last_cars.Where(w => w.status == "Borrowed").ToList();
             cars = cars.Where(w => !last_cars.Select(a => a.car).Contains(w.car_id)).ToList();
-            List<EmployeeModel> users = Employee.GetEmployees();
+            List<CTLModels.EmployeeModel> users = CTLEmployees.GetEmployees();
+            users = users.OrderBy(o => o.name_en).ToList();
             var data = new { cars = cars, users = users };
             return Json(data);
         }
@@ -80,8 +95,8 @@ namespace TRIPEXPENSEREPORT.Controllers
             borrower.main_location = "";
             borrower.status = "Borrowed";
             var userId = HttpContext.Session.GetString("userId");
-            string emp_id = Employee.GetEmployees().Where(w => w.name.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
-            borrower.admin = emp_id;
+            //string emp_id = CTLEmployees.GetEmployees().Where(w => w.name_en.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
+            borrower.admin = userId;
             string message = Borrow.Insert(borrower);          
             return message;
         }
@@ -93,8 +108,8 @@ namespace TRIPEXPENSEREPORT.Controllers
             borrower.main_location = "";
             borrower.status = "Borrowed";
             var userId = HttpContext.Session.GetString("userId");
-            string emp_id = Employee.GetEmployees().Where(w => w.name.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
-            borrower.admin = emp_id;
+            //string emp_id = CTLEmployees.GetEmployees().Where(w => w.name_en.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
+            borrower.admin = userId;
             string message = Borrow.Update(borrower);
             return message;
         }
@@ -109,8 +124,8 @@ namespace TRIPEXPENSEREPORT.Controllers
             borrower = _borrower;
             borrower.status = "Returned";
             var userId = HttpContext.Session.GetString("userId");
-            string emp_id = Employee.GetEmployees().Where(w => w.name.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
-            borrower.admin = emp_id;
+            //string emp_id = CTLEmployees.GetEmployees().Where(w => w.name_en.ToLower() == userId.ToLower()).Select(s => s.emp_id).FirstOrDefault();
+            borrower.admin = userId;
             string message = Borrow.InsertLog(borrower);
             if (message == "Success")
             {
@@ -119,14 +134,14 @@ namespace TRIPEXPENSEREPORT.Controllers
             return message;
         }
 
-        //public IActionResult DownloadXlsxReport()
-        //{
-        //    List<BorrowerModel> borrowers = Borrow.GetBorrowers();
+        public IActionResult DownloadXlsxReport()
+        {
+            List<BorrowerModel> borrowers = Borrow.GetBorrowers();
 
-        //    //Download Excel
-        //    var templateFileInfo = new FileInfo(Path.Combine(_hostingEnvironment.ContentRootPath, "./wwwroot/Template", "borrow_car.xlsx"));
-        //    var stream = Export.ExportBorrow(templateFileInfo, borrowers);
-        //    return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "borrow_car_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx");
-        //}
+            //Download Excel
+            var templateFileInfo = new FileInfo(Path.Combine(_hostingEnvironment.ContentRootPath, "./wwwroot/Template", "borrow_car.xlsx"));
+            var stream = Borrow.ExportBorrow(templateFileInfo, borrowers);
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "borrow_car_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx");
+        }
     }
 }

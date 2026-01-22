@@ -437,13 +437,13 @@
             $('#month_start').val(month);
 
             let drivers = await Getdrivers();
-            const emp = @Html.Raw(Json.Serialize(Model));;
+            const emp = @Html.Raw(Json.Serialize(Model));
             if (emp.role !== "Admin") {
                 drivers = drivers.filter(f => f.emp_id == emp.emp_id).map(m => m);
             }
 
-            if (drivers.length > 0) {
-                GenerateDriverOption(drivers);
+            GenerateDriverOption(drivers);
+            if (drivers.length > 0) {               
                 $('#btn_search').prop('disabled', false);
             } else {
                 alert('ไม่มีข้อมูลในการใช้งาน');
@@ -779,8 +779,19 @@
         }
 
         $('#month_start').on('change',async function(){
-            const driver = await Getdrivers();
-            GenerateDriverOption(driver);
+            let drivers = await Getdrivers();
+            const emp = @Html.Raw(Json.Serialize(Model));
+            if (emp.role !== "Admin") {
+                drivers = drivers.filter(f => f.emp_id == emp.emp_id).map(m => m);
+            }
+
+            GenerateDriverOption(drivers);
+            if (drivers.length > 0) {              
+                $('#btn_search').prop('disabled', false);
+            } else {
+                alert('ไม่มีข้อมูลในการใช้งาน');
+                $('#btn_search').prop('disabled', true);
+            }
         });
 
         $('#btn_search').on('click', function () {
@@ -1229,7 +1240,11 @@
             $('#btn_export').on('click', function () {
              const emp_id = $('#select_driver').val();
              const month = $('#month_start').val();
-            location.href = '@Url.Action("Export", "PersonalCarUser")?emp_id='+ emp_id + '&month=' + month;
+            if (emp_id !== "" && emp_id !== null) {
+                location.href = '@Url.Action("Export", "PersonalCarUser")?emp_id=' + emp_id + '&month=' + month;
+            } else {
+                alert('Please Select Driver');
+            }           
         });
     </script>
 }

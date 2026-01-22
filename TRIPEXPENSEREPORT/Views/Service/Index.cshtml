@@ -6,7 +6,7 @@
     List<ServiceTypeModel> services = ViewBag.serviceType;
 }
 
-<div class="container">
+<div class="container-fluid">
     <div class="row p-1" style="row-gap:10px">
         <div class="col-xl-12">
             <div class="card card-dark">
@@ -49,7 +49,7 @@
                 <div class="card-header" style="background-color: #034694">
                     <span id="title_service_name" class="card-title">SER01:GENERAL SERVICE</span>
                     <div class="card-tools">
-                        <input type="button" id="btn_add_car_service" class="btn btn-success" value="Add Car" />
+                        <input type="button" id="btn_add_car_service" class="btn btn-success" value="ADD CAR" />
                     </div>
                 </div>
                 <div class="card-body" style="overflow-x:auto">
@@ -435,13 +435,13 @@
 
         $('#add_car').on('change', function () {
             let car_id = $('#add_car').val();
-            let license_plate = cars.filter(f => f.Car_No === car_id).map(m => m.License_Plate)[0];
+            let license_plate = cars.filter(f => f.car_id === car_id).map(m => m.license_plate)[0];
             $('#add_license_plate').val(license_plate);
         });
         async function GenerateCarOptions(cars) {
             var str = '<option value="" selected disabled>Select Car</option>';
             for (var i = 0; i < cars.length; i++) {
-                str += '<option value="' + cars[i].Car_No + '">' + cars[i].Car_No + '</option>';
+                str += '<option value="' + cars[i].car_id + '">' + cars[i].car_id + '</option>';
             }
             $('#add_car').empty();
             $('#add_car').append(str);
@@ -449,7 +449,7 @@
         async function GenerateUserOptions(users) {
             var str = '<option value="" selected disabled>Select</option>';
             for (var i = 0; i < users.length; i++) {
-                str += '<option value="' + users[i].name + '">' + users[i].name + '</option>';
+                str += '<option value="' + users[i].name_en + '">' + users[i].name_en + '</option>';
             }
             $('#update_user').empty();
             $('#update_user').append(str);

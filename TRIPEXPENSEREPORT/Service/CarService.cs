@@ -57,5 +57,144 @@ namespace TRIPEXPENSEREPORT.Service
             }
             return cars;
         }
+
+        public string Insert(CarModel car)
+        {
+            try
+            {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
+                string string_command = string.Format($@"
+                    INSERT INTO 
+                        Cars(car_id,
+                            license_plate,
+                            brand,
+                            fleet_card_no,
+                            balance
+                        )
+                        VALUES(@car_id,
+                            @license_plate,
+                            @brand,
+                            @fleet_card_no,
+                            @balance
+                        )");
+
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
+                {
+                    cmd.CommandType = CommandType.Text;
+
+                    cmd.Parameters.Add("@car_id", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@license_plate", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@brand", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@fleet_card_no", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@balance", SqlDbType.Float);
+
+                    cmd.Parameters["@car_id"].Value = car.car_id ?? (object)DBNull.Value;
+                    cmd.Parameters["@license_plate"].Value = car.license_plate ?? (object)DBNull.Value;
+                    cmd.Parameters["@brand"].Value = car.brand ?? (object)DBNull.Value;
+                    cmd.Parameters["@fleet_card_no"].Value = car.fleet_card_no ?? (object)DBNull.Value;
+                    cmd.Parameters["@balance"].Value = car.balance;
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
+            }
+            return "Success";
+        }
+        public string Update(CarModel car)
+        {
+            try
+            {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
+                string string_command = string.Format($@"
+                    UPDATE Cars SET
+                            license_plate = @license_plate,
+                            brand = @brand,
+                            fleet_card_no = @fleet_card_no,
+                            balance = @balance
+                        WHERE car_id = @car_id");
+
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
+                {
+                    cmd.CommandType = CommandType.Text;
+
+                    cmd.Parameters.Add("@car_id", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@license_plate", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@brand", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@fleet_card_no", SqlDbType.NVarChar);
+                    cmd.Parameters.Add("@balance", SqlDbType.Float);
+
+                    cmd.Parameters["@car_id"].Value = car.car_id ?? (object)DBNull.Value;
+                    cmd.Parameters["@license_plate"].Value = car.license_plate ?? (object)DBNull.Value;
+                    cmd.Parameters["@brand"].Value = car.brand ?? (object)DBNull.Value;
+                    cmd.Parameters["@fleet_card_no"].Value = car.fleet_card_no ?? (object)DBNull.Value;
+                    cmd.Parameters["@balance"].Value = car.balance;
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
+            }
+            return "Success";
+        }
+        public string Delete(string car)
+        {
+            try
+            {
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
+                string string_command = string.Format($@"
+                    DELETE FROM Cars WHERE car_id = @car_id");
+
+                using (SqlCommand cmd = new SqlCommand(string_command, con))
+                {
+                    cmd.CommandType = CommandType.Text;
+
+                    cmd.Parameters.Add("@car_id", SqlDbType.NVarChar);
+
+                    cmd.Parameters["@car_id"].Value = car ?? (object)DBNull.Value;
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            finally
+            {
+                if (con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
+            }
+            return "Success";
+        }
     }
 }

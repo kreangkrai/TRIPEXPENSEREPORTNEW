@@ -23,86 +23,136 @@ namespace TRIPEXPENSEREPORT.Service
                 {
                     con.Open();
                 }
-                string strCmd = string.Format($@"
-                                    SELECT '' AS car_id,
-                                           '' AS driver,
-                                           passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           distance,
-                                           speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           0 AS mileage,
-                                           0 AS cash,
-                                           0 AS fleetcard,
-                                           '' AS borrower,
-                                           'PUBLIC' AS mode
-                                    FROM [Public] 
-                                    WHERE passenger = @emp_id 
-                                      AND date >= @start AND date <= @stop 
-                                      AND status <> 'NA'
+                string strCmd = string.Format($@"WITH CombinedTrips AS (
 
-                                    UNION ALL
+                                            SELECT 
+                                                '' AS car_id,
+                                                '' AS driver,
+                                                passenger,
+                                                job_id,
+                                                trip,
+                                                CASE
+                                                    WHEN LEN(trip) = 14 AND ISNUMERIC(trip) = 1
+                                                    THEN TRY_CONVERT(datetime,
+                                                             SUBSTRING(trip, 1,4) + '-' +
+                                                             SUBSTRING(trip, 5,2) + '-' +
+                                                             SUBSTRING(trip, 7,2) + ' ' +
+                                                             SUBSTRING(trip, 9,2) + ':' +
+                                                             SUBSTRING(trip,11,2) + ':' +
+                                                             SUBSTRING(trip,13,2)
+                                                         )
+                                                    ELSE NULL
+                                                END AS trip_date,
+                                                date,
+                                                status,
+                                                distance,
+                                                speed,
+                                                latitude,
+                                                longitude,
+                                                accuracy,
+                                                location_mode,
+                                                location,
+                                                zipcode,
+                                                0 AS mileage,
+                                                0 AS cash,
+                                                0 AS fleetcard,
+                                                '' AS borrower,
+                                                'PUBLIC' AS mode
+                                            FROM [Public]
+                                            WHERE passenger = @emp_id
+                                              AND date >= @start
+                                              AND date <= @stop
+                                              AND status <> 'NA'
 
-                                    SELECT '' AS car_id,
-                                           driver,
-                                           passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           0 AS distance,
-                                           0 AS speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           0 AS mileage,
-                                           0 AS cash,
-                                           0 AS fleetcard,
-                                           '' AS borrower,
-                                           'PASSENGER PERSONAL' AS mode
-                                    FROM Passenger_Personal 
-                                    WHERE passenger = @emp_id 
-                                      AND date >= @start AND date <= @stop
-                                      AND status <> 'NA'
+                                            UNION ALL
 
-                                    UNION ALL
+                                            SELECT 
+                                                '' AS car_id,
+                                                driver,
+                                                passenger,
+                                                job_id,
+                                                trip,
+                                                CASE
+                                                    WHEN LEN(trip) = 14 AND ISNUMERIC(trip) = 1
+                                                    THEN TRY_CONVERT(datetime,
+                                                             SUBSTRING(trip, 1,4) + '-' +
+                                                             SUBSTRING(trip, 5,2) + '-' +
+                                                             SUBSTRING(trip, 7,2) + ' ' +
+                                                             SUBSTRING(trip, 9,2) + ':' +
+                                                             SUBSTRING(trip,11,2) + ':' +
+                                                             SUBSTRING(trip,13,2)
+                                                         )
+                                                    ELSE NULL
+                                                END AS trip_date,
+                                                date,
+                                                status,
+                                                0 AS distance,
+                                                0 AS speed,
+                                                latitude,
+                                                longitude,
+                                                accuracy,
+                                                location_mode,
+                                                location,
+                                                zipcode,
+                                                0 AS mileage,
+                                                0 AS cash,
+                                                0 AS fleetcard,
+                                                '' AS borrower,
+                                                'PASSENGER PERSONAL' AS mode
+                                            FROM Passenger_Personal
+                                            WHERE passenger = @emp_id
+                                              AND date >= @start
+                                              AND date <= @stop
+                                              AND status <> 'NA'
 
-                                    SELECT car_id,
-                                           driver,
-                                           passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           0 AS distance,
-                                           0 AS speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           0 AS mileage,
-                                           0 AS cash,
-                                           0 AS fleetcard,
-                                           '' AS borrower,
-                                           'PASSENGER COMPANY' AS mode
-                                    FROM Passenger_Company 
-                                    WHERE passenger = @emp_id 
-                                      AND date >= @start AND date <= @stop  
-                                      AND status <> 'NA';
-                                    ");
+                                            UNION ALL
+
+                                            SELECT 
+                                                car_id,
+                                                driver,
+                                                passenger,
+                                                job_id,
+                                                trip,
+		                                         CASE
+                                                    WHEN LEN(trip) = 14 AND ISNUMERIC(trip) = 1
+                                                    THEN TRY_CONVERT(datetime,
+                                                             SUBSTRING(trip, 1,4) + '-' +
+                                                             SUBSTRING(trip, 5,2) + '-' +
+                                                             SUBSTRING(trip, 7,2) + ' ' +
+                                                             SUBSTRING(trip, 9,2) + ':' +
+                                                             SUBSTRING(trip,11,2) + ':' +
+                                                             SUBSTRING(trip,13,2)
+                                                         )
+                                                    ELSE NULL
+                                                END AS trip_date,  
+                                                date,
+                                                status,
+                                                0 AS distance,
+                                                0 AS speed,
+                                                latitude,
+                                                longitude,
+                                                accuracy,
+                                                location_mode,
+                                                location,
+                                                zipcode,
+                                                0 AS mileage,
+                                                0 AS cash,
+                                                0 AS fleetcard,
+                                                '' AS borrower,
+                                                'PASSENGER COMPANY' AS mode
+                                            FROM Passenger_Company
+                                            WHERE passenger = @emp_id
+                                              AND date >= @start
+                                              AND date <= @stop
+                                              AND status <> 'NA'
+                                        )
+                                        SELECT *
+                                        FROM CombinedTrips
+                                        WHERE trip_date >= @start
+ 
+                                          AND trip_date <= @stop
+
+                                        ORDER BY trip_date;");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@emp_id", emp_id);
                 command.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd"));
@@ -119,6 +169,7 @@ namespace TRIPEXPENSEREPORT.Service
                             passenger = dr["passenger"].ToString(),
                             job_id = dr["job_id"].ToString(),
                             trip = dr["trip"].ToString(),
+                            trip_date = dr["trip_date"] != DBNull.Value ? Convert.ToDateTime(dr["trip_date"].ToString()) : DateTime.MinValue,
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
                             status = dr["status"].ToString(),
                             distance = dr["distance"] != DBNull.Value ? Convert.ToDouble(dr["distance"].ToString()) : 0,
@@ -159,30 +210,49 @@ namespace TRIPEXPENSEREPORT.Service
                 {
                     con.Open();
                 }
-                string strCmd = string.Format($@"SELECT '' AS car_id,
-                                           driver,
-                                           '' AS passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           distance,
-                                           speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           mileage,
-                                           cash,
-                                           0 AS fleetcard,
-                                           '' AS borrower,
-                                           'PERSONAL' AS mode
-                                    FROM Personal 
-                                    WHERE driver = @emp_id 
-                                      AND date >= @start AND date <= @stop 
-                                      AND status <> 'NA';");
+                string strCmd = string.Format($@"WITH PersonalFiltered AS (
+                                                        SELECT 
+                                                            '' AS car_id,
+                                                            driver,
+                                                            '' AS passenger,
+                                                            job_id,
+                                                            trip,
+                                                            CASE
+                                                                WHEN LEN(trip) = 14 
+                                                                     AND ISNUMERIC(trip) = 1
+                                                                THEN TRY_CONVERT(datetime,
+                                                                         SUBSTRING(trip, 1,4) + '-' +
+                                                                         SUBSTRING(trip, 5,2) + '-' +
+                                                                         SUBSTRING(trip, 7,2) + ' ' +
+                                                                         SUBSTRING(trip, 9,2) + ':' +
+                                                                         SUBSTRING(trip,11,2) + ':' +
+                                                                         SUBSTRING(trip,13,2)
+                                                                     )
+                                                                ELSE NULL
+                                                            END AS trip_date,
+                                                            date,
+                                                            status,
+                                                            distance,
+                                                            speed,
+                                                            latitude,
+                                                            longitude,
+                                                            accuracy,
+                                                            location_mode,
+                                                            location,
+                                                            zipcode,
+                                                            mileage,
+                                                            cash,
+                                                            0 AS fleetcard,
+                                                            '' AS borrower,
+                                                            'PERSONAL' AS mode
+                                                        FROM Personal
+                                                        WHERE driver = @emp_id
+                                                          AND status <> 'NA'
+                                                    )
+                                                    SELECT *
+                                                    FROM PersonalFiltered
+                                                    WHERE trip_date >= @start 
+                                                      AND trip_date <= @stop;");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@emp_id", emp_id);
                 command.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd"));
@@ -199,6 +269,7 @@ namespace TRIPEXPENSEREPORT.Service
                             passenger = dr["passenger"].ToString(),
                             job_id = dr["job_id"].ToString(),
                             trip = dr["trip"].ToString(),
+                            trip_date = dr["trip_date"] != DBNull.Value ? Convert.ToDateTime(dr["trip_date"].ToString()) : DateTime.MinValue,
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
                             status = dr["status"].ToString(),
                             distance = dr["distance"] != DBNull.Value ? Convert.ToDouble(dr["distance"].ToString()) : 0,
@@ -239,30 +310,52 @@ namespace TRIPEXPENSEREPORT.Service
                 {
                     con.Open();
                 }
-                string strCmd = string.Format($@" SELECT car_id,
-                                           driver,
-                                           '' AS passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           distance,
-                                           speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           mileage,
-                                           cash,
-                                           fleetcard,
-                                           borrower,
-                                           'COMPANY' AS mode
-                                    FROM Company 
-                                    WHERE  driver = @emp_id 
-                                      AND date >= @start AND date <= @stop
-                                      AND status <> 'NA';");
+                string strCmd = string.Format($@"WITH CompanyFiltered AS (
+                                            SELECT 
+                                                car_id,
+                                                driver,
+                                                '' AS passenger,
+                                                job_id,
+                                                trip,
+                                                CASE
+                                                    WHEN LEN(trip) = 14 
+                                                         AND ISNUMERIC(trip) = 1
+                                                    THEN TRY_CONVERT(datetime,
+                                                             SUBSTRING(trip, 1,4) + '-' +
+                                                             SUBSTRING(trip, 5,2) + '-' +
+                                                             SUBSTRING(trip, 7,2) + ' ' +
+                                                             SUBSTRING(trip, 9,2) + ':' +
+                                                             SUBSTRING(trip,11,2) + ':' +
+                                                             SUBSTRING(trip,13,2)
+                                                         )
+                                                    ELSE NULL
+                                                END AS trip_date,
+                                                date,
+                                                status,
+                                                distance,
+                                                speed,
+                                                latitude,
+                                                longitude,
+                                                accuracy,
+                                                location_mode,
+                                                location,
+                                                zipcode,
+                                                mileage,
+                                                cash,
+                                                fleetcard,
+                                                borrower,
+                                                'COMPANY' AS mode
+                                            FROM Company
+                                            WHERE driver = @emp_id
+                                              AND date >= @start 
+                                              AND date <= @stop
+                                              AND status <> 'NA'
+                                        )
+                                        SELECT *
+                                        FROM CompanyFiltered
+                                        WHERE trip_date >= @start 
+                                          AND trip_date <= @stop
+                                        ORDER BY trip_date;");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@emp_id", emp_id);
                 command.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd"));
@@ -279,6 +372,7 @@ namespace TRIPEXPENSEREPORT.Service
                             passenger = dr["passenger"].ToString(),
                             job_id = dr["job_id"].ToString(),
                             trip = dr["trip"].ToString(),
+                            trip_date = dr["trip_date"] != DBNull.Value ? Convert.ToDateTime(dr["trip_date"].ToString()) : DateTime.MinValue,
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
                             status = dr["status"].ToString(),
                             distance = dr["distance"] != DBNull.Value ? Convert.ToDouble(dr["distance"].ToString()) : 0,
@@ -320,29 +414,51 @@ namespace TRIPEXPENSEREPORT.Service
                 {
                     con.Open();
                 }
-                string strCmd = string.Format($@" SELECT car_id,
-                                           driver,
-                                           '' AS passenger,
-                                           job_id,
-                                           trip,
-                                           date,
-                                           status,
-                                           distance,
-                                           speed,
-                                           latitude,
-                                           longitude,
-                                           accuracy,
-                                           location_mode,
-                                           location,
-                                           zipcode,
-                                           mileage,
-                                           cash,
-                                           fleetcard,
-                                           borrower,
-                                           'COMPANY' AS mode
-                                    FROM Company 
-                                    WHERE date >= @start AND date <= @stop 
-                                      AND status <> 'NA';");
+                string strCmd = string.Format($@"WITH CompanyFiltered AS (
+                                                SELECT 
+                                                    car_id,
+                                                    driver,
+                                                    '' AS passenger,
+                                                    job_id,
+                                                    trip,
+                                                    CASE
+                                                        WHEN LEN(trip) = 14 
+                                                             AND ISNUMERIC(trip) = 1
+                                                        THEN TRY_CONVERT(datetime,
+                                                                 SUBSTRING(trip, 1,4) + '-' +
+                                                                 SUBSTRING(trip, 5,2) + '-' +
+                                                                 SUBSTRING(trip, 7,2) + ' ' +
+                                                                 SUBSTRING(trip, 9,2) + ':' +
+                                                                 SUBSTRING(trip,11,2) + ':' +
+                                                                 SUBSTRING(trip,13,2)
+                                                             )
+                                                        ELSE NULL
+                                                    END AS trip_date,
+                                                    date,
+                                                    status,
+                                                    distance,
+                                                    speed,
+                                                    latitude,
+                                                    longitude,
+                                                    accuracy,
+                                                    location_mode,
+                                                    location,
+                                                    zipcode,
+                                                    mileage,
+                                                    cash,
+                                                    fleetcard,
+                                                    borrower,
+                                                    'COMPANY' AS mode
+                                                FROM Company
+                                                WHERE date >= @start 
+                                                  AND date <= @stop
+                                                  AND status <> 'NA'
+                                            )
+                                            SELECT *
+                                            FROM CompanyFiltered
+                                            WHERE trip_date >= @start 
+                                              AND trip_date <= @stop
+                                            ORDER BY trip_date;");
                 SqlCommand command = new SqlCommand(strCmd, con);
                 command.Parameters.AddWithValue("@start", start.ToString("yyyy-MM-dd"));
                 command.Parameters.AddWithValue("@stop", end.ToString("yyyy-MM-dd"));
@@ -358,6 +474,7 @@ namespace TRIPEXPENSEREPORT.Service
                             passenger = dr["passenger"].ToString(),
                             job_id = dr["job_id"].ToString(),
                             trip = dr["trip"].ToString(),
+                            trip_date = dr["trip_date"] != DBNull.Value ? Convert.ToDateTime(dr["trip_date"].ToString()) : DateTime.MinValue,
                             date = dr["date"] != DBNull.Value ? Convert.ToDateTime(dr["date"].ToString()) : DateTime.MinValue,
                             status = dr["status"].ToString(),
                             distance = dr["distance"] != DBNull.Value ? Convert.ToDouble(dr["distance"].ToString()) : 0,

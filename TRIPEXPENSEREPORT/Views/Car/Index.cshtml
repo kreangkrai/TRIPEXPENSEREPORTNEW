@@ -1,0 +1,364 @@
+﻿@{
+    ViewData["Title"] = "จัดการรถยนต์";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #table_car {
+        width: 100%;
+        height: 640px;
+        border-radius: 10px;
+        overflow: auto;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .jspreadsheet {
+        font-family: 'Kanit', 'Segoe UI', sans-serif !important;
+        font-size: 15px;
+    }
+
+        .jspreadsheet thead tr th {
+            background: linear-gradient(90deg, #1e88e5, #1565c0) !important;
+            color: white !important;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 2px solid #0d47a1;
+        }
+
+        .jspreadsheet tbody tr:hover {
+            background-color: #e3f2fd !important;
+        }
+
+    .delete-icon {
+        cursor: pointer;
+        color: #e53935;
+        font-size: 24px;
+        transition: all 0.25s ease;
+    }
+
+        .delete-icon:hover {
+            color: #c62828;
+            transform: scale(1.25);
+        }
+
+    .card-primary .card-header {
+        background: linear-gradient(90deg, #1976d2, #0d47a1);
+        border-radius: 10px 10px 0 0;
+    }
+
+    .btn-create {
+        background: linear-gradient(45deg, #43a047, #2e7d32);
+        border: none;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67,160,71,0.4);
+        }
+
+    /* Modal สวยๆ */
+    .modal-content {
+        border-radius: 14px;
+        border: none;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, #1976d2, #0d47a1);
+        color: white;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+</style>
+
+<div class="container">
+    <div class="row p-3 align-items-center">
+        <div class="col-xl-3 pb-3">
+            <button id="btn_create" type="button" class="btn btn-create form-control elevation-2" style="color:white">
+                <i class="fas fa-plus-circle mr-2"></i> เพิ่มรถใหม่
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-primary shadow-lg border-0">
+                <div class="card-header">
+                    <h3 class="card-title font-weight-bold">จัดการข้อมูลรถยนต์</h3>
+                </div>
+                <div class="card-body p-0" style="overflow-x:auto;overflow-y:auto">
+                    <div id="table_car"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal เพิ่ม/แก้ไขรถ -->
+<div class="modal fade" id="modalCar" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalCarTitle" class="modal-title">เพิ่มรถใหม่</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formCar">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="car_id">รหัสรถ <span class="text-danger">*</span></label>
+                                <input id="car_id" type="text" class="form-control" required/>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="license_plate">ทะเบียนรถ <span class="text-danger">*</span></label>
+                                <input id="license_plate" type="text" class="form-control" required/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="brand">ยี่ห้อ / รุ่น <span class="text-danger">*</span></label>
+                                <input id="brand" type="text" class="form-control" required/>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="fleet_card_no">เลขบัตร Fleet Card</label>
+                                <input id="fleet_card_no" type="text" class="form-control"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="balance">ยอดเงินคงเหลือ (บาท)</label>
+                                <input id="balance" type="number" class="form-control" min="0" step="1" value="0.00" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">ยกเลิก</button>
+                <button id="btnCarSave" type="button" class="btn btn-success px-5">
+                    <i class="fas fa-save mr-2"></i> บันทึก
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        let cars = [];
+        let table = null;
+
+        $(document).ready(async function () {
+            cars = await GetCars();
+            GenerateTableCar(cars);
+
+            $('#btn_create').click(function () {
+                $('#modalCarTitle').text('เพิ่มรถใหม่');
+                $('#formCar')[0].reset();
+                $('#car_id').val('');
+                $('#modalCar').modal('show');
+            });
+
+            $('#btnCarSave').click(async function () {
+                const car = {
+                    car_id: $('#car_id').val(),
+                    license_plate: $('#license_plate').val().trim(),
+                    brand: $('#brand').val().trim(),
+                    fleet_card_no: $('#fleet_card_no').val().trim(),
+                    balance: parseFloat($('#balance').val()) || 0
+                };
+
+                if (!car.car_id || !car.license_plate) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'กรุณากรอกข้อมูลให้ครบ',
+                        text: 'รหัสรถ, ทะเบียนรถ และยี่ห้อ/รุ่น ห้ามว่าง',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+                
+                await InsertCars(car);
+                
+
+                $('#modalCar').modal('hide');
+                cars = await GetCars();
+                GenerateTableCar(cars);
+            });
+        });
+
+        async function GetCars() {
+            let datas = [];
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetCars", "Car")',
+                success: function (response) {
+                    datas = response;
+                },
+                error: function () {
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลรถได้', 'error');
+                }
+            });
+            return datas;
+        }
+
+        async function UpdateCars(car) {
+            const str = JSON.stringify(car);
+            await $.ajax({
+                type: "PUT",
+                url: '@Url.Action("Update", "Car")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { str },
+                success: function (response) {
+                    if (response !== "Success") {
+                        Swal.fire('แจ้งเตือน', response, 'warning');
+                    }
+                }
+            });
+        }
+
+        async function InsertCars(car) {
+            const str = JSON.stringify(car);
+            await $.ajax({
+                type: "POST",
+                url: '@Url.Action("Insert", "Car")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { str },
+                success: function (response) {
+                    if (response !== "Success") {
+                        Swal.fire('แจ้งเตือน', response, 'warning');
+                    }
+                }
+            });
+        }
+
+        async function DeleteCars(car) {
+            const result = await Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: "คุณต้องการลบรถคันนี้จริงหรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ตกลง',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (!result.isConfirmed) return;
+
+            await $.ajax({
+                type: "DELETE",
+                url: '@Url.Action("Delete", "Car")',
+                data: { car },
+                success: function (response) {
+                    if (response === "Success") {
+                        cars = cars.filter(c => c.car_id !== car);
+                        GenerateTableCar(cars);
+                        Swal.fire('ลบสำเร็จ!', 'รถถูกลบเรียบร้อยแล้ว', 'success');
+                    } else {
+                        Swal.fire('เกิดข้อผิดพลาด', response, 'error');
+                    }
+                }
+            });
+        }
+
+        const DeleteCarColumn = {
+            createCell: function (cell, value, x, y, instance) {
+                const icon = document.createElement('i');
+                icon.className = 'material-icons delete-icon';
+                icon.innerHTML = 'delete';
+                icon.title = 'ลบรถคันนี้';
+                icon.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const car_id = instance.getValueFromCoords(0, y);
+                    DeleteCars(car_id);
+                });
+                cell.appendChild(icon);
+                cell.style.textAlign = 'center';
+                cell.style.verticalAlign = 'middle';
+            },
+            openEditor: () => false,
+            updateCell: () => ''
+        };
+
+        function GenerateTableCar(data) {
+            $('#table_car').empty();
+
+            table = jspreadsheet(document.getElementById('table_car'), {
+                worksheets: [{
+                    data: data,
+                    columns: [
+                        { type: 'text', title: 'รหัสรถ', width: 110, readOnly: true },
+                        { type: 'text', title: 'ทะเบียนรถ', width: 160 },
+                        { type: 'text', title: 'ยี่ห้อ/รุ่น', width: 240 },
+                        { type: 'text', title: 'Fleet Card', width: 180 },
+                        {
+                            type: 'numeric',
+                            title: 'ยอดคงเหลือ',
+                            width: 140,
+                            mask: '#,##',
+                            decimal: '.'
+                        },
+                        {
+                            type: DeleteCarColumn,
+                            title: 'ลบ',
+                            width: 70,
+                            readOnly: true,
+                            align: 'center'
+                        }
+                    ],
+                    minDimensions: [6, Math.max(10, data.length || 0)],
+                }],
+                toolbar: false,
+                tabs: false,
+                onchange: async function (worksheet, cell, x, y, newValue) {
+                    const rowData = worksheet.getRowData(y);
+                    const car = {
+                        car_id: rowData[0],
+                        license_plate: rowData[1],
+                        brand: rowData[2],
+                        fleet_card_no: rowData[3],
+                        balance: rowData[4]
+                    };
+                    await UpdateCars(car);
+                },
+                ondoubleclick: function (worksheet, col, row) {
+                    if (col === 0 || col === 5) return;
+                    const data = worksheet.getRowData(row);
+                    $('#modalCarTitle').text('แก้ไขข้อมูลรถ');
+                    $('#car_id').val(data[0]);
+                    $('#license_plate').val(data[1]);
+                    $('#brand').val(data[2]);
+                    $('#fleet_card_no').val(data[3]);
+                    $('#balance').val(data[4]);
+                    $('#modalCar').modal('show');
+                }
+            });
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+}

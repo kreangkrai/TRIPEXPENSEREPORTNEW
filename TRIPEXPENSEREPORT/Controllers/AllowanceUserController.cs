@@ -353,13 +353,13 @@ namespace TRIPEXPENSEREPORT.Controllers
         {
             var result = new List<PassengerModel>();
 
-            var grouped = dataList.GroupBy(d => new { d.date.Date, d.trip });
+            var grouped = dataList.GroupBy(d => new { date = d.trip_date.Date, d.trip });
 
             List<AreaModel> areas = Area.GetAreas();
 
             foreach (var tripGroup in grouped)
             {
-                var date = tripGroup.FirstOrDefault().date;
+                var date = tripGroup.Key.date;
                 var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
                 List<string> zipcodes = tripGroup.Select(s => s.zipcode).ToList();
 
@@ -432,7 +432,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                 }
                 string loc = string.Join(",", has_loc.ToArray());
 
-                string code = $"{start.passenger}{start.date.ToString("yyyyMMddHHmmss")}";
+                string code = $"{start.passenger}{start.trip_date.ToString("yyyyMMddHHmmss")}";
                 var company = new PassengerModel
                 {
                     code = code,

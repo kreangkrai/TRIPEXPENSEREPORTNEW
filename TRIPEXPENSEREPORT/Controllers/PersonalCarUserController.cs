@@ -147,9 +147,9 @@ namespace TRIPEXPENSEREPORT.Controllers
             int last = DateTime.DaysInMonth(now.Year, now.Month);
             for (DateTime d = new DateTime (now.Year,now.Month,1); d<= new DateTime (now.Year,now.Month,last); d= d.AddDays(1))
             {
-                if (list.Any(a=>a.date.Date == d.Date))
+                if (list.Any(a=>a.trip_date.Date == d.Date))
                 {
-                    List<DataModel> data =list.Where(a=>a.date.Date==d.Date).ToList();
+                    List<DataModel> data =list.Where(a=>a.trip_date.Date==d.Date).ToList();
                     datas.AddRange(data);
                 }
                 else
@@ -159,6 +159,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                        new DataModel()
                        {
                             date = d,
+                            trip_date = d,
                             driver = "",
                             trip = "",
                             passenger = "",
@@ -252,88 +253,88 @@ namespace TRIPEXPENSEREPORT.Controllers
             }
         }
 
-        public async Task<Dictionary<DateTime, List<PersonalModel>>> ConvertToDictPersonalModels(List<DataModel> dataList)
-        {
-            var result = new Dictionary<DateTime, List<PersonalModel>>();
+        //public async Task<Dictionary<DateTime, List<PersonalModel>>> ConvertToDictPersonalModels(List<DataModel> dataList)
+        //{
+        //    var result = new Dictionary<DateTime, List<PersonalModel>>();
 
-            var grouped = dataList.GroupBy(d => new { d.date.Date, d.trip });
+        //    var grouped = dataList.GroupBy(d => new {  d.trip, date = d.trip_date.Date });
 
-            foreach (var tripGroup in grouped)
-            {
-                var date = tripGroup.Key.Date;
-                var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
+        //    foreach (var tripGroup in grouped)
+        //    {
+        //        var date = tripGroup.Key.date;
+        //        var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
 
-                var start = items[0];
-                var stop = items[items.Count - 1];
+        //        var start = items[0];
+        //        var stop = items[items.Count - 1];
 
-                var pair_latlan = tripGroup.Zip(tripGroup.Skip(1), (a, b) => new { first = a, second = b }).ToList();
-                double sum_dist = 0;
-                foreach (var latlng in pair_latlan)
-                {
-                    string origin = $"{latlng.first.latitude.ToString()},{latlng.first.longitude.ToString()}";
-                    string destination = $"{latlng.second.latitude.ToString()},{latlng.second.longitude.ToString()}";
-                    //sum_dist += await GetDistanceKmAsync(origin, destination);
-                }
-                double distanceKm = sum_dist;
-                int autoKm = (int)Math.Round(distanceKm);
+        //        var pair_latlan = tripGroup.Zip(tripGroup.Skip(1), (a, b) => new { first = a, second = b }).ToList();
+        //        double sum_dist = 0;
+        //        foreach (var latlng in pair_latlan)
+        //        {
+        //            string origin = $"{latlng.first.latitude.ToString()},{latlng.first.longitude.ToString()}";
+        //            string destination = $"{latlng.second.latitude.ToString()},{latlng.second.longitude.ToString()}";
+        //            //sum_dist += await GetDistanceKmAsync(origin, destination);
+        //        }
+        //        double distanceKm = sum_dist;
+        //        int autoKm = (int)Math.Round(distanceKm);
 
-                HashSet<string> has_loc = new HashSet<string>();
-                foreach (var item in items)
-                {
-                    has_loc.Add(item.location);
-                }
-                string loc = string.Join(",", has_loc.ToArray());
-                string code = "";
-                if (start.driver != "")
-                {
-                    code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
-                }
+        //        HashSet<string> has_loc = new HashSet<string>();
+        //        foreach (var item in items)
+        //        {
+        //            has_loc.Add(item.location);
+        //        }
+        //        string loc = string.Join(",", has_loc.ToArray());
+        //        string code = "";
+        //        if (start.driver != "")
+        //        {
+        //            code = $"{start.driver}{start.trip_date.ToString("yyyyMMddHHmmss")}";
+        //        }
 
-                var personal = new PersonalModel
-                {
-                    code = code,
-                    date = date,
-                    driver = start.driver,
-                    job = start.job_id,
-                    location = loc,
-                    time_start = start.date.TimeOfDay,
-                    time_stop = stop.date.TimeOfDay,
-                    auto_km = autoKm,
-                    km = stop.mileage - start.mileage,
-                    description = "",
-                    status = start.date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Pending" : "",
-                    last_date = DateTime.Now,
-                    cash = items.Sum(s => s.cash),
-                    ctbo = 0,
-                    exp = 0,
-                    pt = 0,
-                    mileage_start = start.mileage,
-                    mileage_stop = stop.mileage,
-                    program_km = (int)Math.Round(stop.distance, 0),
-                    approver = "",
-                    zipcode = ""
-                };
+        //        var personal = new PersonalModel
+        //        {
+        //            code = code,
+        //            date = date,
+        //            driver = start.driver,
+        //            job = start.job_id,
+        //            location = loc,
+        //            time_start = start.trip_date.TimeOfDay,
+        //            time_stop = stop.trip_date.TimeOfDay,
+        //            auto_km = autoKm,
+        //            km = stop.mileage - start.mileage,
+        //            description = "",
+        //            status = start.trip_date.TimeOfDay != new TimeSpan(0, 0, 0) ? "Pending" : "",
+        //            last_date = DateTime.Now,
+        //            cash = items.Sum(s => s.cash),
+        //            ctbo = 0,
+        //            exp = 0,
+        //            pt = 0,
+        //            mileage_start = start.mileage,
+        //            mileage_stop = stop.mileage,
+        //            program_km = (int)Math.Round(stop.distance, 0),
+        //            approver = "",
+        //            zipcode = ""
+        //        };
 
-                if (!result.ContainsKey(date))
-                    result[date] = new List<PersonalModel>();
+        //        if (!result.ContainsKey(date))
+        //            result[date] = new List<PersonalModel>();
 
-                result[date].Add(personal);
-            }
+        //        result[date].Add(personal);
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         public async Task<List<PersonalModel>> ConvertToPersonalModels(List<DataModel> dataList)
         {
             var result = new List<PersonalModel>();
 
-            var grouped = dataList.GroupBy(d => new { d.date.Date, d.trip });
+            var grouped = dataList.GroupBy(d => new { d.trip, date = d.trip_date.Date });
 
             List<AreaModel> areas = Area.GetAreas();
 
             foreach (var tripGroup in grouped)
             {
-                var date = tripGroup.Key.Date;
+                var date = tripGroup.Key.date;
                 var items = tripGroup.OrderBy(i => i.status == "START" ? 0 : 1).ToList();
                 List<string> zipcodes = tripGroup.Select(s => s.zipcode).ToList();
 
@@ -429,7 +430,7 @@ namespace TRIPEXPENSEREPORT.Controllers
                 string code = "";
                 if (start.driver != "")
                 {
-                    code = $"{start.driver}{start.date.ToString("yyyyMMddHHmmss")}";
+                    code = $"{start.driver}{start.trip_date.ToString("yyyyMMddHHmmss")}";
                 }
                 var personal = new PersonalModel
                 {

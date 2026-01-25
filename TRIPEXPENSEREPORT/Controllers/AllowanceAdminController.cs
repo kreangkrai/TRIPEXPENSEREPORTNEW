@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Globalization;
 using TRIPEXPENSEREPORT.CTLInterfaces;
@@ -11,6 +12,7 @@ namespace TRIPEXPENSEREPORT.Controllers
 {
     public class AllowanceAdminController : Controller
     {
+        private readonly string mapkit;
         private IEmployee Employees;
         private CTLInterfaces.IEmployee CTLEmployees;
         private ITrip Trip;
@@ -22,7 +24,7 @@ namespace TRIPEXPENSEREPORT.Controllers
         private IProvince Province;
         public AllowanceAdminController(IEmployee employees, CTLInterfaces.IEmployee ctlEmployees,
             ITrip trip, IArea area, IPersonal personal,
-            ICompany company, IAllowance allowance, CTLInterfaces.IHoliday holiday, IProvince province)
+            ICompany company, IAllowance allowance, CTLInterfaces.IHoliday holiday, IProvince province, IOptions<AppSettings> options)
         {
             Employees = employees;
             CTLEmployees = ctlEmployees;
@@ -33,6 +35,7 @@ namespace TRIPEXPENSEREPORT.Controllers
             Allowance = allowance;
             Holiday = holiday;
             Province = province;
+            mapkit = options.Value.Mapkit;
         }
         public IActionResult Index()
         {
@@ -51,13 +54,81 @@ namespace TRIPEXPENSEREPORT.Controllers
                 CTLModels.EmployeeModel emp = emps.Where(w => w.emp_id == emp_id).FirstOrDefault();
 
                 ViewBag.Employee = emp;
-
+                ViewBag.mapkit = mapkit;
                 return View(employee);
             }
             else
             {
                 return RedirectToAction("Index", "Account");
             }
+        }
+
+        [HttpGet]
+        public IActionResult GetALLRoute(string emp_id,string date)
+        {
+            DateTime start = Convert.ToDateTime(date);
+            DateTime stop = start.AddDays(1);
+
+            List<CTLModels.EmployeeModel> emps = CTLEmployees.GetEmployees();
+
+            List<DataModel> routes = Trip.GetAllRouteByEMPID(emp_id,start,stop);
+
+            var _routes = routes.Select(k => new
+            {
+                date = k.date,
+                trip = k.trip,
+                trip_date = k.trip_date,
+                job_id = k.job_id,
+                car_id = k.car_id,
+                driver = k.driver,
+                driver_name = k.driver != "" ? emps.Where(w => w.emp_id == k.driver).FirstOrDefault().name_en : "",
+                passenger = k.passenger,
+                passenger_name = k.passenger != "" ? emps.Where(w => w.emp_id == k.passenger).FirstOrDefault().name_en : "",
+                location = k.location,
+                location_mode = k.location_mode,
+                status = k.status,
+                distance = k.distance,
+                zipcode = k.zipcode,
+                latitude = k.latitude,
+                longitude = k.longitude,
+                mileage = k.mileage,
+                speed = k.speed,
+                fleetcard = k.fleetcard,
+                cash = k.cash,
+                mode = k.mode,
+                borrower = k.borrower,
+                borrower_name = k.borrower != "" ? emps.Where(w => w.emp_id == k.borrower).FirstOrDefault().name_en : "",
+
+            }).OrderBy(x => x.date)
+              .ToList();
+
+            var locations = routes
+    .Where(w => w.status != "NA")
+    .OrderBy(s => s.date)
+    .Select((s, index) => new { s, index })
+    .GroupBy(x => new { x.s.trip })
+    .SelectMany(g => g.Select((x, idx) => new LocationModel
+    {
+        car = x.s.car_id,
+        date = x.s.date,
+        trip = x.s.trip,
+        driver = x.s.driver != "" ? emps.Where(w => w.emp_id == x.s.driver).FirstOrDefault().name_en : "",
+        passenger = x.s.passenger != "" ? emps.Where(w => w.emp_id == x.s.passenger).FirstOrDefault().name_en : "",
+        status = x.s.status,
+        location = x.s.location,
+        time = x.s.date.TimeOfDay,
+        latitude = x.s.latitude,
+        longitude = x.s.longitude,
+        mode = x.s.mode,
+        duration = idx == 0
+                    ? 0
+                    : (int)(x.s.date - g.ElementAt(idx - 1).s.date).TotalMinutes
+    })).ToList();
+
+            List<string> trips = routes.GroupBy(g => g.trip).Select(s => s.FirstOrDefault().trip).ToList();
+
+            var data = new { routes = _routes, locations = locations, trips = trips };
+            return Json(data);
         }
 
         [HttpGet]

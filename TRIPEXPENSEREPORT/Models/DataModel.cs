@@ -50,4 +50,20 @@
         public string borrower { get; set; }
         public string mode { get; set; }
     }
+    public class LocationModel
+    {
+
+        public string car { get; set; }
+        public string driver { get; set; }
+        public string passenger { get; set; }
+        public string trip { get; set; }
+        public DateTime date { get; set; }
+        public string location { get; set; }
+        public TimeSpan time { get; set; }
+        public string status { get; set; }
+        public int duration { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
+        public string mode { get; set; }
+    }
 }

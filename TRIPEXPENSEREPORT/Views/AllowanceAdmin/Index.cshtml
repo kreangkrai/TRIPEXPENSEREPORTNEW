@@ -1,6 +1,7 @@
 ﻿@model TRIPEXPENSEREPORT.Models.EmployeeModel
 @{
     ViewData["Title"] = "TE : เบิกเงิน(แอดมิน)";
+    string mapkit = ViewBag.mapkit;
 }
 
 <style>
@@ -54,6 +55,72 @@
             border-color: transparent transparent #1e88e5 transparent;
             z-index: 100;
         }
+
+    .landmark {
+        width: 250px;
+        padding: 7px 0 0 0;
+        background: rgba(247, 247, 247, 0.75);
+        border-radius: 5px;
+        box-shadow: 10px 10px 50px rgba(0, 0, 0, 0.29);
+        font-family: Helvetica, Arial, sans-serif;
+        -webkit-transform-origin: 0 10px;
+        transform-origin: 0 10px;
+    }
+
+        .landmark h1 {
+            margin-top: 0;
+            padding: 5px 15px;
+            background: #2aaef5;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        .landmark section {
+            padding: 0 15px 5px;
+            font-size: 14px;
+        }
+
+            .landmark section p {
+                margin: 5px 0;
+            }
+
+        .landmark:after {
+            content: "";
+            position: absolute;
+            top: 7px;
+            left: -13px;
+            width: 0;
+            height: 0;
+            margin-bottom: -13px;
+            border-right: 13px solid #2aaef5;
+            border-top: 13px solid rgba(0, 0, 0, 0);
+            border-bottom: 13px solid rgba(0, 0, 0, 0);
+        }
+
+    @@-webkit-keyframes scale-and-fadein {
+        0% {
+            -webkit-transform: scale(0.2);
+            opacity: 0;
+        }
+
+        100% {
+            -webkit-transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes scale-and-fadein {
+        0% {
+            transform: scale(0.2);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
 </style>
 
 <div class="container-fluid">
@@ -99,6 +166,7 @@
                 <table id="table_allowance" class="table table-bordered ">
                     <thead class="bg-primary text-white align-content-center text-center">
                         <tr>
+                            <th style="width: 60px; text-align: center;"></th>
                             <th>วันที่</th>
                             <th>เวลาเริ่มต้น</th>
                             <th>เวลาสิ้นสุด</th>
@@ -169,13 +237,95 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="LocationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><b>สถานที่</b></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="col-xl-12">
+                        <table id="table_location" class="table compact table-sm table-hover w-100">
+                            <thead style="text-align: center; background-color: #034694; color: white; border-color: greenyellow; border-width: 2px; border: solid">
+                                <tr>
+                                    <th>วันที่</th>
+                                    <th>เวลา</th>
+                                    <th>Trip</th>
+                                    <th>รถยนต์</th>
+                                    <th>ผู้ขับ</th>
+                                    <th>ผู้โดยสาร</th>
+                                    <th>สถานะ</th>
+                                    <th>สถานที่</th>
+                                    <th>ระยะเวลา(นาที)</th>
+                                    <th>โหมด</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="col-6 col-xl-6">
+                        <input type="button" id="btn_map" class="btn btn-primary" value="ดูแผนที่" />
+                    </div>
+                    <div class="col-6 col-xl-6">
+                        <input type="button" class="btn btn-secondary" data-dismiss="modal" value="Close">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="ShowMapModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><b>เส้นทาง</b></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row m-0">
+                        <div class="col-md-12 col-xl-12">
+                            <div>
+                                <div id="showmap" style="width:100%;height:600px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div>
+                    <select id="nametrip" class="form-control" style="align-items:flex-end">
+                    </select>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 <partial name="ModalSpin" />
 @section Scripts {
+    <script async defer src="https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.js"></script>
     <script>
         let employees = [];
         let holidays = [];
         var table_allowance;
         let originalData = [];
+        let routes = [];
+        let trips = [];
+        let locations = [];
+        var table_location;
+        let last_trip = "";
+        let index_color = -1;
+        let date_map = "";
         $(document).ready(async function () {
             const today = new Date();
             const month = today.toISOString().slice(0, 7);
@@ -492,6 +642,23 @@
                     });
                 },
                 columns: [
+                                {
+                        data: null,
+                        className: 'text-center',
+                        orderable: false,
+                        render: function (data, type, row) {
+                            if (row.customer !== null){
+                            return `
+                                <i class="fas fa-eye view-detail-icon"
+                                   style="font-size: 1.3rem; color: #2178BE; cursor: pointer;"
+                                   title="คลิกเพื่อดูรายละเอียด"
+                                   aria-hidden="true"></i>
+                            `;
+                            }else{
+                                return null;
+                            }
+                        }
+                    },
                     { data: 'dateDisplay', className: 'text-center fw-bold' },
                     {
                         data: 'timeStart', className: 'text-center',
@@ -590,12 +757,217 @@
             });
         }
 
+        $('#btn_map').on('click', async function () {
+            $('#nametrip').val(trips[0]);
+            initMap(routes, trips[0]);
+        });
+
+        $('#table_allowance tbody').on('click', '.view-detail-icon', async function () {
+            index_color = -1;
+            const row = table_allowance.row($(this).closest('tr')).data();
+            const date = row.date;
+            const emp_id = $('#select_employee').val();
+            $('#LocationModal').modal();
+            const datas = await GetDataMap(emp_id,date);
+
+            routes = datas.routes;
+            trips = datas.trips;
+            locations = datas.locations;
+            GenerateTripOption(trips);            
+            GenerateLocationTable(locations);            
+        });
+
+        $('#nametrip').on('change', function () {
+            let trip = $('#nametrip :selected').text();
+            initMap(routes, trip);
+        });
+
         function GenerateEmployeeOption(employees) {
             $('#select_employee').empty();
             $('#select_employee').append(`<option value="" selected disabled>Please Select Employee</option>`);
             for (let i = 0; i < employees.length; i++) {
                 $('#select_employee').append(`<option value="${employees[i].emp_id}">${employees[i].name}</option>`);
             }
+        }
+
+        function GenerateTripOption(trips) {
+                let str = `<option value="" selected disabled>Please Select</option>`;
+                for (let i = 0; i < trips.length; i++) {
+                    str += `<option value="${trips[i]}">${trips[i]}</option>`;
+                }
+                $('#nametrip').empty();
+                $('#nametrip').append(str);
+            }
+
+        function GenerateLocationTable(datas) {
+            let _datas = [];
+            let _last_date = "";
+            for (let i = 0; i < datas.length; i++) {
+                if (i > 0) {
+                    if (_last_date !== datas[i].date.split('T')[0]) {
+                        _datas.push(['', '', '', '', '', '', '', '', '','']);
+                    }
+                }
+                _last_date = datas[i].date.split('T')[0];
+
+                _datas.push([
+                    datas[i].date.split('T')[0],
+                    datas[i].time,
+                    datas[i].trip,
+                    datas[i].car,
+                    datas[i].driver,
+                    datas[i].passenger,
+                    datas[i].status,
+                    datas[i].location,
+                    datas[i].duration,
+                    datas[i].mode
+                ]);
+            }
+
+            if (table_location !== undefined) {
+                table_location.destroy();
+            }
+            table_location = $('#table_location').DataTable({
+                data: _datas,
+                columnDefs: [
+                    {
+                        targets: [0, 1, 2, 3, 4, 5, 6, 8],
+                        className: 'text-center',
+                    },
+                ],
+                rowCallback: function (row, data) {
+                    let date = data[0];
+                    let trip = data[2];
+                    if (last_trip !== trip && trip !== "") {
+                        index_color++;                        
+                        last_trip = trip;
+                    }
+                    let colors = ['#bdf3a7', '#a7f3e1', '#d3b1f3', '#f5c7d8', '#f5ecc7'];
+                    $('td', row).css('background-color', colors[index_color]);
+
+                    if (date === "") {
+                        $('td', row).css('background-color', "gray");
+                    }
+                },
+                searching: false,
+                paging: false,
+                info: false,
+                order: false,
+            });
+        }
+        async function GetDataMap(emp_id ,date) {
+            let datas = [];
+            await $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetALLRoute", "AllowanceAdmin")',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { emp_id,date },
+                success: function (response) {
+                    datas = response;                  
+                }
+            });
+            return datas;
+        }
+        function initMap(datas, trip) {
+            $("#showmap").html("");
+            $('#ShowMapModal').modal('show');
+            const tokenID = "@Html.Raw(mapkit)";
+            var center = new mapkit.Coordinate(13.728544, 100.728654);
+            mapkit.init({
+                authorizationCallback: function (done) {
+                    done(tokenID);
+                },
+                language: "us"
+            });
+
+            var CALLOUT_OFFSET = new DOMPoint(-148, -140);
+            var landmarkAnnotationCallout = {
+                calloutElementForAnnotation: function (annotation) {
+                    return calloutForLandmarkAnnotation(annotation);
+                },
+
+                calloutAnchorOffsetForAnnotation: function (annotation, element) {
+                    return CALLOUT_OFFSET;
+                },
+
+                calloutAppearanceAnimationForAnnotation: function (annotation) {
+                    return ".4s cubic-bezier(0.4, 0, 0, 1.5) 0s 1 normal scale-and-fadein";
+                }
+            };
+
+            function calloutForLandmarkAnnotation(annotation) {
+                var div = document.createElement("div");
+                div.className = "landmark";
+
+                var title = div.appendChild(document.createElement("h1"));
+                title.textContent = annotation.landmark.title;
+
+                var section = div.appendChild(document.createElement("section"));
+
+                var status = section.appendChild(document.createElement("p"));
+                status.className = "Status";
+                status.textContent = "Status : " + annotation.landmark.status;
+
+                var car = section.appendChild(document.createElement("p"));
+                car.className = "Car";
+                car.textContent = "Car : " + annotation.landmark.car;
+
+                var driver = section.appendChild(document.createElement("p"));
+                driver.className = "Driver";
+                driver.textContent = "Driver : " + annotation.landmark.driver;
+
+                var date = section.appendChild(document.createElement("p"));
+                date.className = "Date";
+                date.textContent = "Date : " + annotation.landmark.date;
+
+                return div;
+            }
+
+            var location = [];
+ 
+            for (var i = 0; i < datas.length; i++) {
+                if (datas[i].trip == trip) {
+                    if (datas[i].status != 'NA') {
+                        location.push({ coordinate: new mapkit.Coordinate(datas[i].latitude, datas[i].longitude), title: datas[i].location, status: datas[i].status, car: datas[i].car_id, driver: datas[i].driver_name, date: datas[i].date });
+                    }
+                }
+            }
+            var annotations = location.map(function (landmark) {
+                var annotation = new mapkit.MarkerAnnotation(landmark.coordinate, {
+                    callout: landmarkAnnotationCallout,
+                    color: "#ff3300",
+                    title: landmark.title,
+                });
+                annotation.landmark = landmark;
+                return annotation;
+            });
+
+
+            var map = new mapkit.Map("showmap", { center: center });
+            map.showItems(annotations);
+
+            // Draw Polyline
+            var points = [];
+            for (var i = 0; i < datas.length; i++) {
+                if (datas[i].trip == trip) {
+                    points.push([datas[i].latitude, datas[i].longitude]);
+                }
+            }
+
+            var coords = points.map(function (point) {
+                return new mapkit.Coordinate(point[0], point[1]);
+            });
+
+            var style = new mapkit.Style({
+                strokeOpacity: 0.8,
+                lineWidth: 5,
+                lineJoin: "round",
+                strokeColor: "#0000FF"
+            });
+
+            var polyline = new mapkit.PolylineOverlay(coords, { style: style });
+
+            map.addOverlay(polyline);
         }
     </script>
 }

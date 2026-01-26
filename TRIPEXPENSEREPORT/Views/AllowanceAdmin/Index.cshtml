@@ -191,7 +191,7 @@
                     </tbody>
                     <tfoot class="table-warning text-black fw-bold">
                         <tr>
-                            <th colspan="6" class="text-center">ยอดรวมทั้งหมด</th>
+                            <th colspan="7" class="text-center">ยอดรวมทั้งหมด</th>
                             <th id="totalProvince" class="text-end">0.00</th>
                             <th id="totalA14" class="text-end">0.00</th>
                             <th id="totalA48" class="text-end">0.00</th>
@@ -596,7 +596,7 @@
                     }
                 },
                 drawCallback: function () {
-                    //mergeDateRows();
+
                 },
                 footerCallback: function (row, data, start, end, display) {
                     const api = this.api();
@@ -607,14 +607,14 @@
                         }, 0);
                     };
 
-                    const totalProvince = sum(6);
-                    const totalA14 = sum(7);
-                    const totalA48 = sum(8);
-                    const totalA8 = sum(9);
-                    const totalAOther = sum(10);
-                    const totalAHostel = sum(11);
-                    const totalAAmount = sum(13);
-                    const totalASum = sum(15);
+                    const totalProvince = sum(7);
+                    const totalA14 = sum(8);
+                    const totalA48 = sum(9);
+                    const totalA8 = sum(10);
+                    const totalAOther = sum(11);
+                    const totalAHostel = sum(12);
+                    const totalAAmount = sum(14);
+                    const totalASum = sum(16);
 
                     $('#totalProvince').html(totalProvince.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
                     $('#totalA14').html(totalA14.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
@@ -622,22 +622,22 @@
                     $('#totalA8').html(totalA8.toLocaleString('th-TH', { minimumFractionDigits: 0 }));
                     $('#totalAOther').html(totalAOther.toLocaleString('th-TH')).css({
                         'vertical-align': 'middle',
-                        'font-size': '20px',
+                        'font-size': '16px',
                         'text-align': 'center'
                     });
                     $('#totalAHostel').html(totalAHostel.toLocaleString('th-TH')).css({
                         'vertical-align': 'middle',
-                        'font-size': '20px',
+                        'font-size': '16px',
                         'text-align': 'center'
                     });
                     $('#totalAAmount').html(totalAAmount.toLocaleString('th-TH')).css({
                         'vertical-align': 'middle',
-                        'font-size': '20px',
+                        'font-size': '16px',
                         'text-align': 'center'
                     });
                     $('#totalASum').html(totalASum.toLocaleString('th-TH')).css({
                         'vertical-align': 'middle',
-                        'font-size': '20px',
+                        'font-size': '16px',
                         'text-align': 'center'
                     });
                 },

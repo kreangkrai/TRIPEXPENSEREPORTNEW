@@ -122,10 +122,10 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             List<DataModel> datas = new List<DataModel>();
             List<DateTime> dates = new List<DateTime>();
-            DateTime now = DateTime.Now;
-            int last = DateTime.DaysInMonth(now.Year, now.Month);
+            //DateTime now = DateTime.Now;
+            //int last = DateTime.DaysInMonth(now.Year, now.Month);
             List<CompanyModel> datas_companies = new List<CompanyModel>();
-            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            for (DateTime d = start; d <= stop; d = d.AddDays(1))
             {
                 if (companies.Any(a => a.date.Date == d.Date))
                 {
@@ -209,8 +209,8 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             List<DateTime> dates = new List<DateTime>();
             DateTime now = DateTime.Now;
-            int last = DateTime.DaysInMonth(now.Year, now.Month);
-            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            //int last = DateTime.DaysInMonth(now.Year, now.Month);
+            for (DateTime d = start; d <= stop; d = d.AddDays(1))
             {
                 if (companies.Any(a => a.date.Date == d.Date))
                 {
@@ -286,7 +286,7 @@ namespace TRIPEXPENSEREPORT.Controllers
             // Compare Old Data
             List<DataModel> list = Trip.GetDatasCompnayByDate(start, stop);
             List<DataModel> old_datas = new List<DataModel>();
-            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            for (DateTime d = start; d <= stop; d = d.AddDays(1))
             {
                 if (list.Any(a => a.trip_date.Date == d.Date))
                 {

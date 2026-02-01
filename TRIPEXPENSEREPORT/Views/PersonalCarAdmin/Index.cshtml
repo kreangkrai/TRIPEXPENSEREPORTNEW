@@ -571,15 +571,21 @@
 
             } catch (err) {
                 return null;
-
+                  
             } finally {
                 $modal.modal('hide');
             }
         }
 
         $('#month_start').on('change', async function () {
-            const driver = await Getdrivers();
-            GenerateDriverOption(driver);
+            const drivers = await Getdrivers();
+            if (drivers.length > 0) {
+                GenerateDriverOption(drivers);
+                $('#btn_search').prop('disabled', false);
+            } else {
+                alert('ไม่มีข้อมูลในการใช้งาน');
+                $('#btn_search').prop('disabled', true);
+            }
         });
 
         $('#btn_search').on('click', function () {
@@ -632,7 +638,7 @@
             const month = $('#month_start').val();
             await $.ajax({
                 type: "GET",
-                url: '@Url.Action("Getdrivers", "PersonalCarAdmin")',
+                url: '@Url.Action("GetDrivers", "PersonalCarAdmin")',
                 contentType: 'application/x-www-form-urlencoded',
                 data: { month },
                 success: function (response) {

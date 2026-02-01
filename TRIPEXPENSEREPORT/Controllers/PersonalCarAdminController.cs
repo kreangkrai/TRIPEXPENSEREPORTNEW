@@ -136,10 +136,10 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             List<DataModel> datas = new List<DataModel>();
             List<DateTime> dates = new List<DateTime>();
-            DateTime now = DateTime.Now;
-            int last = DateTime.DaysInMonth(now.Year, now.Month);
+            //DateTime now = DateTime.Now;
+            //int last = DateTime.DaysInMonth(now.Year, now.Month);
             List<PersonalModel> datas_personal = new List<PersonalModel>();
-            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            for (DateTime d = start; d <= stop; d = d.AddDays(1))
             {
                 if (personals.Any(a => a.date.Date == d.Date))
                 {
@@ -203,7 +203,7 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             // Compare Old Data
             List<DataModel> list = Trip.GetDatasPersonalByEMPID(emp_id, start, stop);
-            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            for (DateTime d = start; d <= stop; d = d.AddDays(1))
             {
                 if (list.Any(a => a.trip_date.Date == d.Date))
                 {

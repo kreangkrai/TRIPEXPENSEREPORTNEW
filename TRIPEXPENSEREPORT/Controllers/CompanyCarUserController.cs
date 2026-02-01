@@ -130,9 +130,9 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             List<DataModel> datas = new List<DataModel>();
             List<DateTime> dates = new List<DateTime>();
-            DateTime now = DateTime.Now;
-            int last = DateTime.DaysInMonth(now.Year, now.Month);
-            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            //DateTime now = DateTime.Now;
+            //int last = DateTime.DaysInMonth(now.Year, now.Month);
+            for (DateTime d = start; d <= stop; d = d.AddDays(1))
             {
                 if (list.Any(a => a.trip_date.Date == d.Date))
                 {
@@ -247,8 +247,8 @@ namespace TRIPEXPENSEREPORT.Controllers
 
             List<DateTime> dates = new List<DateTime>();
             DateTime now = DateTime.Now;
-            int last = DateTime.DaysInMonth(now.Year, now.Month);
-            for (DateTime d = new DateTime(now.Year, now.Month, 1); d <= new DateTime(now.Year, now.Month, last); d = d.AddDays(1))
+            //int last = DateTime.DaysInMonth(now.Year, now.Month);
+            for (DateTime d = start; d <= stop; d = d.AddDays(1))
             {
                 if (companies.Any(a => a.date.Date == d.Date))
                 {
